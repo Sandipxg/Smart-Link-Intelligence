@@ -678,6 +678,7 @@ def create_app() -> Flask:
                 return row[key] if row and row[key] is not None else 0
 
             analytics_payload = {
+                "debug_version": "v1.0.1_isp_restored",
                 "intent": {
                     "curious": curious_count,
                     "interested": interested_count,
