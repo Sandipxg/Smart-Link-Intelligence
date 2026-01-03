@@ -587,22 +587,27 @@ def create_app() -> Flask:
             )
 
             # Get ISP distribution
-            isp_data = query_db(
+            isp_counts_raw = query_db(
                 """
-                SELECT 
-                    CASE 
-                        WHEN isp IS NOT NULL AND isp != 'Unknown' THEN isp
-                        ELSE 'Other/Unknown'
-                    END as provider,
-                    COUNT(DISTINCT ip_hash) as count
+                SELECT isp, COUNT(DISTINCT ip_hash) as count
                 FROM visits
                 WHERE link_id = ?
-                GROUP BY provider
-                ORDER BY count DESC
-                LIMIT 10
+                GROUP BY isp
                 """,
                 [link["id"]]
             )
+            
+            normalized_isp_counts = {}
+            for row in isp_counts_raw:
+                provider = normalize_isp(row['isp'])
+                # Aggregate counts for normalized names
+                normalized_isp_counts[provider] = normalized_isp_counts.get(provider, 0) + row['count']
+            
+            # Convert to list of dicts for template, sorted by count
+            isp_data = [
+                {'provider': k, 'count': v} 
+                for k, v in sorted(normalized_isp_counts.items(), key=lambda x: x[1], reverse=True)
+            ][:10]
 
             # Get device distribution
             device_data = query_db(
@@ -2821,6 +2826,42 @@ def parse_os(user_agent: str) -> str:
     return "Unknown OS"
 
 
+def normalize_isp(isp_name: str) -> str:
+    """Normalize common ISP names to prevent duplicates in analytics."""
+    if not isp_name or isp_name.lower() == 'unknown':
+        return "Other/Unknown"
+    
+    name = isp_name.strip()
+    # Remove trailing dot if exists
+    if name.endswith('.'):
+        name = name[:-1].strip()
+        
+    name_lower = name.lower()
+    
+    # Reliance Jio variations
+    if "reliance jio" in name_lower or "reliancejio" in name_lower:
+        return "Reliance Jio"
+    
+    # Airtel variations
+    if "bharti airtel" in name_lower or "airtel" in name_lower:
+        return "Airtel"
+    
+    # Vodafone Idea variations
+    if "vodafone" in name_lower or "idea" in name_lower:
+        return "Vi (Vodafone Idea)"
+    
+    # BSNL variations
+    if "bsnl" in name_lower or "bharat sanchar" in name_lower:
+        return "BSNL"
+    
+    # Tata Tele/Communications
+    if "tata tele" in name_lower or "tata comm" in name_lower:
+        return "Tata"
+        
+    return name
+
+
+
 def get_isp_info(ip: str) -> dict:
     """Get ISP and hostname via DNS reverse lookup and API fallback."""
     result = {
@@ -2860,7 +2901,7 @@ def get_isp_info(ip: str) -> dict:
         if response.status_code == 200:
             data = response.json()
             if data.get('isp'):
-                result['isp'] = data['isp']
+                result['isp'] = normalize_isp(data['isp'])
             if data.get('org'):
                 result['org'] = data['org']
     except Exception:
@@ -2868,7 +2909,6 @@ def get_isp_info(ip: str) -> dict:
     
     return result
 
-
+appl = create_app()
 if __name__ == "__main__":
-    app = create_app()
-    app.run(debug=True, port=5000, host="0.0.0.0")
+    appl.run(debug=True, port=5000, host="0.0.0.0")
