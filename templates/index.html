@@ -33,6 +33,19 @@
         {% endif %}
       </div>
 
+      <!-- New Link Success Box -->
+      {% if new_link %}
+      <div class="new-link-box fade-in mb-4">
+        <div class="d-flex align-items-center justify-content-center gap-3 py-2">
+          <i class="bi bi-files fs-4 copy-icon" onclick="copyToClipboard('{{ new_link }}', this)" title="Copy link"></i>
+          <a href="{{ new_link }}" target="_blank" class="text-decoration-none fw-bold fs-5 text-primary">
+            {{ new_link }}
+          </a>
+          <i class="bi bi-copy fs-4 copy-icon" onclick="copyToClipboard('{{ new_link }}', this)" title="Copy link"></i>
+        </div>
+      </div>
+      {% endif %}
+
       <!-- Create Link Section -->
       <div class="card shadow-sm border-0 mb-4">
         <div class="card-header bg-white border-bottom">
@@ -194,6 +207,19 @@
 </script>
 {% endif %}
 
+<script>
+  function copyToClipboard(text, element) {
+    navigator.clipboard.writeText(text).then(() => {
+      const originalClass = element.className;
+      element.className = 'bi bi-check2 text-success fs-4';
+      setTimeout(() => {
+        element.className = originalClass;
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+    });
+  }
+</script>
 <script src="{{ url_for('static', filename='js/link_management.js') }}"></script>
 
 {% endblock %}

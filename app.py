@@ -153,7 +153,8 @@ def create_app() -> Flask:
             "linkStats": [{"state": row["state"], "count": row["count"]} for row in link_stats]
         }
         
-        return render_template("index.html", links=links, chart_data=chart_data, behavior_rules=behavior_rules)
+        new_link = session.pop('new_link', None)
+        return render_template("index.html", links=links, chart_data=chart_data, behavior_rules=behavior_rules, new_link=new_link)
 
 
     @app.route("/create", methods=["POST"])
@@ -213,6 +214,9 @@ def create_app() -> Flask:
             flash(f"An unexpected error occurred: {str(e)}", "danger")
             return redirect(url_for("index"))
         flash(f"Link created with code {code}", "success")
+        # Store full link for the success box on dashboard
+        base_url = request.host_url.rstrip('/')
+        session['new_link'] = f"{base_url}/r/{code}"
         return redirect(url_for("index"))
 
     @app.route("/r/<code>")
