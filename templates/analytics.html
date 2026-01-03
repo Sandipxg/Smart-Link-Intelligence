@@ -448,52 +448,84 @@
             </h4>
             <p class="small text-muted mb-0 mt-1">Click on any row to view full details</p>
           </div>
-          <span class="badge bg-primary">{{ detailed_visitors|length }} visitors</span>
+          <div class="d-flex align-items-center gap-2">
+            <a href="{{ url_for('export_link_analytics_excel', code_id=link.code) }}"
+              class="btn btn-outline-light btn-sm">
+              <svg width="14" height="14" fill="currentColor" class="me-1" viewBox="0 0 16 16">
+                <path
+                  d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+                <path
+                  d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
+              </svg>
+              Export to Excel
+            </a>
+            <span class="badge bg-primary">{{ detailed_visitors|length }} visitors</span>
+          </div>
         </div>
         <div class="card-body p-0">
-          <div class="table-responsive">
+          <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
             <table class="table table-hover table-striped mb-0">
-              <thead class="table-light">
+              <thead class="table-light sticky-top" style="top: 0; z-index: 1;">
                 <tr>
+                  <th class="small fw-bold">Srno</th>
                   <th class="small fw-bold">Time</th>
                   <th class="small fw-bold">IP Address</th>
-                  <th class="small fw-bold">Location</th>
+                  <th class="small fw-bold">Country</th>
+                  <th class="small fw-bold">City</th>
                   <th class="small fw-bold">Browser</th>
-                  <th class="small fw-bold">OS</th>
                   <th class="small fw-bold">ISP</th>
-                  <th class="small fw-bold text-center">Actions</th>
+                  <th class="small fw-bold">Coordinate</th>
                 </tr>
               </thead>
               <tbody>
                 {% for visitor in detailed_visitors %}
                 <tr class="visitor-row" style="cursor: pointer;" data-visitor='{{ visitor | tojson }}'
                   onclick="showVisitorModal(this)">
+                  <td class="small">{{ loop.index }}</td>
                   <td class="small">{{ visitor.timestamp[:19] }}</td>
                   <td class="small font-monospace">{{ visitor.ip_address }}</td>
                   <td class="small">
-                    {% if visitor.city and visitor.city != 'Unknown' %}
-                    {{ visitor.city }}, {{ visitor.country }}
+                    {% if visitor.latitude and visitor.longitude %}
+                    <a href="https://www.google.com/maps?q={{ visitor.latitude }},{{ visitor.longitude }}"
+                      target="_blank" class="text-decoration-none text-dark" onclick="event.stopPropagation()">
+                      {{ visitor.country }}
+                    </a>
                     {% else %}
                     {{ visitor.country }}
                     {% endif %}
                   </td>
+                  <td class="small">
+                    {% if visitor.latitude and visitor.longitude %}
+                    <a href="https://www.google.com/maps?q={{ visitor.latitude }},{{ visitor.longitude }}"
+                      target="_blank" class="text-decoration-none text-dark" onclick="event.stopPropagation()">
+                      {{ visitor.city if visitor.city and visitor.city != 'Unknown' else 'N/A' }}
+                    </a>
+                    {% else %}
+                    {{ visitor.city if visitor.city and visitor.city != 'Unknown' else 'N/A' }}
+                    {% endif %}
+                  </td>
                   <td class="small">{{ visitor.browser[:30] }}{% if visitor.browser|length > 30 %}...{% endif %}</td>
-                  <td class="small">{{ visitor.os }}</td>
                   <td class="small">{{ visitor.isp[:25] }}{% if visitor.isp|length > 25 %}...{% endif %}</td>
-                  <td class="text-center">
-                    <button class="btn btn-sm btn-outline-primary"
-                      onclick="event.stopPropagation(); showVisitorModal(this.closest('tr'))">
-                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z" />
+                  <td class="small">
+                    {% if visitor.latitude and visitor.longitude %}
+                    <a href="https://www.google.com/maps?q={{ visitor.latitude }},{{ visitor.longitude }}"
+                      target="_blank"
+                      class="text-decoration-none d-flex align-items-center gap-1 text-primary fw-medium"
+                      onclick="event.stopPropagation()">
+                      <svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
                         <path
-                          d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
+                          d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" />
                       </svg>
-                    </button>
+                      {{ "{:.4f}".format(visitor.latitude) }}, {{ "{:.4f}".format(visitor.longitude) }}
+                    </a>
+                    {% else %}
+                    <span class="text-muted">N/A</span>
+                    {% endif %}
                   </td>
                 </tr>
                 {% else %}
                 <tr>
-                  <td colspan="7" class="text-center py-4 text-muted">
+                  <td colspan="8" class="text-center py-4 text-muted">
                     <svg width="48" height="48" fill="currentColor" class="mb-2 opacity-50" viewBox="0 0 16 16">
                       <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
                       <path
@@ -543,10 +575,6 @@
               <tr>
                 <th class="bg-light">Browser</th>
                 <td id="modal-browser"></td>
-              </tr>
-              <tr>
-                <th class="bg-light">Operating System</th>
-                <td id="modal-os"></td>
               </tr>
               <tr>
                 <th class="bg-light">User Agent</th>
@@ -611,7 +639,6 @@
       document.getElementById('modal-country').textContent = visitor.country || 'Unknown';
       document.getElementById('modal-city').textContent = visitor.city || 'Unknown';
       document.getElementById('modal-browser').textContent = visitor.browser || 'Unknown';
-      document.getElementById('modal-os').textContent = visitor.os || 'Unknown';
       document.getElementById('modal-useragent').textContent = visitor.user_agent || 'Unknown';
       document.getElementById('modal-referrer').textContent = visitor.referrer || 'no referrer';
       document.getElementById('modal-hostname').textContent = visitor.hostname || 'Unknown';

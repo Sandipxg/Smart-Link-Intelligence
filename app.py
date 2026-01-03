@@ -958,6 +958,99 @@ def create_app() -> Flask:
             headers={"Content-disposition": f"attachment; filename=analytics_{code_id}.csv"}
         )
 
+    @app.route("/links/<code_id>/export-excel")
+    @login_required
+    def export_link_analytics_excel(code_id):
+        try:
+            link = query_db("SELECT * FROM links WHERE code = ?", [code_id], one=True)
+            if not link:
+                return "Link not found", 404
+            
+            # Use the same unique visitor logic as the analytics route
+            visits = query_db(
+                """
+                SELECT ts, ip_address, country, city, browser, isp, hostname, org, timezone, device, behavior, is_suspicious, latitude, longitude, user_agent, referrer
+                FROM visits
+                WHERE link_id = ?
+                ORDER BY ts DESC
+                """,
+                [link["id"]],
+            )
+            
+            # Create Excel content using HTML table format
+            html_content = f"""
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <style>
+                    table {{ border-collapse: collapse; width: 100%; }}
+                    th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 10pt; }}
+                    th {{ background-color: #f2f2f2; font-weight: bold; }}
+                    .center {{ text-align: center; }}
+                    .header {{ background-color: #333; color: white; padding: 15px; margin-bottom: 20px; }}
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h2>Detailed Visitor Log - {link['code']}</h2>
+                    <p>Original URL: {link['primary_url']}</p>
+                    <p>Generated on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
+                    <p>Total Records: {len(visits)}</p>
+                </div>
+                <table>
+                    <tr>
+                        <th>Srno</th>
+                        <th>Time (UTC)</th>
+                        <th>IP Address</th>
+                        <th>Country</th>
+                        <th>City</th>
+                        <th>Browser</th>
+                        <th>ISP</th>
+                        <th>Coordinate</th>
+                    </tr>
+            """
+            
+            # Add data rows
+            for i, v in enumerate(visits, 1):
+                # Normalize ISP for the export as well
+                provider = normalize_isp(v['isp'])
+                
+                # Format coordinate
+                coordinate = f"{v['latitude']}, {v['longitude']}" if v['latitude'] and v['longitude'] else "N/A"
+                
+                html_content += f"""
+                    <tr>
+                        <td class="center">{i}</td>
+                        <td>{str(v['ts'])[:19]}</td>
+                        <td>{str(v['ip_address'])}</td>
+                        <td>{str(v['country'])}</td>
+                        <td>{str(v['city'])}</td>
+                        <td>{str(v['browser'])}</td>
+                        <td>{provider}</td>
+                        <td>{coordinate}</td>
+                    </tr>
+                """
+            
+            html_content += """
+                </table>
+            </body>
+            </html>
+            """
+            
+            from flask import Response
+            return Response(
+                html_content,
+                mimetype="application/vnd.ms-excel",
+                headers={
+                    "Content-disposition": f"attachment; filename=visitor_log_{code_id}.xls",
+                    "Content-Type": "application/vnd.ms-excel; charset=utf-8"
+                }
+            )
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return f"Export Error: {str(e)}", 500
+
     @app.route("/signup", methods=["GET", "POST"])
     def signup():
         if request.method == "POST":
