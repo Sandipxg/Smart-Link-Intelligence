@@ -572,61 +572,67 @@ document.addEventListener('DOMContentLoaded', function () {
     // 8. Users by ISP Chart (Pie Chart)
     const ispCtx = document.getElementById('ispChart');
     if (ispCtx) {
-        const ispData = data.isp || [];
-        const labels = ispData.length > 0
-            ? ispData.map(i => i.provider)
-            : ['No data yet'];
-        const chartData = ispData.length > 0
-            ? ispData.map(i => i.count)
-            : [1];
+        try {
+            const ispData = data.isp || [];
+            console.log('Rendering ISP Chart with data:', ispData);
 
-        new Chart(ispCtx, {
-            type: 'pie',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: chartData,
-                    backgroundColor: [
-                        'rgba(59, 130, 246, 0.8)',
-                        'rgba(168, 85, 247, 0.8)',
-                        'rgba(236, 72, 153, 0.8)',
-                        'rgba(34, 197, 94, 0.8)',
-                        'rgba(245, 158, 11, 0.8)',
-                        'rgba(239, 68, 68, 0.8)',
-                        'rgba(107, 114, 128, 0.8)',
-                        'rgba(99, 102, 241, 0.8)',
-                        'rgba(139, 92, 246, 0.8)',
-                        'rgba(232, 121, 249, 0.8)'
-                    ],
-                    borderColor: '#ffffff',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            usePointStyle: true,
-                            pointStyle: 'circle'
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                if (ispData.length === 0) return 'No ISP data yet';
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((context.parsed * 100) / total).toFixed(1);
-                                return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+            const labels = ispData.length > 0
+                ? ispData.map(i => i.provider || 'Other/Unknown')
+                : ['No data yet'];
+            const chartData = ispData.length > 0
+                ? ispData.map(i => i.count)
+                : [1];
+
+            new Chart(ispCtx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(168, 85, 247, 0.8)',
+                            'rgba(236, 72, 153, 0.8)',
+                            'rgba(34, 197, 94, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(107, 114, 128, 0.8)',
+                            'rgba(99, 102, 241, 0.8)',
+                            'rgba(139, 92, 246, 0.8)',
+                            'rgba(232, 121, 249, 0.8)'
+                        ],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    if (ispData.length === 0) return 'No ISP data yet';
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed * 100) / total).toFixed(1);
+                                    return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
+            });
+        } catch (e) {
+            console.error('Failed to initialize ISP Chart:', e);
+        }
     }
 
     // Export to CSV Function
