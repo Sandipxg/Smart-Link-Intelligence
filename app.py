@@ -2844,7 +2844,7 @@ def normalize_isp(isp_name: str) -> str:
     
     # Airtel variations
     if "bharti airtel" in name_lower or "airtel" in name_lower:
-        return "Airtel"
+        return "Bharti Airtel"
     
     # Vodafone Idea variations
     if "vodafone" in name_lower or "idea" in name_lower:
