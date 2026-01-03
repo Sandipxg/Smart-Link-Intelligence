@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-lg border-0">
+      <div class="card-header bg-primary text-white text-center py-4">
+        <h4 class="mb-0">
+          <i class="bi bi-person-plus me-2"></i>Create Your Account
+        </h4>
+        <p class="mb-0 opacity-75">Join Smart Link Intelligence</p>
+      </div>
+      <div class="card-body p-4">
+        <form method="POST" id="signupForm" novalidate>
+          <!-- Username Field -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              <i class="bi bi-person me-1"></i>Username <span class="text-danger">*</span>
+            </label>
+            <input type="text" name="username" class="form-control form-control-lg" id="username" required autofocus
+              pattern="^[a-zA-Z0-9_]{3,20}$" placeholder="Enter username">
+            <div class="form-text">3-20 characters, letters, numbers, and underscores only</div>
+            <div class="invalid-feedback">
+              Username must be 3-20 characters and contain only letters, numbers, and underscores.
+            </div>
+            <div class="valid-feedback">
+              Username looks good!
+            </div>
+          </div>
+
+          <!-- Email Field -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              <i class="bi bi-envelope me-1"></i>Email Address <span class="text-danger">*</span>
+            </label>
+            <input type="email" name="email" class="form-control form-control-lg" id="email" required
+              placeholder="name@example.com">
+            <div class="form-text">We'll use this for account recovery and notifications</div>
+            <div class="invalid-feedback">
+              Please provide a valid email address.
+            </div>
+            <div class="valid-feedback">
+              Email looks good!
+            </div>
+          </div>
+
+          <!-- Password Field -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              <i class="bi bi-lock me-1"></i>Password <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <input type="password" name="password" class="form-control form-control-lg" id="password" required
+                minlength="8" placeholder="Create a strong password">
+              <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                <i class="bi bi-eye" id="toggleIcon"></i>
+              </button>
+            </div>
+            <div class="form-text">
+              Password must be at least 8 characters with uppercase, lowercase, number, and special character
+            </div>
+            <div class="invalid-feedback" id="passwordError">
+              Password does not meet requirements.
+            </div>
+            <div class="valid-feedback">
+              Password meets all requirements!
+            </div>
+
+            <!-- Password Strength Indicator -->
+            <div class="mt-2">
+              <div class="progress" style="height: 5px;">
+                <div class="progress-bar" id="passwordStrength" role="progressbar" style="width: 0%"></div>
+              </div>
+              <small class="text-muted" id="strengthText">Password strength</small>
+            </div>
+
+            <!-- Password Requirements -->
+            <div class="mt-2">
+              <small class="text-muted">Password must contain:</small>
+              <ul class="list-unstyled small mt-1">
+                <li id="length"><i class="bi bi-x-circle text-danger me-1"></i>At least 8 characters</li>
+                <li id="uppercase"><i class="bi bi-x-circle text-danger me-1"></i>One uppercase letter</li>
+                <li id="lowercase"><i class="bi bi-x-circle text-danger me-1"></i>One lowercase letter</li>
+                <li id="number"><i class="bi bi-x-circle text-danger me-1"></i>One number</li>
+                <li id="special"><i class="bi bi-x-circle text-danger me-1"></i>One special character</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Confirm Password Field -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold">
+              <i class="bi bi-lock-fill me-1"></i>Confirm Password <span class="text-danger">*</span>
+            </label>
+            <input type="password" name="confirm_password" class="form-control form-control-lg" id="confirmPassword"
+              required placeholder="Confirm your password">
+            <div class="invalid-feedback">
+              Passwords do not match.
+            </div>
+            <div class="valid-feedback">
+              Passwords match!
+            </div>
+          </div>
+
+          <!-- Terms and Conditions -->
+          <div class="mb-4">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+              <label class="form-check-label" for="terms">
+                I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and
+                <a href="#" class="text-decoration-none">Privacy Policy</a>
+              </label>
+              <div class="invalid-feedback">
+                You must agree to the terms and conditions.
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="d-grid mb-3">
+            <button class="btn btn-primary btn-lg" type="submit" id="submitBtn">
+              <i class="bi bi-person-plus me-2"></i>Create Account
+            </button>
+          </div>
+
+          <!-- Login Link -->
+          <div class="text-center">
+            <p class="mb-0 text-muted">Already have an account?
+              <a href="{{ url_for('login') }}" class="text-decoration-none fw-semibold">Sign In</a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+  <!-- Hero Section -->
+  <div class="text-center mb-5">
+    <div class="mb-4">
+      <i class="bi bi-crown-fill text-warning" style="font-size: 4rem;"></i>
+    </div>
+    <h1 class="display-4 fw-bold mb-3">
+      Upgrade to <span class="text-warning">LinkPro Elite</span>
+    </h1>
+    <p class="lead text-muted mb-4">
+      Unlock premium features and enjoy an ad-free experience for you and your visitors
+    </p>
+  </div>
+
+  <!-- Features Comparison -->
+  <div class="row justify-content-center mb-5">
+    <div class="col-lg-10">
+      <div class="card shadow-lg border-0">
+        <div class="card-body p-5">
+          <div class="row">
+            <!-- Free Plan -->
+            <div class="col-md-6">
+              <div class="text-center mb-4">
+                <h3 class="fw-bold">Free Plan</h3>
+                <div class="text-muted">Current Plan</div>
+              </div>
+              <ul class="list-unstyled">
+                <li class="mb-3">
+                  <i class="bi bi-check-circle text-success me-2"></i>
+                  Unlimited link creation
+                </li>
+                <li class="mb-3">
+                  <i class="bi bi-check-circle text-success me-2"></i>
+                  Basic analytics
+                </li>
+                <li class="mb-3">
+                  <i class="bi bi-check-circle text-success me-2"></i>
+                  Link customization
+                </li>
+                <li class="mb-3 text-muted">
+                  <i class="bi bi-x-circle text-danger me-2"></i>
+                  Ads shown to visitors
+                </li>
+                <li class="mb-3 text-muted">
+                  <i class="bi bi-x-circle text-danger me-2"></i>
+                  Limited premium features
+                </li>
+              </ul>
+            </div>
+
+            <!-- Premium Plan -->
+            <div class="col-md-6 border-start">
+              <div class="text-center mb-4">
+                <h3 class="fw-bold text-warning">
+                  <i class="bi bi-crown-fill me-2"></i>LinkPro Elite
+                </h3>
+                <div class="text-warning fw-semibold">Premium Experience</div>
+              </div>
+              <ul class="list-unstyled">
+                <li class="mb-3">
+                  <i class="bi bi-check-circle text-success me-2"></i>
+                  Everything in Free Plan
+                </li>
+                <li class="mb-3">
+                  <i class="bi bi-star-fill text-warning me-2"></i>
+                  <strong>Ad-free experience for visitors</strong>
+                </li>
+                <li class="mb-3">
+                  <i class="bi bi-star-fill text-warning me-2"></i>
+                  <strong>Advanced analytics & insights</strong>
+                </li>
+                <li class="mb-3">
+                  <i class="bi bi-star-fill text-warning me-2"></i>
+                  <strong>Priority support</strong>
+                </li>
+                <li class="mb-3">
+                  <i class="bi bi-star-fill text-warning me-2"></i>
+                  <strong>Custom branding options</strong>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pricing Cards -->
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="row g-4">
+        <!-- Monthly Plan -->
+        <div class="col-md-6">
+          <div class="card h-100 shadow border-0">
+            <div class="card-body text-center p-4">
+              <h4 class="fw-bold mb-3">Monthly</h4>
+              <div class="mb-4">
+                <span class="display-4 fw-bold text-primary">$9</span>
+                <span class="text-muted">/month</span>
+              </div>
+              <ul class="list-unstyled mb-4">
+                <li class="mb-2">✨ Ad-free links</li>
+                <li class="mb-2">📊 Advanced analytics</li>
+                <li class="mb-2">🎨 Custom branding</li>
+                <li class="mb-2">🚀 Priority support</li>
+              </ul>
+              <form method="POST" action="{{ url_for('process_upgrade') }}">
+                <input type="hidden" name="plan" value="monthly">
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                  <i class="bi bi-crown-fill me-2"></i>Upgrade Monthly
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Yearly Plan -->
+        <div class="col-md-6">
+          <div class="card h-100 shadow border-warning border-3 position-relative">
+            <div class="position-absolute top-0 start-50 translate-middle">
+              <span class="badge bg-warning text-dark px-3 py-2">
+                <i class="bi bi-star-fill me-1"></i>Best Value
+              </span>
+            </div>
+            <div class="card-body text-center p-4 pt-5">
+              <h4 class="fw-bold mb-3 text-warning">Yearly</h4>
+              <div class="mb-2">
+                <span class="display-4 fw-bold text-warning">$89</span>
+                <span class="text-muted">/year</span>
+              </div>
+              <div class="text-success mb-4">
+                <small><strong>Save $19 (17% off)</strong></small>
+              </div>
+              <ul class="list-unstyled mb-4">
+                <li class="mb-2">✨ Ad-free links</li>
+                <li class="mb-2">📊 Advanced analytics</li>
+                <li class="mb-2">🎨 Custom branding</li>
+                <li class="mb-2">🚀 Priority support</li>
+                <li class="mb-2 text-warning"><strong>+ 2 months free!</strong></li>
+              </ul>
+              <form method="POST" action="{{ url_for('process_upgrade') }}">
+                <input type="hidden" name="plan" value="yearly">
+                <button type="submit" class="btn btn-warning btn-lg w-100 text-dark fw-bold">
+                  <i class="bi bi-crown-fill me-2"></i>Upgrade Yearly
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Benefits Section -->
+  <div class="row justify-content-center mt-5">
+    <div class="col-lg-10">
+      <div class="text-center mb-4">
+        <h3 class="fw-bold">Why Choose LinkPro Elite?</h3>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-4 text-center">
+          <div class="bg-primary bg-opacity-10 rounded-circle p-4 d-inline-flex mb-3">
+            <i class="bi bi-lightning-charge text-primary" style="font-size: 2rem;"></i>
+          </div>
+          <h5 class="fw-bold">Lightning Fast</h5>
+          <p class="text-muted">No ads means faster loading times and better user experience for your visitors.</p>
+        </div>
+        <div class="col-md-4 text-center">
+          <div class="bg-success bg-opacity-10 rounded-circle p-4 d-inline-flex mb-3">
+            <i class="bi bi-graph-up text-success" style="font-size: 2rem;"></i>
+          </div>
+          <h5 class="fw-bold">Better Analytics</h5>
+          <p class="text-muted">Get detailed insights into your link performance with advanced analytics tools.</p>
+        </div>
+        <div class="col-md-4 text-center">
+          <div class="bg-warning bg-opacity-10 rounded-circle p-4 d-inline-flex mb-3">
+            <i class="bi bi-palette text-warning" style="font-size: 2rem;"></i>
+          </div>
+          <h5 class="fw-bold">Custom Branding</h5>
+          <p class="text-muted">Personalize your links with custom branding and make them truly yours.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ Section -->
+  <div class="row justify-content-center mt-5">
+    <div class="col-lg-8">
+      <div class="text-center mb-4">
+        <h3 class="fw-bold">Frequently Asked Questions</h3>
+      </div>
+      <div class="accordion" id="faqAccordion">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+              What happens to my existing links?
+            </button>
+          </h2>
+          <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">
+              All your existing links will immediately become ad-free once you upgrade to LinkPro Elite. Your visitors will enjoy a seamless experience without any interruptions.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+              Can I cancel anytime?
+            </button>
+          </h2>
+          <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">
+              Yes! You can cancel your LinkPro Elite subscription at any time. You'll continue to enjoy premium features until the end of your billing period.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+              Is there a free trial?
+            </button>
+          </h2>
+          <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">
+              We offer a 7-day money-back guarantee. If you're not satisfied with LinkPro Elite, we'll refund your payment within the first week.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

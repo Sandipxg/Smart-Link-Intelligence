@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Main Content -->
+    <div class="col-12">
+      <!-- Header Section -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="fw-bold mb-1">
+            <i class="bi bi-speedometer2 me-2"></i>Dashboard
+            {% if g.user.is_premium %}
+            <span class="badge bg-warning text-dark ms-2">
+              <i class="bi bi-crown-fill me-1"></i>LinkPro Elite
+            </span>
+            {% endif %}
+          </h2>
+          <p class="text-muted mb-0">
+            {% if g.user.is_premium %}
+            Enjoy ad-free links and premium features with LinkPro Elite
+            {% else %}
+            Create intelligent short links with behavioral analytics
+            {% endif %}
+          </p>
+        </div>
+        {% if not g.user.is_premium %}
+        <div>
+          <a href="{{ url_for('upgrade') }}" class="btn btn-warning">
+            <i class="bi bi-star-fill me-1"></i>Upgrade to Elite
+          </a>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Create Link Section -->
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white border-bottom">
+          <div class="d-flex align-items-center">
+            <div class="bg-primary text-white rounded-circle p-2 me-3">
+              <i class="bi bi-plus-circle fs-5"></i>
+            </div>
+            <div>
+              <h5 class="mb-0">Create New Smart Link</h5>
+              <small class="text-muted">Transform URLs into intelligent tracking links</small>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('create') }}" id="linkCreateForm">
+            <!-- Basic Information -->
+            <div class="row g-3 mb-4">
+              <div class="col-12">
+                <label class="form-label fw-semibold">
+                  <i class="bi bi-link me-1"></i>Original URL <span class="text-danger">*</span>
+                </label>
+                <input type="url" name="primary_url" class="form-control form-control-lg"
+                  placeholder="https://example.com/your-long-url" required>
+                <div class="form-text">Enter the full URL you want to shorten and track</div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                  <i class="bi bi-tag me-1"></i>Custom Alias (Optional)
+                </label>
+                <input type="text" name="code" class="form-control form-control-lg" placeholder="my-custom-link"
+                  maxlength="24">
+                <div class="form-text">Leave blank for auto-generated code</div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                  <i class="bi bi-gear me-1"></i>Behavior Thresholds
+                </label>
+                <select class="form-select form-select-lg" name="behavior_rule_id" id="behaviorRuleId">
+                  <option value="">Use Default Thresholds</option>
+                  {% for rule in behavior_rules %}
+                  <option value="{{ rule.id }}" {% if rule.is_default %}selected{% endif %}>
+                    {{ rule.rule_name }}
+                    {% if rule.is_default %}(Default){% endif %}
+                    - {{ rule.interested_threshold }}+ visits, {{ rule.engaged_threshold }}+ clicks
+                  </option>
+                  {% endfor %}
+                </select>
+                <div class="form-text">
+                  <a href="{{ url_for('behavior_rules') }}" class="text-decoration-none">
+                    <i class="bi bi-gear"></i> Manage Rules
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Redirect Configuration -->
+            <div class="row g-3 mb-4">
+              <div class="col-12">
+                <label class="form-label fw-semibold">
+                  <i class="bi bi-diagram-3 me-1"></i>Redirect Configuration
+                </label>
+                <select class="form-select form-select-lg" name="behavior_rule" id="behaviorRule"
+                  onchange="showHideFields()">
+                  <option value="standard" selected>Standard Redirect (Same destination)</option>
+                  <option value="progression">Progressive Redirect (Different URLs for different behaviors)</option>
+                  <option value="password_protected">Password Protected (Require password to access)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Password Protection Fields -->
+            <div class="row g-3 mb-4" id="passwordFields" style="display: none;">
+              <div class="col-12">
+                <div class="alert alert-warning">
+                  <i class="bi bi-shield-lock me-2"></i>
+                  <strong>Password Protection:</strong> Visitors must enter the correct password to be redirected.
+                </div>
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-semibold">
+                  <i class="bi bi-key me-1"></i>Access Password <span class="text-danger">*</span>
+                </label>
+                <input type="password" name="password" class="form-control"
+                  placeholder="Enter a password to lock this link" autocomplete="new-password">
+                <div class="form-text">Make sure to remember this password</div>
+              </div>
+            </div>
+
+            <!-- Progressive Fields -->
+            <div class="row g-3 mb-4" id="progressiveFields" style="display: none;">
+              <div class="col-12">
+                <div class="alert alert-success">
+                  <i class="bi bi-info-circle me-2"></i>
+                  <strong>Progressive Mode:</strong> Configure different URLs for different visitor behaviors.
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                  <i class="bi bi-arrow-repeat me-1"></i>Returning Visitor URL <span class="text-danger">*</span>
+                </label>
+                <input type="url" name="returning_url" class="form-control"
+                  placeholder="https://example.com/returning-users">
+                <div class="form-text">For users who return within the configured time window</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                  <i class="bi bi-fire me-1"></i>CTA URL (Highly Engaged) <span class="text-danger">*</span>
+                </label>
+                <input type="url" name="cta_url" class="form-control" placeholder="https://example.com/call-to-action">
+                <div class="form-text">For highly engaged users (multiple clicks)</div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-2">
+              <button class="btn btn-primary btn-lg px-4" type="submit">
+                <i class="bi bi-plus-circle me-2"></i>Create Smart Link
+              </button>
+              <button class="btn btn-outline-secondary btn-lg px-4" type="reset" onclick="resetForm()">
+                <i class="bi bi-arrow-clockwise me-2"></i>Reset Form
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Quick Access to Analytics -->
+      {% if links %}
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h5 class="mb-2">
+                <i class="bi bi-bar-chart text-primary me-2"></i>Analytics Dashboard
+              </h5>
+              <p class="text-muted mb-0">
+                View detailed analytics, track performance, and manage all your smart links.
+              </p>
+            </div>
+            <div class="col-md-4 text-end">
+              <a href="{{ url_for('analytics_overview') }}" class="btn btn-primary btn-lg">
+                <i class="bi bi-arrow-right me-2"></i>View Analytics
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Data for JavaScript -->
+{% if chart_data %}
+<script>
+  window.dashboardData = {{ chart_data | tojson }};
+</script>
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/link_management.js') }}"></script>
+
+{% endblock %}

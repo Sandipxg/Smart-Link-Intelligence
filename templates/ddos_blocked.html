@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Access Blocked - Smart Link Intelligence{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark text-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-shield-exclamation"></i>
+                        {{ message }}
+                    </h4>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-shield-x text-warning" style="font-size: 4rem;"></i>
+                    </div>
+                    
+                    <h5 class="card-title">Access Temporarily Restricted</h5>
+                    <p class="card-text text-muted">{{ description }}</p>
+                    
+                    <div class="alert alert-info mt-4">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>What happened?</strong><br>
+                        Our security system detected unusual traffic patterns and automatically activated protection measures to ensure service stability.
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h6>What can you do?</h6>
+                        <ul class="list-unstyled text-start">
+                            <li><i class="bi bi-clock text-primary"></i> Wait a few minutes and try again</li>
+                            <li><i class="bi bi-arrow-clockwise text-primary"></i> Refresh the page</li>
+                            <li><i class="bi bi-person-check text-primary"></i> Ensure you're accessing the link normally</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button onclick="window.history.back()" class="btn btn-secondary me-2">
+                            <i class="bi bi-arrow-left"></i> Go Back
+                        </button>
+                        <button onclick="location.reload()" class="btn btn-primary">
+                            <i class="bi bi-arrow-clockwise"></i> Try Again
+                        </button>
+                    </div>
+                </div>
+                <div class="card-footer text-muted text-center">
+                    <small>
+                        <i class="bi bi-shield-check"></i>
+                        Protected by Smart Link Intelligence Security System
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn {
+    border-radius: 25px;
+    padding: 10px 20px;
+}
+
+.alert {
+    border-radius: 10px;
+}
+
+ul li {
+    margin-bottom: 8px;
+}
+
+.bi {
+    margin-right: 8px;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block title %}DDoS Stats for {{ link.code }} - Smart Link Intelligence{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">
+            <i class="bi bi-bar-chart text-primary me-2"></i>
+            DDoS Protection Statistics
+        </h2>
+        <p class="text-muted mb-0">
+            Detailed security analysis for link: 
+            <code class="bg-light px-2 py-1 rounded">{{ link.code }}</code>
+        </p>
+    </div>
+    <a href="{{ url_for('ddos_protection_dashboard') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+    </a>
+</div>
+
+<!-- Link Information -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="bi bi-link-45deg me-2"></i>
+            Link Information
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-borderless">
+                    <tr>
+                        <td class="fw-semibold">Link Code:</td>
+                        <td><code class="bg-light px-2 py-1 rounded">{{ link.code }}</code></td>
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold">Primary URL:</td>
+                        <td class="text-break">{{ link.primary_url }}</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold">Behavior Rule:</td>
+                        <td><span class="badge bg-info">{{ link.behavior_rule.title() }}</span></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-borderless">
+                    <tr>
+                        <td class="fw-semibold">Current Status:</td>
+                        <td>
+                            {% if link.auto_disabled %}
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-shield-x me-1"></i>Disabled
+                                </span>
+                            {% elif link.protection_level >= 4 %}
+                                <span class="badge bg-warning">
+                                    <i class="bi bi-shield-exclamation me-1"></i>Temp. Disabled
+                                </span>
+                            {% elif link.protection_level >= 3 %}
+                                <span class="badge bg-info">
+                                    <i class="bi bi-shield-check me-1"></i>Captcha Required
+                                </span>
+                            {% else %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-shield-check me-1"></i>Active
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold">Protection Level:</td>
+                        <td>
+                            {% if link.protection_level == 0 %}
+                                <span class="badge bg-success">Level 0 - Normal</span>
+                            {% elif link.protection_level <= 2 %}
+                                <span class="badge bg-info">Level {{ link.protection_level }} - Low</span>
+                            {% elif link.protection_level <= 3 %}
+                                <span class="badge bg-warning">Level {{ link.protection_level }} - Medium</span>
+                            {% elif link.protection_level <= 4 %}
+                                <span class="badge bg-danger">Level {{ link.protection_level }} - High</span>
+                            {% else %}
+                                <span class="badge bg-dark">Level {{ link.protection_level }} - Critical</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold">Created:</td>
+                        <td>{{ link.created_at[:16] if link.created_at else 'Unknown' }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Protection Statistics -->
+{% if stats %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="bi bi-pie-chart me-2"></i>
+            Event Statistics
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% for stat in stats %}
+            <div class="col-md-4 mb-3">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h4 class="text-primary">{{ stat.count }}</h4>
+                        <h6 class="text-muted mb-0">{{ stat.event_type.replace('_', ' ').title() }}</h6>
+                        {% if stat.last_event %}
+                        <small class="text-muted">Last: {{ stat.last_event[:16] }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Event Timeline -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="bi bi-clock-history me-2"></i>
+            Security Event Timeline
+        </h5>
+        {% if link.auto_disabled or link.protection_level >= 3 %}
+        <form method="POST" action="{{ url_for('recover_link', link_id=link.id) }}" class="d-inline">
+            <button type="submit" class="btn btn-success btn-sm" 
+                    onclick="return confirm('Are you sure you want to recover this link?')">
+                <i class="bi bi-arrow-clockwise me-1"></i>Recover Link
+            </button>
+        </form>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        {% if events %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Event Type</th>
+                        <th>Severity</th>
+                        <th>Protection Level</th>
+                        <th>IP Hash</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">{{ event.detected_at[:10] }}</div>
+                            <small class="text-muted">{{ event.detected_at[11:16] }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">
+                                {{ event.event_type.replace('_', ' ').title() }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if event.severity <= 2 %}
+                                <span class="badge bg-info">
+                                    <i class="bi bi-info-circle me-1"></i>Low
+                                </span>
+                            {% elif event.severity <= 3 %}
+                                <span class="badge bg-warning">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>Medium
+                                </span>
+                            {% elif event.severity <= 4 %}
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-exclamation-octagon me-1"></i>High
+                                </span>
+                            {% else %}
+                                <span class="badge bg-dark">
+                                    <i class="bi bi-x-octagon me-1"></i>Critical
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark">Level {{ event.protection_level }}</span>
+                        </td>
+                        <td>
+                            {% if event.ip_hash %}
+                                <code class="small">{{ event.ip_hash[:8] }}...</code>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if event.resolved_at %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i>Resolved
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning">
+                                    <i class="bi bi-clock me-1"></i>Active
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-shield-check text-success" style="font-size: 4rem;"></i>
+            <h4 class="text-muted mt-3">No Security Events</h4>
+            <p class="text-muted">This link has a clean security record. No DDoS attacks or suspicious activity detected.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Protection Information -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Event Types
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <span class="badge bg-info me-2">Rate Limit</span>
+                        Too many requests from single IP
+                    </li>
+                    <li class="mb-2">
+                        <span class="badge bg-warning me-2">Burst Attack</span>
+                        Rapid fire requests detected
+                    </li>
+                    <li class="mb-2">
+                        <span class="badge bg-danger me-2">DDoS Attack</span>
+                        Distributed attack pattern
+                    </li>
+                    <li class="mb-2">
+                        <span class="badge bg-dark me-2">Link Disabled</span>
+                        Automatic protection activated
+                    </li>
+                    <li class="mb-0">
+                        <span class="badge bg-success me-2">Manual Recovery</span>
+                        Link manually restored
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-shield-check me-2"></i>
+                    Protection Actions
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <i class="bi bi-clock text-info me-2"></i>
+                        Rate limiting (60 req/min per IP)
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-shield text-warning me-2"></i>
+                        Burst detection (100 req/10sec)
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-robot text-primary me-2"></i>
+                        Captcha verification (Level 3+)
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-pause-circle text-danger me-2"></i>
+                        Temporary disable (Level 4+)
+                    </li>
+                    <li class="mb-0">
+                        <i class="bi bi-stop-circle text-dark me-2"></i>
+                        Permanent disable (Level 5+)
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+
+.table-borderless td {
+    border: none;
+    padding: 0.5rem 0.75rem;
+}
+
+.text-break {
+    word-break: break-all;
+}
+</style>
+{% endblock %}

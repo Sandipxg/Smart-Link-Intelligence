@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Link Intelligence - Next-Gen Link Management Platform</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #bd24df;
+            --secondary: #2d6ade;
+            --body-bg: #040D26;
+            --darkmode: #0c1b44;
+            --tablebg: #132259;
+            --border: #091945;
+            --lightblue: #8a9bca;
+            --lightsky: #ECF2FF;
+            --lightpurple: #B4C7ED;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--body-bg);
+            color: white;
+            line-height: 1.6;
+        }
+
+        /* Background Gradients */
+        .bg-banner-image {
+            background: linear-gradient(90deg, rgba(189, 36, 223, 0.5), rgba(45, 106, 222, 0.5) 97.15%);
+        }
+
+        .bg-simple-bg {
+            background: linear-gradient(90deg, rgba(189, 36, 223, 0.1), rgba(45, 106, 222, 0.1) 97.15%);
+        }
+
+        /* Header Styles */
+        .navbar-custom {
+            background-color: transparent;
+            transition: all 0.3s ease;
+            padding: 1.5rem 0;
+        }
+
+        .navbar-custom.scrolled {
+            background-color: var(--body-bg);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 20px rgba(110, 127, 185, 0.1);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand-custom {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-link-custom {
+            color: white !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link-custom:hover {
+            color: var(--primary) !important;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(189, 36, 223, 0.3);
+            color: white;
+        }
+
+        .btn-outline-custom {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-outline-custom:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding-top: 100px;
+            overflow: hidden;
+        }
+
+        .hero-bg-blur {
+            position: absolute;
+            top: 0;
+            left: -25%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(189, 36, 223, 0.5), rgba(45, 106, 222, 0.5) 97.15%);
+            filter: blur(390px);
+            z-index: -1;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1rem; /* Reduced from 1.5rem */
+            min-height: 1.2em; /* Prevent layout shift */
+            text-align: left; /* Ensure left alignment */
+        }
+
+        /* Typewriter Animation Styles */
+        #typewriter-text {
+            display: inline;
+        }
+
+        #typewriter-cursor {
+            display: inline;
+            animation: blink 1s infinite;
+            color: var(--primary);
+            font-weight: 400;
+            margin-left: 1px; /* Reduced margin */
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .typewriter-word {
+            display: inline;
+        }
+
+        .typewriter-word.smart-links {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Ensure smooth text flow and left alignment */
+        .hero-title {
+            white-space: normal; /* Changed from pre-wrap */
+            word-wrap: break-word;
+            text-align: left;
+            display: block;
+            position: relative;
+        }
+
+        /* Fix any potential text shifting */
+        .hero-title span {
+            display: inline;
+            vertical-align: baseline;
+        }
+
+        /* Ensure the container doesn't cause shifting */
+        .col-lg-7 {
+            text-align: left;
+        }
+
+        /* Additional alignment fixes */
+        .hero-section .container {
+            text-align: left;
+        }
+
+        .hero-section [data-aos="fade-up"] {
+            text-align: left;
+        }
+
+        .hero-subtitle {
+            font-size: 1.125rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+            max-width: 70%;
+            margin-top: 0.75rem; /* Reduced spacing from heading */
+        }
+
+        .hero-image {
+            max-width: 100%;
+            height: auto;
+            margin: -12rem -8rem;
+        }
+
+        /* Section Styles */
+        section {
+            padding: 3.5rem 0;
+            background-color: var(--body-bg);
+        }
+
+        .section-title {
+            color: var(--lightsky);
+            font-size: clamp(2.5rem, 4vw, 3rem);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            color: var(--primary);
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-description {
+            color: var(--lightpurple);
+            font-size: 1.125rem;
+            text-align: center;
+            max-width: 42rem;
+            margin: 0 auto 3rem;
+        }
+
+        /* Work Steps */
+        .work-card {
+            background-color: var(--darkmode);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .work-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(189, 36, 223, 0.2);
+        }
+
+        .work-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+        }
+
+        .work-title {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .work-description {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        /* Features */
+        .features-section {
+            position: relative;
+        }
+
+        .features-bg-blur {
+            position: absolute;
+            top: 0;
+            left: -25%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            filter: blur(390px);
+            z-index: -1;
+        }
+
+        .feature-card {
+            background-color: var(--darkmode);
+            padding: 2rem;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(189, 36, 223, 0.2);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .feature-title {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .feature-description {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.875rem;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            background: var(--bg-simple-bg);
+            padding: 4rem 0;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--lightpurple);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* FAQ Section */
+        .faq-item {
+            background-color: var(--darkmode);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .faq-header {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .faq-header:hover {
+            background-color: rgba(189, 36, 223, 0.1);
+        }
+
+        .faq-title {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            margin: 0;
+            flex: 1;
+        }
+
+        .faq-icon {
+            color: var(--primary);
+            font-size: 1.25rem;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-content {
+            padding: 0 1.5rem 1.5rem;
+            color: rgba(255, 255, 255, 0.6);
+            display: none;
+        }
+
+        .faq-item.active .faq-content {
+            display: block;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(45deg);
+        }
+
+        /* Contact Section */
+        .contact-section {
+            background: var(--bg-simple-bg);
+        }
+
+        .contact-form {
+            background-color: var(--darkmode);
+            padding: 2.5rem;
+            border-radius: 12px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-control-custom {
+            background-color: var(--tablebg);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .form-control-custom:focus {
+            background-color: var(--tablebg);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 0.2rem rgba(189, 36, 223, 0.25);
+        }
+
+        .form-control-custom::placeholder {
+            color: var(--lightblue);
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--darkmode);
+            padding: 3rem 0 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--lightpurple);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--primary);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            background-color: var(--tablebg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .copyright {
+            text-align: center;
+            color: var(--lightblue);
+            font-size: 0.875rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-subtitle {
+                max-width: 100%;
+            }
+            
+            .hero-image {
+                margin: -5rem -2rem;
+            }
+            
+            .navbar-toggler {
+                border: none;
+                padding: 0.25rem 0.5rem;
+            }
+            
+            .navbar-toggler:focus {
+                box-shadow: none;
+            }
+            
+            .navbar-toggler-icon {
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='m4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+            }
+        }
+
+        /* Animation Classes */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Video Modal */
+        .video-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .video-modal.show {
+            display: flex;
+        }
+
+        .video-container {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            padding: 1rem;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .video-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .video-title {
+            color: white;
+            margin: 0;
+            flex: 1;
+        }
+
+        .video-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-close:hover {
+            color: var(--lightsky);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top" id="navbar">
+        <div class="container">
+            <a href="#" class="navbar-brand-custom">
+                <div class="logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
+                        <path d="M12 20L18 26L28 14" stroke="white" stroke-width="3" stroke-linecap="round" />
+                    </svg>
+                </div>
+                Smart Link Intelligence
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" href="#home-section">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" href="#how-it-works">How It Works</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" href="#features-section">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" href="#faq-section">FAQ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" href="#contact">Contact</a>
+                    </li>
+                </ul>
+                
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('login') }}" class="btn-outline-custom">Sign In</a>
+                    <a href="{{ url_for('signup') }}" class="btn-gradient">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="home-section">
+        <div class="hero-bg-blur"></div>
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-7 mb-5 mb-lg-0">
+                    <div data-aos="fade-up">
+                        <h1 class="hero-title">
+                            <span id="typewriter-text"></span><span id="typewriter-cursor">|</span>
+                        </h1>
+                        <p class="hero-subtitle">
+                            A powerful, secure, and intelligent platform to create behavior-aware links with advanced analytics, DDoS protection, and AI-powered routing. Transform your URLs into smart experiences.
+                        </p>
+                        <div class="d-flex gap-3 align-items-center flex-wrap">
+                            <a href="{{ url_for('signup') }}" class="btn-gradient">
+                                <i class="bi bi-rocket-takeoff me-2"></i>Sign Up
+                            </a>
+                            <button class="btn-outline-custom" onclick="openVideoModal()">
+                                <i class="bi bi-play-circle me-2"></i>How It Works
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div data-aos="fade-left" data-aos-delay="200">
+                        <img src="https://via.placeholder.com/600x450/bd24df/ffffff?text=Smart+Link+Dashboard" alt="Smart Link Dashboard" class="hero-image">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="stat-card">
+                        <div class="stat-number" data-count="99.9">0</div>
+                        <div class="stat-label">% Uptime</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="stat-card">
+                        <div class="stat-number" data-count="10">0</div>
+                        <div class="stat-label">Million+ Links</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="stat-card">
+                        <div class="stat-number" data-count="50">0</div>
+                        <div class="stat-label">Thousand+ Users</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="400">
+                    <div class="stat-card">
+                        <div class="stat-number" data-count="5">0</div>
+                        <div class="stat-label">Layer DDoS Protection</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works">
+        <div class="container">
+            <div data-aos="fade-up">
+                <p class="section-subtitle">HOW IT WORKS</p>
+                <h2 class="section-title">Get Started in 3 Simple Steps</h2>
+                <p class="section-description">
+                    Create your smart links in minutes and start leveraging AI-powered routing, advanced analytics, and enterprise-grade security features.
+                </p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="work-card">
+                        <div class="work-icon">
+                            <i class="bi bi-person-plus"></i>
+                        </div>
+                        <h3 class="work-title">Create Account</h3>
+                        <p class="work-description">
+                            Sign up with your email, set up a secure password, and verify your identity to unlock full access to the platform. Getting started takes just a few minutes.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="work-card">
+                        <div class="work-icon">
+                            <i class="bi bi-link-45deg"></i>
+                        </div>
+                        <h3 class="work-title">Create Smart Links</h3>
+                        <p class="work-description">
+                            Paste your URL, customize behavior rules, set up progressive routing, and configure advanced settings. Our AI will handle the rest automatically.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="work-card">
+                        <div class="work-icon">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <h3 class="work-title">Track & Optimize</h3>
+                        <p class="work-description">
+                            Monitor real-time analytics, track user behavior, analyze conversion funnels, and optimize your links for maximum engagement and results.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features-section">
+        <div class="features-bg-blur"></div>
+        <div class="container position-relative">
+            <div data-aos="fade-up">
+                <p class="section-subtitle">FEATURES</p>
+                <h2 class="section-title">The Most Trusted Platform for Smart Link Management</h2>
+                <p class="section-description">
+                    Discover powerful tools designed to help you create, secure, and optimize your links — trusted by marketers, developers, and businesses worldwide.
+                </p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <h3 class="feature-title">Enterprise Security</h3>
+                        <p class="feature-description">
+                            Your links are protected with 5-layer DDoS protection, advanced encryption, and real-time threat detection for maximum security.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-brain"></i>
+                        </div>
+                        <h3 class="feature-title">AI-Powered Routing</h3>
+                        <p class="feature-description">
+                            Intelligent behavior analysis routes users to the perfect destination based on their engagement level and interaction patterns.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <h3 class="feature-title">Real-Time Analytics</h3>
+                        <p class="feature-description">
+                            Get live insights, geographic data, device analytics, and behavior tracking with beautiful visualizations and detailed reports.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-sliders"></i>
+                        </div>
+                        <h3 class="feature-title">Custom Behavior Rules</h3>
+                        <p class="feature-description">
+                            Create flexible behavior rules with custom thresholds for visitor classification and progressive user journey optimization.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-palette"></i>
+                        </div>
+                        <h3 class="feature-title">Smart Monetization</h3>
+                        <p class="feature-description">
+                            Grid-based ad system with custom branding, image support, and premium ad-free experiences for enhanced user engagement.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-code-slash"></i>
+                        </div>
+                        <h3 class="feature-title">Developer API</h3>
+                        <p class="feature-description">
+                            RESTful API with comprehensive documentation, webhooks, and easy integration for developers and enterprise applications.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq-section">
+        <div class="container">
+            <div data-aos="fade-up">
+                <p class="section-subtitle">FAQ</p>
+                <h2 class="section-title">Frequently Asked Questions</h2>
+                <p class="section-description">
+                    Get answers to common questions about Smart Link Intelligence and how it can transform your link management strategy.
+                </p>
+            </div>
+            
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="faq-item" data-aos="fade-up" data-aos-delay="100">
+                        <div class="faq-header" onclick="toggleFaq(this)">
+                            <h3 class="faq-title">What is Smart Link Intelligence?</h3>
+                            <i class="bi bi-plus faq-icon"></i>
+                        </div>
+                        <div class="faq-content">
+                            Smart Link Intelligence is a next-generation link management platform that uses AI to analyze user behavior and route visitors to the most appropriate destination based on their engagement level, creating personalized user experiences.
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item" data-aos="fade-up" data-aos-delay="200">
+                        <div class="faq-header" onclick="toggleFaq(this)">
+                            <h3 class="faq-title">How does the DDoS protection work?</h3>
+                            <i class="bi bi-plus faq-icon"></i>
+                        </div>
+                        <div class="faq-content">
+                            Our 5-layer DDoS protection system automatically detects and mitigates attacks in real-time. It includes rate limiting, burst detection, IP filtering, and automatic link protection that can temporarily disable links under attack and restore them when safe.
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item" data-aos="fade-up" data-aos-delay="300">
+                        <div class="faq-header" onclick="toggleFaq(this)">
+                            <h3 class="faq-title">Can I customize behavior rules for my links?</h3>
+                            <i class="bi bi-plus faq-icon"></i>
+                        </div>
+                        <div class="faq-content">
+                            Yes! You can create custom behavior rules with your own thresholds for visitor classification. Set custom time windows, visit counts, and engagement levels to define when users are considered curious, interested, or highly engaged.
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item" data-aos="fade-up" data-aos-delay="400">
+                        <div class="faq-header" onclick="toggleFaq(this)">
+                            <h3 class="faq-title">Is there an API for developers?</h3>
+                            <i class="bi bi-plus faq-icon"></i>
+                        </div>
+                        <div class="faq-content">
+                            Absolutely! We provide a comprehensive RESTful API with full documentation, webhooks for real-time events, and easy integration options for developers and businesses looking to integrate smart link functionality into their applications.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section" id="contact">
+        <div class="container">
+            <div data-aos="fade-up">
+                <p class="section-subtitle">CONTACT US</p>
+                <h2 class="section-title">Get in Touch</h2>
+                <p class="section-description">
+                    Have questions or need help getting started? We're here to help you make the most of Smart Link Intelligence.
+                </p>
+            </div>
+            
+            <div data-aos="fade-up" data-aos-delay="200">
+                <form class="contact-form" onsubmit="handleContactForm(event)">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control form-control-custom" placeholder="Your Name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="email" class="form-control form-control-custom" placeholder="Your Email" required>
+                        </div>
+                    </div>
+                    <input type="text" class="form-control form-control-custom" placeholder="Subject" required>
+                    <textarea class="form-control form-control-custom" rows="5" placeholder="Your Message" required></textarea>
+                    <div class="text-center">
+                        <button type="submit" class="btn-gradient">
+                            <i class="bi bi-send me-2"></i>Send Message
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <a href="#home-section" class="footer-link">Home</a>
+                <a href="#how-it-works" class="footer-link">How It Works</a>
+                <a href="#features-section" class="footer-link">Features</a>
+                <a href="#faq-section" class="footer-link">FAQ</a>
+                <a href="#contact" class="footer-link">Contact</a>
+            </div>
+            
+            <div class="social-links">
+                <a href="#" class="social-link"><i class="bi bi-twitter"></i></a>
+                <a href="#" class="social-link"><i class="bi bi-linkedin"></i></a>
+                <a href="#" class="social-link"><i class="bi bi-github"></i></a>
+                <a href="#" class="social-link"><i class="bi bi-youtube"></i></a>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2024 Smart Link Intelligence. All rights reserved. Made with ❤️ for the future of link management.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Video Modal -->
+    <div class="video-modal" id="videoModal">
+        <div class="video-container">
+            <div class="video-header">
+                <h3 class="video-title">How Smart Link Intelligence Works</h3>
+                <button class="video-close" onclick="closeVideoModal()">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <iframe 
+                width="800" 
+                height="450" 
+                src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+                title="How Smart Link Intelligence Works" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS Animation -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        // Typewriter Animation
+        class TypewriterEffect {
+            constructor(element, text, options = {}) {
+                this.element = element;
+                this.text = text;
+                this.speed = options.speed || 100;
+                this.delay = options.delay || 1000;
+                this.cursor = document.getElementById('typewriter-cursor');
+                this.currentIndex = 0;
+                this.isComplete = false;
+                
+                // Start animation after a brief delay
+                setTimeout(() => this.type(), this.delay);
+            }
+
+            type() {
+                if (this.currentIndex < this.text.length) {
+                    // Get current character
+                    const currentChar = this.text.charAt(this.currentIndex);
+                    const currentText = this.text.substring(0, this.currentIndex + 1);
+                    
+                    // Update the text content
+                    this.element.innerHTML = this.formatText(currentText);
+                    
+                    this.currentIndex++;
+                    
+                    // Variable speed for more natural typing
+                    let nextDelay = this.speed;
+                    if (currentChar === ' ') {
+                        nextDelay = this.speed * 0.5; // Faster for spaces
+                    } else if (currentChar === ',' || currentChar === '.') {
+                        nextDelay = this.speed * 2; // Pause at punctuation
+                    }
+                    
+                    setTimeout(() => this.type(), nextDelay);
+                } else {
+                    // Typing complete - hide cursor immediately
+                    this.isComplete = true;
+                    this.hideCursor();
+                }
+            }
+
+            hideCursor() {
+                if (this.cursor) {
+                    // Stop the blinking animation and hide cursor
+                    this.cursor.style.animation = 'none';
+                    this.cursor.style.opacity = '0';
+                    this.cursor.style.display = 'none';
+                    
+                    // Alternative method - remove the cursor element entirely
+                    setTimeout(() => {
+                        if (this.cursor && this.cursor.parentNode) {
+                            this.cursor.parentNode.removeChild(this.cursor);
+                        }
+                    }, 300);
+                }
+            }
+
+            formatText(text) {
+                // Apply special styling to "Smart Links" while preserving cursor position
+                let formattedText = text.replace(
+                    /Smart Links/g, 
+                    '<span class="typewriter-word smart-links">Smart Links</span>'
+                );
+                
+                return formattedText;
+            }
+        }
+
+        // Initialize typewriter effect when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const typewriterElement = document.getElementById('typewriter-text');
+            if (typewriterElement) {
+                const text = "Create, Manage & Optimize Smart Links with Ease";
+                new TypewriterEffect(typewriterElement, text, {
+                    speed: 75,  // Base typing speed in milliseconds
+                    delay: 800  // Initial delay before starting
+                });
+            }
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Counter animation
+        function animateCounters() {
+            const counters = document.querySelectorAll('[data-count]');
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-count'));
+                const increment = target / 100;
+                let current = 0;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        counter.textContent = target;
+                        clearInterval(timer);
+                    } else {
+                        counter.textContent = Math.floor(current);
+                    }
+                }, 20);
+            });
+        }
+
+        // Trigger counter animation when stats section is visible
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounters();
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+
+        const statsSection = document.querySelector('.stats-section');
+        if (statsSection) {
+            observer.observe(statsSection);
+        }
+
+        // FAQ Toggle
+        function toggleFaq(element) {
+            const faqItem = element.parentElement;
+            const isActive = faqItem.classList.contains('active');
+            
+            // Close all FAQ items
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Open clicked item if it wasn't active
+            if (!isActive) {
+                faqItem.classList.add('active');
+            }
+        }
+
+        // Video Modal
+        function openVideoModal() {
+            document.getElementById('videoModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeVideoModal() {
+            document.getElementById('videoModal').classList.remove('show');
+            document.body.style.overflow = '';
+            // Stop video
+            const iframe = document.querySelector('#videoModal iframe');
+            const src = iframe.src;
+            iframe.src = '';
+            iframe.src = src;
+        }
+
+        // Contact Form
+        function handleContactForm(event) {
+            event.preventDefault();
+            alert('Thank you for your message! We\'ll get back to you soon.');
+            event.target.reset();
+        }
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                const navbarCollapse = document.querySelector('.navbar-collapse');
+                if (navbarCollapse.classList.contains('show')) {
+                    bootstrap.Collapse.getInstance(navbarCollapse).hide();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+
+{% block title %}DDoS Protection - Smart Link Intelligence{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">
+            <i class="bi bi-shield-check text-primary me-2"></i>
+            DDoS Protection Dashboard
+        </h2>
+        <p class="text-muted mb-0">Monitor and manage security for your smart links</p>
+    </div>
+</div>
+
+<!-- Protection Overview -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Protected Links</h6>
+                        <h3 class="mb-0">{{ links|selectattr('protection_level', 'equalto', 0)|list|length }}</h3>
+                    </div>
+                    <i class="bi bi-shield-check" style="font-size: 2rem; opacity: 0.7;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Under Protection</h6>
+                        <h3 class="mb-0">{{ links|selectattr('protection_level', 'greaterthan', 0)|list|length }}</h3>
+                    </div>
+                    <i class="bi bi-shield-exclamation" style="font-size: 2rem; opacity: 0.7;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Disabled Links</h6>
+                        <h3 class="mb-0">{{ links|selectattr('auto_disabled', 'equalto', 1)|list|length }}</h3>
+                    </div>
+                    <i class="bi bi-shield-x" style="font-size: 2rem; opacity: 0.7;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Total Events</h6>
+                        <h3 class="mb-0">{{ recent_events|length }}</h3>
+                    </div>
+                    <i class="bi bi-activity" style="font-size: 2rem; opacity: 0.7;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Links Protection Status -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="bi bi-link-45deg me-2"></i>
+            Links Protection Status
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if links %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Link Code</th>
+                        <th>Primary URL</th>
+                        <th>Protection Level</th>
+                        <th>Status</th>
+                        <th>DDoS Events</th>
+                        <th>Last Event</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for link in links %}
+                    <tr>
+                        <td>
+                            <code class="bg-light px-2 py-1 rounded">{{ link.code }}</code>
+                        </td>
+                        <td>
+                            <div class="text-truncate" style="max-width: 200px;" title="{{ link.primary_url }}">
+                                {{ link.primary_url }}
+                            </div>
+                        </td>
+                        <td>
+                            {% if link.protection_level == 0 %}
+                                <span class="badge bg-success">Normal</span>
+                            {% elif link.protection_level <= 2 %}
+                                <span class="badge bg-info">Low</span>
+                            {% elif link.protection_level <= 3 %}
+                                <span class="badge bg-warning">Medium</span>
+                            {% elif link.protection_level <= 4 %}
+                                <span class="badge bg-danger">High</span>
+                            {% else %}
+                                <span class="badge bg-dark">Critical</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if link.auto_disabled %}
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-shield-x me-1"></i>Disabled
+                                </span>
+                            {% elif link.protection_level >= 4 %}
+                                <span class="badge bg-warning">
+                                    <i class="bi bi-shield-exclamation me-1"></i>Temp. Disabled
+                                </span>
+                            {% elif link.protection_level >= 3 %}
+                                <span class="badge bg-info">
+                                    <i class="bi bi-shield-check me-1"></i>Captcha Required
+                                </span>
+                            {% else %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-shield-check me-1"></i>Active
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if link.ddos_events > 0 %}
+                                <span class="badge bg-warning">{{ link.ddos_events }}</span>
+                            {% else %}
+                                <span class="text-muted">0</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if link.last_ddos_event %}
+                                <small class="text-muted">{{ link.last_ddos_event[:16] }}</small>
+                            {% else %}
+                                <small class="text-muted">Never</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                {% if link.auto_disabled or link.protection_level >= 3 %}
+                                <form method="POST" action="{{ url_for('recover_link', link_id=link.id) }}" class="d-inline">
+                                    <button type="submit" class="btn btn-success btn-sm" 
+                                            onclick="return confirm('Are you sure you want to recover this link?')">
+                                        <i class="bi bi-arrow-clockwise"></i> Recover
+                                    </button>
+                                </form>
+                                {% endif %}
+                                <a href="{{ url_for('ddos_link_stats', link_id=link.id) }}" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-bar-chart"></i> Stats
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="bi bi-link-45deg text-muted" style="font-size: 3rem;"></i>
+            <h5 class="text-muted mt-3">No Links Found</h5>
+            <p class="text-muted">Create your first smart link to see protection status here.</p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i>Create Link
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Recent DDoS Events -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="bi bi-activity me-2"></i>
+            Recent Security Events
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if recent_events %}
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Link</th>
+                        <th>Event Type</th>
+                        <th>Severity</th>
+                        <th>Protection Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in recent_events %}
+                    <tr>
+                        <td>
+                            <small>{{ event.detected_at[:16] }}</small>
+                        </td>
+                        <td>
+                            <code class="bg-light px-2 py-1 rounded">{{ event.code }}</code>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">{{ event.event_type.replace('_', ' ').title() }}</span>
+                        </td>
+                        <td>
+                            {% if event.severity <= 2 %}
+                                <span class="badge bg-info">Low</span>
+                            {% elif event.severity <= 3 %}
+                                <span class="badge bg-warning">Medium</span>
+                            {% elif event.severity <= 4 %}
+                                <span class="badge bg-danger">High</span>
+                            {% else %}
+                                <span class="badge bg-dark">Critical</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark">Level {{ event.protection_level }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="bi bi-shield-check text-success" style="font-size: 3rem;"></i>
+            <h5 class="text-muted mt-3">No Security Events</h5>
+            <p class="text-muted">Your links are secure! No DDoS attacks detected.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Protection Information -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Protection Levels
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <span class="badge bg-success me-2">Level 0</span>
+                        Normal operation
+                    </li>
+                    <li class="mb-2">
+                        <span class="badge bg-info me-2">Level 1-2</span>
+                        Monitoring increased
+                    </li>
+                    <li class="mb-2">
+                        <span class="badge bg-warning me-2">Level 3</span>
+                        Captcha verification required
+                    </li>
+                    <li class="mb-2">
+                        <span class="badge bg-danger me-2">Level 4</span>
+                        Temporary disable (1 hour)
+                    </li>
+                    <li class="mb-0">
+                        <span class="badge bg-dark me-2">Level 5</span>
+                        Link disabled until manual recovery
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-shield-check me-2"></i>
+                    How It Works
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Automatic threat detection
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Rate limiting protection
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Burst attack prevention
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Automatic link recovery
+                    </li>
+                    <li class="mb-0">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Manual override controls
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+</style>
+{% endblock %}

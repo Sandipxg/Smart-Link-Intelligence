@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">
+        <i class="bi bi-gear text-primary me-2"></i>Account Settings
+      </h2>
+      <p class="text-muted mb-0">Manage your account preferences and application settings</p>
+    </div>
+    <div class="text-end">
+      {% if g.user.is_premium %}
+      <span class="badge bg-warning text-dark">
+        <i class="bi bi-crown-fill me-1"></i>LinkPro Elite
+      </span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Account Information -->
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-person-circle me-2"></i>Account Information
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <form method="POST" action="{{ url_for('update_settings') }}" id="settingsForm">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Username</label>
+                <input type="text" name="username" class="form-control" value="{{ g.user.username }}" readonly>
+                <div class="form-text">Username cannot be changed</div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Email Address</label>
+                <input type="email" name="email" class="form-control" value="{{ g.user.email or '' }}"
+                  placeholder="your-email@example.com">
+                <div class="form-text">Used for notifications and account recovery</div>
+              </div>
+
+              <div class="col-12">
+                <hr class="my-4">
+                <h6 class="fw-bold mb-3">
+                  <i class="bi bi-shield-lock me-2"></i>Change Password
+                </h6>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Current Password</label>
+                <input type="password" name="current_password" class="form-control"
+                  placeholder="Enter current password">
+                <div class="form-text">Required to change password</div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">New Password</label>
+                <input type="password" name="new_password" class="form-control" placeholder="Enter new password">
+                <div class="form-text">Leave blank to keep current password</div>
+              </div>
+
+              <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-check-circle me-2"></i>Save Changes
+                </button>
+                <button type="reset" class="btn btn-outline-secondary ms-2">
+                  <i class="bi bi-arrow-clockwise me-2"></i>Reset
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Application Preferences -->
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-sliders me-2"></i>Application Preferences
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <form method="POST" action="{{ url_for('update_preferences') }}" id="preferencesForm">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Default Link Behavior</label>
+                <select name="default_behavior" class="form-select">
+                  <option value="standard">Standard Redirect</option>
+                  <option value="progression">Progression Redirect</option>
+                </select>
+                <div class="form-text">Default behavior for new links</div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Analytics Retention</label>
+                <select name="analytics_retention" class="form-select">
+                  <option value="30">30 Days</option>
+                  <option value="90" selected>90 Days</option>
+                  <option value="365">1 Year</option>
+                  <option value="0">Forever</option>
+                </select>
+                <div class="form-text">How long to keep analytics data</div>
+              </div>
+
+              <div class="col-12">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" name="email_notifications" id="emailNotifications"
+                    checked>
+                  <label class="form-check-label fw-semibold" for="emailNotifications">
+                    Email Notifications
+                  </label>
+                  <div class="form-text">Receive email updates about your links and account</div>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" name="auto_generate_codes" id="autoGenerateCodes"
+                    checked>
+                  <label class="form-check-label fw-semibold" for="autoGenerateCodes">
+                    Auto-generate Link Codes
+                  </label>
+                  <div class="form-text">Automatically create short codes when not specified</div>
+                </div>
+              </div>
+
+              <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-success">
+                  <i class="bi bi-check-circle me-2"></i>Save Preferences
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account Stats & Actions -->
+    <div class="col-lg-4">
+      <div class="sticky-top" style="top: 2rem;">
+        <!-- Account Stats -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-info text-white">
+            <h6 class="mb-0">
+              <i class="bi bi-graph-up me-2"></i>Account Statistics
+            </h6>
+          </div>
+          <div class="card-body p-3">
+            <div class="row g-3 text-center">
+              <div class="col-6">
+                <div class="bg-primary bg-opacity-10 rounded p-3">
+                  <div class="h4 fw-bold text-primary mb-1">{{ total_links or 0 }}</div>
+                  <div class="small text-primary">Total Links</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="bg-success bg-opacity-10 rounded p-3">
+                  <div class="h4 fw-bold text-success mb-1">{{ total_clicks or 0 }}</div>
+                  <div class="small text-success">Total Clicks</div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="bg-warning bg-opacity-10 rounded p-3">
+                  <div class="h4 fw-bold text-warning mb-1">
+                    {% if g.user.is_premium %}
+                    Elite Member
+                    {% else %}
+                    Free Account
+                    {% endif %}
+                  </div>
+                  <div class="small text-warning">Account Type</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-warning text-dark">
+            <h6 class="mb-0">
+              <i class="bi bi-lightning-charge me-2"></i>Quick Actions
+            </h6>
+          </div>
+          <div class="card-body p-3">
+            <div class="d-grid gap-2">
+              {% if not g.user.is_premium %}
+              <a href="{{ url_for('upgrade') }}" class="btn btn-warning">
+                <i class="bi bi-star-fill me-2"></i>Upgrade to Elite
+              </a>
+              {% endif %}
+              <a href="{{ url_for('create_ad') }}" class="btn btn-outline-primary">
+                <i class="bi bi-megaphone me-2"></i>Create Ad
+              </a>
+              <button class="btn btn-outline-danger" onclick="showDeleteAccountModal()">
+                <i class="bi bi-trash me-2"></i>Delete Account
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Account Info -->
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-3">
+            <h6 class="fw-bold mb-3">Account Details</h6>
+            <div class="small text-muted">
+              <div class="d-flex justify-content-between mb-2">
+                <span>Member Since:</span>
+                <span>{{ g.user.created_at[:10] if g.user.created_at else 'N/A' }}</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Account Type:</span>
+                <span>
+                  {% if g.user.is_premium %}
+                  <span class="badge bg-warning text-dark">Elite</span>
+                  {% else %}
+                  <span class="badge bg-secondary">Free</span>
+                  {% endif %}
+                </span>
+              </div>
+              {% if g.user.is_premium and g.user.premium_expires_at %}
+              <div class="d-flex justify-content-between">
+                <span>Elite Expires:</span>
+                <span>{{ g.user.premium_expires_at[:10] }}</span>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-exclamation-triangle me-2"></i>Delete Account
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-danger">
+          <strong>Warning:</strong> This action cannot be undone. All your links, analytics data, and ads will be
+          permanently deleted.
+        </div>
+        <p>To confirm account deletion, please type your username below:</p>
+        <form method="POST" action="{{ url_for('delete_account') }}" id="deleteAccountForm">
+          <div class="mb-3">
+            <input type="text" name="confirm_username" class="form-control" placeholder="Enter your username" required>
+          </div>
+          <div class="mb-3">
+            <input type="password" name="confirm_password" class="form-control" placeholder="Enter your password"
+              required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" form="deleteAccountForm" class="btn btn-danger">
+          <i class="bi bi-trash me-2"></i>Delete My Account
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %}

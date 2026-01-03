@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Comprehensive behavioral analytics and explainable insights for intelligent short links">
+  <title>Link Analytics - {{ link.code }} - Smart Link Intelligence</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body class="bg-light min-vh-100">
+  <!-- Navigation Header -->
+  <header class="bg-white border-bottom sticky-top shadow-sm">
+    <nav class="container-fluid px-4">
+      <div class="d-flex align-items-center justify-content-between py-3">
+        <!-- Logo -->
+        <div class="d-flex align-items-center gap-3">
+          <div class="bg-primary rounded-3 p-2">
+            <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+              <path d="M12 20L18 26L28 14" stroke="white" stroke-width="3" stroke-linecap="round" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="h5 mb-0 fw-bold">Smart Link Intelligence</h1>
+            <p class="small text-muted mb-0">Behavioral Analytics Platform</p>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="d-flex align-items-center gap-2">
+          <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-sm">
+            ← Dashboard
+          </a>
+          {% if g.user %}
+          <span class="text-muted small">{{ g.user.username }}</span>
+          <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Logout</a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container-fluid px-4 py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Analytics</li>
+      </ol>
+    </nav>
+
+    <!-- Link Header Information -->
+    <section class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="row g-4">
+          <!-- Link Details -->
+          <div class="col-lg-6">
+            <div class="d-flex gap-3">
+              <div class="bg-primary bg-opacity-10 rounded-3 p-3 d-flex align-items-center justify-content-center"
+                style="width: 60px; height: 60px;">
+                <svg width="28" height="28" fill="currentColor" class="text-primary" viewBox="0 0 16 16">
+                  <path d="M9.465 10H12a2 2 0 1 1 0 4H9.465c.34-.588.535-1.271.535-2 0-.729-.195-1.412-.535-2z" />
+                  <path d="M6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 1a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
+                </svg>
+              </div>
+              <div class="flex-grow-1">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <h2 class="h4 mb-0">Link Analytics</h2>
+                  <span class="badge bg-success">{{ link.state }}</span>
+                </div>
+                <div class="mb-2">
+                  <span class="text-muted small">Short Code:</span>
+                  <code class="bg-primary bg-opacity-10 text-primary px-2 py-1 rounded">{{ link.code }}</code>
+                </div>
+                <div class="mb-1">
+                  <span class="text-muted small">Original URL:</span>
+                  <a href="{{ link.primary_url }}" target="_blank"
+                    class="text-decoration-none small d-inline-block text-truncate" style="max-width: 500px;">
+                    {{ link.primary_url }}
+                  </a>
+                </div>
+                {% if behavior_rule %}
+                <div class="mb-1">
+                  <span class="text-muted small">Behavior Rule:</span>
+                  <span class="badge bg-info">{{ behavior_rule.rule_name }}</span>
+                  <small class="text-muted">
+                    ({{ behavior_rule.interested_threshold }}+ visits → Interested,
+                    {{ behavior_rule.engaged_threshold }}+ clicks → Engaged)
+                  </small>
+                </div>
+                {% endif %}
+                <div>
+                  <span class="text-muted small">Created: {{ link.created_at }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Share & Actions -->
+          <div class="col-lg-3">
+            <div class="card h-100 border-0 bg-light">
+              <div class="card-body d-flex align-items-center justify-content-between p-3">
+                <div class="d-flex flex-column align-items-start">
+                  <p class="small fw-bold text-muted mb-2">Scan to Download Report</p>
+                  <!-- Button now links directly to the server-side CSV route -->
+                  <a href="{{ url_for('export_csv', code_id=link.code) }}"
+                    class="btn btn-outline-dark btn-sm mb-2 w-100">
+                    <svg width="14" height="14" fill="currentColor" class="me-1" viewBox="0 0 16 16">
+                      <path
+                        d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+                      <path
+                        d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
+                    </svg>
+                    Download CSV
+                  </a>
+                  <button class="btn btn-primary btn-sm w-100"
+                    data-csv-url="{{ url_for('export_csv', code_id=link.code, _external=True) }}"
+                    onclick="navigator.clipboard.writeText(this.dataset.csvUrl)">
+                    Copy CSV Link
+                  </button>
+                </div>
+                <!-- QR Code encodes the direct CSV download URL -->
+                <div class="bg-white p-1 rounded border">
+                  <img
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data={{ url_for('export_csv', code_id=link.code, _external=True) }}"
+                    alt="Scan to download CSV" width="80" height="80">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trust Score & Stats -->
+          <div class="col-lg-3">
+            <div class="row g-3">
+              <!-- Trust Score -->
+              <div class="col-12">
+                <div class="card bg-success bg-opacity-10 border-success border-opacity-25">
+                  <div class="card-body text-center">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                      <span class="small fw-medium text-success">Trust Score</span>
+                      <svg width="20" height="20" fill="currentColor" class="text-success" viewBox="0 0 16 16">
+                        <path
+                          d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                      </svg>
+                    </div>
+                    <div class="d-flex align-items-end justify-content-center gap-1 mb-2">
+                      <span class="display-5 fw-bold text-success">{{ trust }}</span>
+                      <span class="h5 text-success mb-2">/100</span>
+                    </div>
+                    <div class="progress mb-2" style="height: 8px;">
+                      <div class="progress-bar bg-success" style="width: {{ trust }}%"></div>
+                    </div>
+                    <p class="small mb-0 text-success">
+                      {% if trust >= 70 %}High quality engagement{% elif trust >= 50 %}Moderate quality{% else %}Needs
+                      improvement{% endif %}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Stats -->
+              <div class="col-6">
+                <div class="card">
+                  <div class="card-body text-center p-3">
+                    <p class="small text-muted mb-1">Total Clicks</p>
+                    <p class="h4 fw-bold mb-0">{{ "{:,}".format(totals.total or 0) }}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="card">
+                  <div class="card-body text-center p-3">
+                    <p class="small text-muted mb-1">Unique Visitors</p>
+                    <p class="h4 fw-bold mb-0">{{ "{:,}".format(totals.unique_visitors or 0) }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Analytics Visualizations -->
+    <section class="mb-4">
+      <h3 class="h5 fw-bold mb-3">Behavioral Analytics Visualizations</h3>
+
+      <div class="row g-3">
+        <!-- Attention Decay Analysis -->
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <h4 class="h6 fw-bold mb-1">Attention Decay Analysis</h4>
+                  <p class="small text-muted mb-0">Engagement patterns over time</p>
+                </div>
+              </div>
+              <div style="height: 280px;">
+                <canvas id="attentionDecayChart"></canvas>
+              </div>
+              <div class="mt-3 p-3 bg-light rounded">
+                <p class="small mb-0">
+                  <strong>Insight:</strong> {% if attention|length > 1 %}Engagement tracked across {{ attention|length
+                  }} time periods{% else %}Gathering initial engagement data{% endif %}.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Click Frequency Patterns -->
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <h4 class="h6 fw-bold mb-1">Click Frequency Patterns</h4>
+                  <p class="small text-muted mb-0">Hourly distribution analysis</p>
+                </div>
+              </div>
+              <div style="height: 280px;">
+                <canvas id="clickFrequencyChart"></canvas>
+              </div>
+              <div class="mt-3 p-3 bg-light rounded">
+                <p class="small mb-0">
+                  <strong>Insight:</strong> Peak activity patterns suggest professional audience behavior.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Intent Classification -->
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <h4 class="h6 fw-bold mb-1">User Intent Classification</h4>
+                  <p class="small text-muted mb-0">Behavioral segmentation breakdown</p>
+                </div>
+              </div>
+              <div style="height: 280px;">
+                <canvas id="intentClassificationChart"></canvas>
+              </div>
+              <div class="mt-3 row g-2 text-center">
+                {% set total_visitors = totals.unique_visitors or 1 %}
+                <div class="col-4">
+                  <div class="p-2 bg-secondary bg-opacity-10 rounded">
+                    <p class="small text-muted mb-1">Curious</p>
+                    <p class="h5 fw-bold mb-0">{{ ((totals.curious or 0) * 100 / total_visitors)|round|int }}%</p>
+                    <p class="small text-muted mb-0">{{ "{:,}".format(totals.curious or 0) }}</p>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="p-2 bg-warning bg-opacity-10 rounded">
+                    <p class="small text-muted mb-1">Interested</p>
+                    <p class="h5 fw-bold mb-0">{{ ((totals.interested or 0) * 100 / total_visitors)|round|int }}%
+                    </p>
+                    <p class="small text-muted mb-0">{{ "{:,}".format(totals.interested or 0) }}</p>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="p-2 bg-success bg-opacity-10 rounded">
+                    <p class="small text-muted mb-1">Engaged</p>
+                    <p class="h5 fw-bold mb-0">{{ ((totals.engaged or 0) * 100 / total_visitors)|round|int }}%</p>
+                    <p class="small text-muted mb-0">{{ "{:,}".format(totals.engaged or 0) }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Traffic Quality Assessment -->
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <h4 class="h6 fw-bold mb-1">Traffic Quality Assessment</h4>
+                  <p class="small text-muted mb-0">Human vs automated traffic</p>
+                </div>
+              </div>
+              <div style="height: 280px;">
+                <canvas id="trafficQualityChart"></canvas>
+              </div>
+              <div class="mt-3 p-3 bg-success bg-opacity-10 rounded">
+                {% set total_clicks = totals.total or 1 %}
+                {% set suspicious = totals.suspicious or 0 %}
+                {% set human_percentage = (((total_clicks - suspicious) * 100) / total_clicks)|round|int %}
+                <p class="small mb-0 text-success">
+                  <strong>Insight:</strong> {{ human_percentage }}% human traffic with {{ "{:,}".format(suspicious) }}
+                  suspicious clicks
+                  detected.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Engagement Trends -->
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <h4 class="h6 fw-bold mb-1">Engagement Trends</h4>
+                  <p class="small text-muted mb-0">Click patterns over 7-day period showing daily engagement
+                    distribution</p>
+                </div>
+              </div>
+              <div style="height: 280px;">
+                <canvas id="dailyEngagementChart"></canvas>
+              </div>
+              <div class="mt-3 p-3 bg-info bg-opacity-10 rounded">
+                <p class="small mb-0 text-info">
+                  <strong>Insight:</strong> {{ weekend_insight }}
+                </p>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+        <!-- Users by Device -->
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <h4 class="h6 fw-bold mb-1">Users by Device</h4>
+                  <p class="small text-muted mb-0">Device type breakdown</p>
+                </div>
+              </div>
+              <div style="height: 280px;">
+                <canvas id="deviceChart"></canvas>
+              </div>
+              <div class="mt-3 row g-2 text-center">
+                {% for device in device_data %}
+                <div class="col-4">
+                  <div class="p-2 bg-light rounded">
+                    <p class="small text-muted mb-1">{{ device.device }}</p>
+                    {% set pct = ((device.count * 100) / (totals.unique_visitors or 1))|round|int %}
+                    <p class="h5 fw-bold mb-0">{{ pct }}%</p>
+                    <p class="small text-muted mb-0">{{ "{:,}".format(device.count) }}</p>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Users by Continent -->
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <h4 class="h6 fw-bold mb-1">Users by Continent</h4>
+                  <p class="small text-muted mb-0">Geographic distribution by continent</p>
+                </div>
+              </div>
+              <div style="height: 280px;">
+                <canvas id="regionChart"></canvas>
+              </div>
+              <div class="mt-3">
+                {% if region_data %}
+                <div class="table-responsive">
+                  <table class="table table-sm mb-0">
+                    <tbody>
+                      {% for region in region_data[:5] %}
+                      <tr>
+                        <td class="border-0 small">{{ region.location }}</td>
+                        <td class="border-0 small text-end">{{ "{:,}".format(region.count) }}</td>
+                        {% set r_pct = ((region.count * 100) / (totals.unique_visitors or 1))|round|int %}
+                        <td class="border-0 small text-end text-muted">{{ r_pct }}%</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+                {% else %}
+                <p class="small text-muted mb-0">No regional data available yet.</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Detailed Visitor Log Section (Grabify-like) -->
+    <section class="mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+          <div>
+            <h4 class="h6 fw-bold mb-0">
+              <svg width="18" height="18" fill="currentColor" class="me-2" viewBox="0 0 16 16">
+                <path
+                  d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z" />
+              </svg>
+              Detailed Visitor Log
+            </h4>
+            <p class="small text-muted mb-0 mt-1">Click on any row to view full details</p>
+          </div>
+          <span class="badge bg-primary">{{ detailed_visitors|length }} visitors</span>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="small fw-bold">Time</th>
+                  <th class="small fw-bold">IP Address</th>
+                  <th class="small fw-bold">Location</th>
+                  <th class="small fw-bold">Browser</th>
+                  <th class="small fw-bold">OS</th>
+                  <th class="small fw-bold">ISP</th>
+                  <th class="small fw-bold text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for visitor in detailed_visitors %}
+                <tr class="visitor-row" style="cursor: pointer;" data-visitor='{{ visitor | tojson }}'
+                  onclick="showVisitorModal(this)">
+                  <td class="small">{{ visitor.timestamp[:19] }}</td>
+                  <td class="small font-monospace">{{ visitor.ip_address }}</td>
+                  <td class="small">
+                    {% if visitor.city and visitor.city != 'Unknown' %}
+                    {{ visitor.city }}, {{ visitor.country }}
+                    {% else %}
+                    {{ visitor.country }}
+                    {% endif %}
+                  </td>
+                  <td class="small">{{ visitor.browser[:30] }}{% if visitor.browser|length > 30 %}...{% endif %}</td>
+                  <td class="small">{{ visitor.os }}</td>
+                  <td class="small">{{ visitor.isp[:25] }}{% if visitor.isp|length > 25 %}...{% endif %}</td>
+                  <td class="text-center">
+                    <button class="btn btn-sm btn-outline-primary"
+                      onclick="event.stopPropagation(); showVisitorModal(this.closest('tr'))">
+                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z" />
+                        <path
+                          d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="7" class="text-center py-4 text-muted">
+                    <svg width="48" height="48" fill="currentColor" class="mb-2 opacity-50" viewBox="0 0 16 16">
+                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                      <path
+                        d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
+                    </svg>
+                    <p class="mb-0">No visitor data yet. Share your link to start tracking!</p>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Visitor Details Modal (Grabify-like Advanced Log) -->
+  <div class="modal fade" id="visitorModal" tabindex="-1" aria-labelledby="visitorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title" id="visitorModalLabel">
+            <svg width="20" height="20" fill="currentColor" class="me-2" viewBox="0 0 16 16">
+              <path
+                d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z" />
+            </svg>
+            Advanced Log
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0">
+          <table class="table table-bordered mb-0">
+            <tbody>
+              <tr>
+                <th class="bg-light" style="width: 30%;">IP Address</th>
+                <td id="modal-ip" class="font-monospace"></td>
+              </tr>
+              <tr>
+                <th class="bg-light">Country</th>
+                <td id="modal-country"></td>
+              </tr>
+              <tr>
+                <th class="bg-light">City</th>
+                <td id="modal-city"></td>
+              </tr>
+              <tr>
+                <th class="bg-light">Browser</th>
+                <td id="modal-browser"></td>
+              </tr>
+              <tr>
+                <th class="bg-light">Operating System</th>
+                <td id="modal-os"></td>
+              </tr>
+              <tr>
+                <th class="bg-light">User Agent</th>
+                <td id="modal-useragent" class="small font-monospace text-break"></td>
+              </tr>
+              <tr>
+                <th class="bg-light">Referring URL</th>
+                <td id="modal-referrer"></td>
+              </tr>
+              <tr>
+                <th class="bg-light">Host Name</th>
+                <td id="modal-hostname" class="font-monospace"></td>
+              </tr>
+              <tr>
+                <th class="bg-light">ISP</th>
+                <td id="modal-isp"></td>
+              </tr>
+              <tr>
+                <th class="bg-light">Organization</th>
+                <td id="modal-org"></td>
+              </tr>
+              <tr>
+                <th class="bg-light">Timezone</th>
+                <td id="modal-timezone"></td>
+              </tr>
+              <tr>
+                <th class="bg-light">Device Type</th>
+                <td id="modal-device"></td>
+              </tr>
+              <tr>
+                <th class="bg-light">Behavior</th>
+                <td id="modal-behavior"></td>
+              </tr>
+              <tr>
+                <th class="bg-light">Timestamp</th>
+                <td id="modal-timestamp"></td>
+              </tr>
+              <tr>
+                <th class="bg-light">Coordinates</th>
+                <td id="modal-coords"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data for JavaScript -->
+  <script>
+    // Use the pre-constructed payload from the backend
+    window.analyticsData = {{ analytics_payload | tojson }};
+
+    // Function to show visitor details modal
+    function showVisitorModal(row) {
+      const visitor = JSON.parse(row.dataset.visitor);
+
+      document.getElementById('modal-ip').textContent = visitor.ip_address || 'N/A';
+      document.getElementById('modal-country').textContent = visitor.country || 'Unknown';
+      document.getElementById('modal-city').textContent = visitor.city || 'Unknown';
+      document.getElementById('modal-browser').textContent = visitor.browser || 'Unknown';
+      document.getElementById('modal-os').textContent = visitor.os || 'Unknown';
+      document.getElementById('modal-useragent').textContent = visitor.user_agent || 'Unknown';
+      document.getElementById('modal-referrer').textContent = visitor.referrer || 'no referrer';
+      document.getElementById('modal-hostname').textContent = visitor.hostname || 'Unknown';
+      document.getElementById('modal-isp').textContent = visitor.isp || 'Unknown';
+      document.getElementById('modal-org').textContent = visitor.org || 'Unknown';
+      document.getElementById('modal-timezone').textContent = visitor.timezone || 'Unknown';
+      document.getElementById('modal-device').textContent = visitor.device || 'Unknown';
+      document.getElementById('modal-behavior').textContent = visitor.behavior || 'Unknown';
+      document.getElementById('modal-timestamp').textContent = visitor.timestamp || 'Unknown';
+
+      // Coordinates
+      if (visitor.latitude && visitor.longitude) {
+        document.getElementById('modal-coords').innerHTML =
+          `${visitor.latitude}, ${visitor.longitude} 
+           <a href="https://www.google.com/maps?q=${visitor.latitude},${visitor.longitude}" target="_blank" class="ms-2 btn btn-sm btn-outline-primary">
+             View on Map
+           </a>`;
+      } else {
+        document.getElementById('modal-coords').textContent = 'Not available';
+      }
+
+      // Show the modal
+      const modal = new bootstrap.Modal(document.getElementById('visitorModal'));
+      modal.show();
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>
