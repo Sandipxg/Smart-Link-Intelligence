@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Global functions for navigation
-    window.showCreateLinkModal = function() {
+    window.showCreateLinkModal = function () {
         if (window.APP_CONFIG && window.APP_CONFIG.isAuthenticated) {
             const modal = new bootstrap.Modal(document.getElementById('quickCreateModal'));
             modal.show();
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    window.showAnalyticsOverview = function() {
+    window.showAnalyticsOverview = function () {
         if (window.APP_CONFIG && window.APP_CONFIG.isAuthenticated) {
             window.location.href = window.APP_CONFIG.analyticsUrl;
         } else {
@@ -29,21 +29,21 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Toggle form fields based on behavior rule selection
-    window.toggleFormFields = function() {
+    window.toggleFormFields = function () {
         const behaviorRule = document.getElementById('behaviorRule');
         const progressiveFields = document.getElementById('progressiveFields');
         const standardInfo = document.getElementById('standardInfo');
         const progressionInfo = document.getElementById('progressionInfo');
-        
+
         if (!behaviorRule || !progressiveFields) {
             return;
         }
-        
+
         if (behaviorRule.value === 'progression') {
             progressiveFields.style.display = 'block';
             if (standardInfo) standardInfo.style.display = 'none';
             if (progressionInfo) progressionInfo.style.display = 'block';
-            
+
             // Make returning_url and cta_url required for progression
             const returningUrl = document.querySelector('input[name="returning_url"]');
             const ctaUrl = document.querySelector('input[name="cta_url"]');
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function () {
             progressiveFields.style.display = 'none';
             if (standardInfo) standardInfo.style.display = 'block';
             if (progressionInfo) progressionInfo.style.display = 'none';
-            
+
             // Remove required attribute for standard redirect
             const returningUrl = document.querySelector('input[name="returning_url"]');
             const ctaUrl = document.querySelector('input[name="cta_url"]');
@@ -63,24 +63,24 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Reset form function
-    window.resetForm = function() {
+    window.resetForm = function () {
         const form = document.getElementById('linkCreateForm');
         if (form) {
             form.reset();
             const progressiveFields = document.getElementById('progressiveFields');
             const standardInfo = document.getElementById('standardInfo');
             const progressionInfo = document.getElementById('progressionInfo');
-            
+
             if (progressiveFields) progressiveFields.style.display = 'none';
             if (standardInfo) standardInfo.style.display = 'block';
             if (progressionInfo) progressionInfo.style.display = 'none';
-            
+
             // Remove required attributes
             const returningUrl = document.querySelector('input[name="returning_url"]');
             const ctaUrl = document.querySelector('input[name="cta_url"]');
             if (returningUrl) returningUrl.required = false;
             if (ctaUrl) ctaUrl.required = false;
-            
+
             // Remove validation classes
             form.classList.remove('was-validated');
         }
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (window.toggleFormFields) {
         window.toggleFormFields();
     }
-    
+
     // Chart.js default configuration
     Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
     Chart.defaults.color = '#6b7280';
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Dashboard Link Status Chart (for index page)
     if (window.dashboardData && document.getElementById('linkStatusChart')) {
         const linkStats = window.dashboardData.linkStats || [];
-        
+
         if (linkStats.length > 0) {
             const labels = linkStats.map(item => item.state);
             const data = linkStats.map(item => item.count);
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Decaying': 'rgba(251, 191, 36, 0.8)',
                 'Inactive': 'rgba(239, 68, 68, 0.8)'
             };
-            
+
             const backgroundColors = labels.map(label => colors[label] || 'rgba(107, 114, 128, 0.8)');
             const borderColors = labels.map(label => colors[label]?.replace('0.8', '1') || '#6b7280');
 
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             padding: 12,
                             cornerRadius: 8,
                             callbacks: {
-                                label: function(context) {
+                                label: function (context) {
                                     const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                     const percentage = ((context.parsed * 100) / total).toFixed(1);
                                     return `${context.label}: ${context.parsed} (${percentage}%)`;
@@ -196,13 +196,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const attentionCtx = document.getElementById('attentionDecayChart');
     if (attentionCtx) {
         const attentionData = data.attention || [];
-        const labels = attentionData.length > 0 
+        const labels = attentionData.length > 0
             ? attentionData.map(d => d.day)
             : ['No data yet'];
-        const chartData = attentionData.length > 0 
+        const chartData = attentionData.length > 0
             ? attentionData.map(d => d.count)
             : [0];
-            
+
         new Chart(attentionCtx, {
             type: 'line',
             data: {
@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (intentCtx && data.intent) {
         const totalIntent = (data.intent.curious || 0) + (data.intent.interested || 0) + (data.intent.engaged || 0);
         const labels = ['Curious', 'Interested', 'Engaged'];
-        const chartData = totalIntent === 0 
+        const chartData = totalIntent === 0
             ? [1, 1, 1]
             : [data.intent.curious || 0, data.intent.interested || 0, data.intent.engaged || 0];
 
@@ -329,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 if (totalIntent === 0) return context.label + ': No data yet';
                                 const percentage = ((context.parsed * 100) / totalIntent).toFixed(1);
                                 return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (qualityCtx && data.quality) {
         const totalQuality = (data.quality.human || 0) + (data.quality.suspicious || 0);
         const labels = ['Human Traffic', 'Suspicious'];
-        const chartData = totalQuality === 0 
+        const chartData = totalQuality === 0
             ? [1, 0]
             : [data.quality.human || 0, data.quality.suspicious || 0];
 
@@ -378,7 +378,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 if (totalQuality === 0) return context.label + ': No data yet';
                                 const percentage = ((context.parsed * 100) / totalQuality).toFixed(1);
                                 return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
@@ -394,10 +394,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const dailyCtx = document.getElementById('dailyEngagementChart');
     if (dailyCtx) {
         const dailyData = data.daily || [];
-        const labels = dailyData.length > 0 
+        const labels = dailyData.length > 0
             ? dailyData.map(d => d.day)
             : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const chartData = dailyData.length > 0 
+        const chartData = dailyData.length > 0
             ? dailyData.map(d => d.count)
             : [0, 0, 0, 0, 0, 0, 0];
 
@@ -431,10 +431,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         padding: 12,
                         cornerRadius: 8,
                         callbacks: {
-                            title: function(context) {
+                            title: function (context) {
                                 return context[0].label;
                             },
-                            label: function(context) {
+                            label: function (context) {
                                 if (dailyData.length === 0) return 'No data yet';
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                 const percentage = total > 0 ? ((context.parsed.y * 100) / total).toFixed(1) : 0;
@@ -449,7 +449,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         ticks: { precision: 0 },
                         grid: { color: 'rgba(0, 0, 0, 0.05)' }
                     },
-                    x: { 
+                    x: {
                         grid: { display: false },
                         ticks: {
                             font: { weight: 'bold' }
@@ -464,10 +464,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const regionCtx = document.getElementById('regionChart');
     if (regionCtx) {
         const regionData = data.region || [];
-        const labels = regionData.length > 0 
+        const labels = regionData.length > 0
             ? regionData.map(r => r.location)
             : ['No data yet'];
-        const chartData = regionData.length > 0 
+        const chartData = regionData.length > 0
             ? regionData.map(r => r.count)
             : [1];
 
@@ -503,7 +503,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 if (regionData.length === 0) return 'No visitors yet';
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                 const percentage = ((context.parsed * 100) / total).toFixed(1);
@@ -520,10 +520,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const deviceCtx = document.getElementById('deviceChart');
     if (deviceCtx) {
         const deviceData = data.device || [];
-        const labels = deviceData.length > 0 
+        const labels = deviceData.length > 0
             ? deviceData.map(d => d.device)
             : ['No data yet'];
-        const chartData = deviceData.length > 0 
+        const chartData = deviceData.length > 0
             ? deviceData.map(d => d.count)
             : [1];
 
@@ -556,8 +556,68 @@ document.addEventListener('DOMContentLoaded', function () {
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 if (deviceData.length === 0) return 'No visitors yet';
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed * 100) / total).toFixed(1);
+                                return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 8. Users by ISP Chart (Pie Chart)
+    const ispCtx = document.getElementById('ispChart');
+    if (ispCtx) {
+        const ispData = data.isp || [];
+        const labels = ispData.length > 0
+            ? ispData.map(i => i.provider)
+            : ['No data yet'];
+        const chartData = ispData.length > 0
+            ? ispData.map(i => i.count)
+            : [1];
+
+        new Chart(ispCtx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: chartData,
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(168, 85, 247, 0.8)',
+                        'rgba(236, 72, 153, 0.8)',
+                        'rgba(34, 197, 94, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(107, 114, 128, 0.8)',
+                        'rgba(99, 102, 241, 0.8)',
+                        'rgba(139, 92, 246, 0.8)',
+                        'rgba(232, 121, 249, 0.8)'
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                if (ispData.length === 0) return 'No ISP data yet';
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                 const percentage = ((context.parsed * 100) / total).toFixed(1);
                                 return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
@@ -592,6 +652,13 @@ document.addEventListener('DOMContentLoaded', function () {
         if (data.device) {
             data.device.forEach(d => {
                 csvContent += `Device,${d.device},${d.count}\n`;
+            });
+        }
+
+        // Add ISP Data
+        if (data.isp) {
+            data.isp.forEach(i => {
+                csvContent += `ISP,${i.provider},${i.count}\n`;
             });
         }
 

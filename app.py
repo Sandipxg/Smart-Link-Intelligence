@@ -14,7 +14,8 @@ GEOIP_AVAILABLE = False
 import requests
 import tarfile
 from email.message import EmailMessage
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 # Import threading for async IP fetching if needed, though we'll keep it simple for now
 import threading
 from functools import wraps
@@ -430,12 +431,15 @@ def create_app() -> Flask:
             behavior_rule = None
             if link["behavior_rule_id"]:
                 behavior_rule = query_db("SELECT * FROM behavior_rules WHERE id = ?", [link["behavior_rule_id"]], one=True)
-            else:
-                # Get user's default behavior rule
-                behavior_rule = query_db(
-                    "SELECT * FROM behavior_rules WHERE user_id = ? AND is_default = 1",
-                    [g.user["id"]], one=True
-                )
+            
+            if not behavior_rule:
+                # Get user's default behavior rule (fallback to link owner's rule or g.user's)
+                user_id = link["user_id"] or (g.user["id"] if g.user else None)
+                if user_id:
+                    behavior_rule = query_db(
+                        "SELECT * FROM behavior_rules WHERE user_id = ? AND is_default = 1",
+                        [user_id], one=True
+                    )
 
             visits = query_db(
                 """
@@ -582,6 +586,24 @@ def create_app() -> Flask:
                 [link["id"]]
             )
 
+            # Get ISP distribution
+            isp_data = query_db(
+                """
+                SELECT 
+                    CASE 
+                        WHEN isp IS NOT NULL AND isp != 'Unknown' THEN isp
+                        ELSE 'Other/Unknown'
+                    END as provider,
+                    COUNT(DISTINCT ip_hash) as count
+                FROM visits
+                WHERE link_id = ?
+                GROUP BY provider
+                ORDER BY count DESC
+                LIMIT 10
+                """,
+                [link["id"]]
+            )
+
             # Get device distribution
             device_data = query_db(
                 """
@@ -593,40 +615,48 @@ def create_app() -> Flask:
                 [link["id"]],
             )
 
-            # Get daily engagement trends (7-day pattern) using SQL
-            daily_raw = query_db(
-                """
-                SELECT 
-                    CASE CAST(strftime('%w', ts) AS INTEGER)
-                        WHEN 0 THEN 'Sun'
-                        WHEN 1 THEN 'Mon'
-                        WHEN 2 THEN 'Tue'
-                        WHEN 3 THEN 'Wed'
-                        WHEN 4 THEN 'Thu'
-                        WHEN 5 THEN 'Fri'
-                        WHEN 6 THEN 'Sat'
-                    END as day_name,
-                    COUNT(*) as count
-                FROM visits 
-                WHERE link_id = ?
-                GROUP BY strftime('%w', ts)
-                ORDER BY CAST(strftime('%w', ts) AS INTEGER)
-                """,
-                [link["id"]],
+            # Get daily and hourly engagement trends using visitor's local timezone
+            visits_raw = query_db(
+                "SELECT ts, timezone FROM visits WHERE link_id = ?",
+                [link["id"]]
             )
             
-            # Ensure all days are present with 0 counts if no data
-            day_names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-            daily_counts = {row['day_name']: row['count'] for row in daily_raw}
+            from collections import Counter
+            local_days = []
+            local_hours = []
             
+            for row in visits_raw:
+                try:
+                    dt_utc = datetime.fromisoformat(row["ts"]).replace(tzinfo=timezone.utc)
+                    tz_name = row["timezone"] or "UTC"
+                    try:
+                        visitor_tz = ZoneInfo(tz_name)
+                    except:
+                        visitor_tz = timezone.utc
+                    
+                    dt_local = dt_utc.astimezone(visitor_tz)
+                    local_days.append(dt_local.weekday())
+                    local_hours.append(dt_local.hour)
+                except: pass
+            
+            # Process daily distribution (Mon=0...Sun=6)
+            day_names_sun = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+            day_counts = Counter(local_days)
             daily_data = []
-            for day_name in day_names:
-                count = daily_counts.get(day_name, 0)
-                daily_data.append({"day": day_name, "count": count})
+            # Map Python's 0=Mon...6=Sun to display 0=Sun...6=Sat
+            ordered_indices = [6, 0, 1, 2, 3, 4, 5]
+            for i, idx in enumerate(ordered_indices):
+                daily_data.append({"day": day_names_sun[i], "count": day_counts.get(idx, 0)})
             
+            # Process hourly distribution (0-23)
+            hour_counts = Counter(local_hours)
+            hourly_data = []
+            for h in range(24):
+                hourly_data.append({"hour": h, "count": hour_counts.get(h, 0)})
+
             # Calculate weekend vs weekday insight
-            weekday_total = sum(daily_counts.get(day, 0) for day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'])
-            weekend_total = sum(daily_counts.get(day, 0) for day in ['Sat', 'Sun'])
+            weekday_total = sum(day_counts.get(i, 0) for i in range(5)) # Mon-Fri
+            weekend_total = sum(day_counts.get(i, 0) for i in range(5, 7)) # Sat-Sun
             
             weekend_insight = ""
             if weekday_total > 0 and weekend_total > 0:
@@ -639,34 +669,6 @@ def create_app() -> Flask:
                     weekend_insight = "Traffic is fairly consistent between weekdays and weekends."
             else:
                 weekend_insight = "Gathering engagement pattern data..."
-
-            # Get raw timestamps for Python-side processing
-            hourly_raw = query_db(
-                """
-                SELECT ts FROM visits WHERE link_id = ?
-                """,
-                [link["id"]],
-            )
-            
-            # Process hourly distribution in Python
-            from collections import Counter
-            
-            local_hours = []
-            for row in hourly_raw:
-                try:
-                    dt_utc = datetime.fromisoformat(row["ts"])
-                    dt_local = dt_utc + (datetime.now() - datetime.utcnow())
-                    local_hours.append(dt_local.hour)
-                except:
-                    pass
-
-            hour_counts = Counter(local_hours)
-            final_hourly_data = []
-            
-            for h, c in hour_counts.items():
-                final_hourly_data.append({"hour": h, "count": c})
-                    
-            hourly_data = sorted(final_hourly_data, key=lambda x: x["hour"])
 
             trust = trust_score(link["id"])
             attention = attention_decay(list(reversed(recalculated_visits)))
@@ -691,6 +693,7 @@ def create_app() -> Flask:
                 "region": region_data,  # Already list of dicts
                 "cities": [dict(row) for row in city_data],  # SQLite Row objects
                 "device": [dict(row) for row in device_data],  # SQLite Row objects
+                "isp": [dict(row) for row in isp_data],
                 "weekend_insight": weekend_insight
             }
             
@@ -740,6 +743,7 @@ def create_app() -> Flask:
                 analytics_payload=analytics_payload,
                 behavior_rule=behavior_rule,
                 detailed_visitors=detailed_visitors,
+                isp_data=isp_data,
             )
         except Exception as e:
             import traceback
@@ -754,19 +758,29 @@ def create_app() -> Flask:
         if not link:
             return f"Link {code} not found", 404
         
-        # Get daily data (same logic as analytics route)
-        daily_raw = query_db("SELECT ts FROM visits WHERE link_id = ?", [link["id"]])
+        # Get daily data and timestamps for hourly distribution (same logic as analytics route)
+        visits_raw = query_db("SELECT ts, timezone FROM visits WHERE link_id = ?", [link["id"]])
         
         from collections import Counter
         local_days = []
-        for row in daily_raw:
+        local_hours = []
+        
+        for row in visits_raw:
             try:
-                dt_utc = datetime.fromisoformat(row["ts"])
-                dt_local = dt_utc + (datetime.now() - datetime.utcnow())
-                day_of_week = dt_local.weekday()
-                local_days.append(day_of_week)
+                dt_utc = datetime.fromisoformat(row["ts"]).replace(tzinfo=timezone.utc)
+                
+                # Get visitor's timezone
+                tz_name = row["timezone"] or "UTC"
+                try:
+                    visitor_tz = ZoneInfo(tz_name)
+                except:
+                    visitor_tz = timezone.utc
+                
+                dt_local = dt_utc.astimezone(visitor_tz)
+                local_days.append(dt_local.weekday())
+                local_hours.append(dt_local.hour)
             except Exception as e:
-                print(f"Error processing timestamp {row['ts']}: {e}")
+                print(f"Error processing debug timestamp: {e}")
                 pass
 
         day_counts = Counter(local_days)
@@ -777,13 +791,16 @@ def create_app() -> Flask:
             count = day_counts.get(i, 0)
             daily_data.append({"day": day_name, "count": count})
         
+        hour_counts = Counter(local_hours)
+        final_hourly_data = [{"hour": h, "count": hour_counts.get(h, 0)} for h in range(24)]
+        
         # Create simplified analytics payload
         analytics_payload = {
             "daily": daily_data,
             "intent": {"curious": 0, "interested": 0, "engaged": 0},
             "quality": {"human": 0, "suspicious": 0},
             "attention": [],
-            "hourly": [],
+            "hourly": final_hourly_data,
             "region": [],
             "device": []
         }
@@ -862,15 +879,22 @@ def create_app() -> Flask:
         # 3. Device
         device_data = query_db("SELECT device, COUNT(*) as count FROM visits WHERE link_id = ? GROUP BY device", [link["id"]])
         
-        # 4. Hourly
-        hourly_raw = query_db("SELECT ts FROM visits WHERE link_id = ?", [link["id"]])
+        # 4. Hourly distribution using visitor's local timezone
+        hourly_raw = query_db("SELECT ts, timezone FROM visits WHERE link_id = ?", [link["id"]])
         import datetime
+        from zoneinfo import ZoneInfo
         from collections import Counter
         local_hours = []
         for row in hourly_raw:
             try:
-                dt_utc = datetime.datetime.fromisoformat(row["ts"])
-                dt_local = dt_utc + (datetime.datetime.now() - datetime.datetime.utcnow())
+                dt_utc = datetime.datetime.fromisoformat(row["ts"]).replace(tzinfo=datetime.timezone.utc)
+                tz_name = row["timezone"] or "UTC"
+                try:
+                    visitor_tz = ZoneInfo(tz_name)
+                except:
+                    visitor_tz = datetime.timezone.utc
+                
+                dt_local = dt_utc.astimezone(visitor_tz)
                 local_hours.append(dt_local.hour)
             except: pass
         hour_counts = Counter(local_hours)
@@ -2163,14 +2187,15 @@ def classify_behavior(link_id: int, session_id: str, visits, now: datetime, beha
     recent = [datetime.fromisoformat(v["ts"]) for v in visits if (now - datetime.fromisoformat(v["ts"])) < timedelta(hours=returning_window_hours)]
     
     # Count total visits for this session
-    per_session = query_db(
+    res = query_db(
         """
         SELECT COUNT(*) AS c FROM visits
         WHERE link_id = ? AND session_id = ?
         """,
         [link_id, session_id],
         one=True,
-    )["c"]
+    )
+    per_session = res["c"] if res else 0
 
     # Apply custom thresholds
     if per_session >= engaged_threshold:

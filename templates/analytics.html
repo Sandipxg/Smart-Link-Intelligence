@@ -396,6 +396,41 @@
             </div>
           </div>
         </div>
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <h4 class="h6 fw-bold mb-1">Users by ISP</h4>
+                  <p class="small text-muted mb-0">Internet Service Provider breakdown</p>
+                </div>
+              </div>
+              <div style="height: 280px;">
+                <canvas id="ispChart"></canvas>
+              </div>
+              <div class="mt-3">
+                {% if isp_data %}
+                <div class="table-responsive">
+                  <table class="table table-sm mb-0">
+                    <tbody>
+                      {% for row in isp_data[:5] %}
+                      <tr>
+                        <td class="border-0 small">{{ row.provider }}</td>
+                        <td class="border-0 small text-end">{{ "{:,}".format(row.count) }}</td>
+                        {% set i_pct = ((row.count * 100) / (totals.unique_visitors or 1))|round|int %}
+                        <td class="border-0 small text-end text-muted">{{ i_pct }}%</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+                {% else %}
+                <p class="small text-muted mb-0">No ISP data available yet.</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
