@@ -38,6 +38,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 # Import DDoS Protection
 from ddos_protection import DDoSProtection
+from chatbot import get_chat_response
 
 # Configuration
 DATABASE = os.path.join(os.path.dirname(__file__), "smart_links.db")
@@ -108,6 +109,16 @@ def create_app() -> Flask:
     
     # Ensure upload directory exists
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+    @app.route("/chat", methods=["POST"])
+    def chat():
+        data = request.get_json()
+        message = data.get("message")
+        if not message:
+            return jsonify({"error": "No message provided"}), 400
+        
+        response = get_chat_response(message)
+        return jsonify({"response": response})
 
     @app.route("/")
     def landing():

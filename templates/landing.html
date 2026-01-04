@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Link Intelligence - Next-Gen Link Management Platform</title>
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
+    <!-- Chat Widget CSS -->
+    <link href="{{ url_for('static', filename='css/chat.css') }}" rel="stylesheet">
+
     <style>
         :root {
             --primary: #bd24df;
@@ -160,9 +164,12 @@
             font-size: clamp(2.5rem, 5vw, 4.5rem);
             font-weight: 800;
             line-height: 1.1;
-            margin-bottom: 1rem; /* Reduced from 1.5rem */
-            min-height: 1.2em; /* Prevent layout shift */
-            text-align: left; /* Ensure left alignment */
+            margin-bottom: 1rem;
+            /* Reduced from 1.5rem */
+            min-height: 1.2em;
+            /* Prevent layout shift */
+            text-align: left;
+            /* Ensure left alignment */
         }
 
         /* Typewriter Animation Styles */
@@ -175,12 +182,21 @@
             animation: blink 1s infinite;
             color: var(--primary);
             font-weight: 400;
-            margin-left: 1px; /* Reduced margin */
+            margin-left: 1px;
+            /* Reduced margin */
         }
 
         @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
+
+            0%,
+            50% {
+                opacity: 1;
+            }
+
+            51%,
+            100% {
+                opacity: 0;
+            }
         }
 
         .typewriter-word {
@@ -196,7 +212,8 @@
 
         /* Ensure smooth text flow and left alignment */
         .hero-title {
-            white-space: normal; /* Changed from pre-wrap */
+            white-space: normal;
+            /* Changed from pre-wrap */
             word-wrap: break-word;
             text-align: left;
             display: block;
@@ -228,7 +245,8 @@
             color: rgba(255, 255, 255, 0.8);
             margin-bottom: 2rem;
             max-width: 70%;
-            margin-top: 0.75rem; /* Reduced spacing from heading */
+            margin-top: 0.75rem;
+            /* Reduced spacing from heading */
         }
 
         .hero-image {
@@ -532,20 +550,20 @@
             .hero-subtitle {
                 max-width: 100%;
             }
-            
+
             .hero-image {
                 margin: -5rem -2rem;
             }
-            
+
             .navbar-toggler {
                 border: none;
                 padding: 0.25rem 0.5rem;
             }
-            
+
             .navbar-toggler:focus {
                 box-shadow: none;
             }
-            
+
             .navbar-toggler-icon {
                 background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='m4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
             }
@@ -622,6 +640,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-custom fixed-top" id="navbar">
@@ -634,11 +653,11 @@
                 </div>
                 Smart Link Intelligence
             </a>
-            
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item">
@@ -657,7 +676,7 @@
                         <a class="nav-link nav-link-custom" href="#contact">Contact</a>
                     </li>
                 </ul>
-                
+
                 <div class="d-flex gap-2">
                     <a href="{{ url_for('login') }}" class="btn-outline-custom">Sign In</a>
                     <a href="{{ url_for('signup') }}" class="btn-gradient">Sign Up</a>
@@ -677,7 +696,9 @@
                             <span id="typewriter-text"></span><span id="typewriter-cursor">|</span>
                         </h1>
                         <p class="hero-subtitle">
-                            A powerful, secure, and intelligent platform to create behavior-aware links with advanced analytics, DDoS protection, and AI-powered routing. Transform your URLs into smart experiences.
+                            A powerful, secure, and intelligent platform to create behavior-aware links with advanced
+                            analytics, DDoS protection, and AI-powered routing. Transform your URLs into smart
+                            experiences.
                         </p>
                         <div class="d-flex gap-3 align-items-center flex-wrap">
                             <a href="{{ url_for('signup') }}" class="btn-gradient">
@@ -691,7 +712,8 @@
                 </div>
                 <div class="col-lg-5">
                     <div data-aos="fade-left" data-aos-delay="200">
-                        <img src="https://via.placeholder.com/600x450/bd24df/ffffff?text=Smart+Link+Dashboard" alt="Smart Link Dashboard" class="hero-image">
+                        <img src="https://via.placeholder.com/600x450/bd24df/ffffff?text=Smart+Link+Dashboard"
+                            alt="Smart Link Dashboard" class="hero-image">
                     </div>
                 </div>
             </div>
@@ -737,10 +759,11 @@
                 <p class="section-subtitle">HOW IT WORKS</p>
                 <h2 class="section-title">Get Started in 3 Simple Steps</h2>
                 <p class="section-description">
-                    Create your smart links in minutes and start leveraging AI-powered routing, advanced analytics, and enterprise-grade security features.
+                    Create your smart links in minutes and start leveraging AI-powered routing, advanced analytics, and
+                    enterprise-grade security features.
                 </p>
             </div>
-            
+
             <div class="row g-4">
                 <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
                     <div class="work-card">
@@ -749,7 +772,8 @@
                         </div>
                         <h3 class="work-title">Create Account</h3>
                         <p class="work-description">
-                            Sign up with your email, set up a secure password, and verify your identity to unlock full access to the platform. Getting started takes just a few minutes.
+                            Sign up with your email, set up a secure password, and verify your identity to unlock full
+                            access to the platform. Getting started takes just a few minutes.
                         </p>
                     </div>
                 </div>
@@ -760,7 +784,8 @@
                         </div>
                         <h3 class="work-title">Create Smart Links</h3>
                         <p class="work-description">
-                            Paste your URL, customize behavior rules, set up progressive routing, and configure advanced settings. Our AI will handle the rest automatically.
+                            Paste your URL, customize behavior rules, set up progressive routing, and configure advanced
+                            settings. Our AI will handle the rest automatically.
                         </p>
                     </div>
                 </div>
@@ -771,7 +796,8 @@
                         </div>
                         <h3 class="work-title">Track & Optimize</h3>
                         <p class="work-description">
-                            Monitor real-time analytics, track user behavior, analyze conversion funnels, and optimize your links for maximum engagement and results.
+                            Monitor real-time analytics, track user behavior, analyze conversion funnels, and optimize
+                            your links for maximum engagement and results.
                         </p>
                     </div>
                 </div>
@@ -787,10 +813,11 @@
                 <p class="section-subtitle">FEATURES</p>
                 <h2 class="section-title">The Most Trusted Platform for Smart Link Management</h2>
                 <p class="section-description">
-                    Discover powerful tools designed to help you create, secure, and optimize your links — trusted by marketers, developers, and businesses worldwide.
+                    Discover powerful tools designed to help you create, secure, and optimize your links — trusted by
+                    marketers, developers, and businesses worldwide.
                 </p>
             </div>
-            
+
             <div class="row g-4">
                 <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
                     <div class="feature-card">
@@ -799,7 +826,8 @@
                         </div>
                         <h3 class="feature-title">Enterprise Security</h3>
                         <p class="feature-description">
-                            Your links are protected with 5-layer DDoS protection, advanced encryption, and real-time threat detection for maximum security.
+                            Your links are protected with 5-layer DDoS protection, advanced encryption, and real-time
+                            threat detection for maximum security.
                         </p>
                     </div>
                 </div>
@@ -810,7 +838,8 @@
                         </div>
                         <h3 class="feature-title">AI-Powered Routing</h3>
                         <p class="feature-description">
-                            Intelligent behavior analysis routes users to the perfect destination based on their engagement level and interaction patterns.
+                            Intelligent behavior analysis routes users to the perfect destination based on their
+                            engagement level and interaction patterns.
                         </p>
                     </div>
                 </div>
@@ -821,7 +850,8 @@
                         </div>
                         <h3 class="feature-title">Real-Time Analytics</h3>
                         <p class="feature-description">
-                            Get live insights, geographic data, device analytics, and behavior tracking with beautiful visualizations and detailed reports.
+                            Get live insights, geographic data, device analytics, and behavior tracking with beautiful
+                            visualizations and detailed reports.
                         </p>
                     </div>
                 </div>
@@ -832,7 +862,8 @@
                         </div>
                         <h3 class="feature-title">Custom Behavior Rules</h3>
                         <p class="feature-description">
-                            Create flexible behavior rules with custom thresholds for visitor classification and progressive user journey optimization.
+                            Create flexible behavior rules with custom thresholds for visitor classification and
+                            progressive user journey optimization.
                         </p>
                     </div>
                 </div>
@@ -843,7 +874,8 @@
                         </div>
                         <h3 class="feature-title">Smart Monetization</h3>
                         <p class="feature-description">
-                            Grid-based ad system with custom branding, image support, and premium ad-free experiences for enhanced user engagement.
+                            Grid-based ad system with custom branding, image support, and premium ad-free experiences
+                            for enhanced user engagement.
                         </p>
                     </div>
                 </div>
@@ -854,7 +886,8 @@
                         </div>
                         <h3 class="feature-title">Developer API</h3>
                         <p class="feature-description">
-                            RESTful API with comprehensive documentation, webhooks, and easy integration for developers and enterprise applications.
+                            RESTful API with comprehensive documentation, webhooks, and easy integration for developers
+                            and enterprise applications.
                         </p>
                     </div>
                 </div>
@@ -869,10 +902,11 @@
                 <p class="section-subtitle">FAQ</p>
                 <h2 class="section-title">Frequently Asked Questions</h2>
                 <p class="section-description">
-                    Get answers to common questions about Smart Link Intelligence and how it can transform your link management strategy.
+                    Get answers to common questions about Smart Link Intelligence and how it can transform your link
+                    management strategy.
                 </p>
             </div>
-            
+
             <div class="row justify-content-center">
                 <div class="col-lg-8">
                     <div class="faq-item" data-aos="fade-up" data-aos-delay="100">
@@ -881,37 +915,45 @@
                             <i class="bi bi-plus faq-icon"></i>
                         </div>
                         <div class="faq-content">
-                            Smart Link Intelligence is a next-generation link management platform that uses AI to analyze user behavior and route visitors to the most appropriate destination based on their engagement level, creating personalized user experiences.
+                            Smart Link Intelligence is a next-generation link management platform that uses AI to
+                            analyze user behavior and route visitors to the most appropriate destination based on their
+                            engagement level, creating personalized user experiences.
                         </div>
                     </div>
-                    
+
                     <div class="faq-item" data-aos="fade-up" data-aos-delay="200">
                         <div class="faq-header" onclick="toggleFaq(this)">
                             <h3 class="faq-title">How does the DDoS protection work?</h3>
                             <i class="bi bi-plus faq-icon"></i>
                         </div>
                         <div class="faq-content">
-                            Our 5-layer DDoS protection system automatically detects and mitigates attacks in real-time. It includes rate limiting, burst detection, IP filtering, and automatic link protection that can temporarily disable links under attack and restore them when safe.
+                            Our 5-layer DDoS protection system automatically detects and mitigates attacks in real-time.
+                            It includes rate limiting, burst detection, IP filtering, and automatic link protection that
+                            can temporarily disable links under attack and restore them when safe.
                         </div>
                     </div>
-                    
+
                     <div class="faq-item" data-aos="fade-up" data-aos-delay="300">
                         <div class="faq-header" onclick="toggleFaq(this)">
                             <h3 class="faq-title">Can I customize behavior rules for my links?</h3>
                             <i class="bi bi-plus faq-icon"></i>
                         </div>
                         <div class="faq-content">
-                            Yes! You can create custom behavior rules with your own thresholds for visitor classification. Set custom time windows, visit counts, and engagement levels to define when users are considered curious, interested, or highly engaged.
+                            Yes! You can create custom behavior rules with your own thresholds for visitor
+                            classification. Set custom time windows, visit counts, and engagement levels to define when
+                            users are considered curious, interested, or highly engaged.
                         </div>
                     </div>
-                    
+
                     <div class="faq-item" data-aos="fade-up" data-aos-delay="400">
                         <div class="faq-header" onclick="toggleFaq(this)">
                             <h3 class="faq-title">Is there an API for developers?</h3>
                             <i class="bi bi-plus faq-icon"></i>
                         </div>
                         <div class="faq-content">
-                            Absolutely! We provide a comprehensive RESTful API with full documentation, webhooks for real-time events, and easy integration options for developers and businesses looking to integrate smart link functionality into their applications.
+                            Absolutely! We provide a comprehensive RESTful API with full documentation, webhooks for
+                            real-time events, and easy integration options for developers and businesses looking to
+                            integrate smart link functionality into their applications.
                         </div>
                     </div>
                 </div>
@@ -926,22 +968,26 @@
                 <p class="section-subtitle">CONTACT US</p>
                 <h2 class="section-title">Get in Touch</h2>
                 <p class="section-description">
-                    Have questions or need help getting started? We're here to help you make the most of Smart Link Intelligence.
+                    Have questions or need help getting started? We're here to help you make the most of Smart Link
+                    Intelligence.
                 </p>
             </div>
-            
+
             <div data-aos="fade-up" data-aos-delay="200">
                 <form class="contact-form" onsubmit="handleContactForm(event)">
                     <div class="row">
                         <div class="col-md-6">
-                            <input type="text" class="form-control form-control-custom" placeholder="Your Name" required>
+                            <input type="text" class="form-control form-control-custom" placeholder="Your Name"
+                                required>
                         </div>
                         <div class="col-md-6">
-                            <input type="email" class="form-control form-control-custom" placeholder="Your Email" required>
+                            <input type="email" class="form-control form-control-custom" placeholder="Your Email"
+                                required>
                         </div>
                     </div>
                     <input type="text" class="form-control form-control-custom" placeholder="Subject" required>
-                    <textarea class="form-control form-control-custom" rows="5" placeholder="Your Message" required></textarea>
+                    <textarea class="form-control form-control-custom" rows="5" placeholder="Your Message"
+                        required></textarea>
                     <div class="text-center">
                         <button type="submit" class="btn-gradient">
                             <i class="bi bi-send me-2"></i>Send Message
@@ -962,16 +1008,17 @@
                 <a href="#faq-section" class="footer-link">FAQ</a>
                 <a href="#contact" class="footer-link">Contact</a>
             </div>
-            
+
             <div class="social-links">
                 <a href="#" class="social-link"><i class="bi bi-twitter"></i></a>
                 <a href="#" class="social-link"><i class="bi bi-linkedin"></i></a>
                 <a href="#" class="social-link"><i class="bi bi-github"></i></a>
                 <a href="#" class="social-link"><i class="bi bi-youtube"></i></a>
             </div>
-            
+
             <div class="copyright">
-                <p>&copy; 2024 Smart Link Intelligence. All rights reserved. Made with ❤️ for the future of link management.</p>
+                <p>&copy; 2024 Smart Link Intelligence. All rights reserved. Made with ❤️ for the future of link
+                    management.</p>
             </div>
         </div>
     </footer>
@@ -985,13 +1032,9 @@
                     <i class="bi bi-x"></i>
                 </button>
             </div>
-            <iframe 
-                width="800" 
-                height="450" 
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
-                title="How Smart Link Intelligence Works" 
-                frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            <iframe width="800" height="450" src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                title="How Smart Link Intelligence Works" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen>
             </iframe>
         </div>
@@ -1001,7 +1044,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- AOS Animation -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    
+
     <script>
         // Initialize AOS
         AOS.init({
@@ -1020,7 +1063,7 @@
                 this.cursor = document.getElementById('typewriter-cursor');
                 this.currentIndex = 0;
                 this.isComplete = false;
-                
+
                 // Start animation after a brief delay
                 setTimeout(() => this.type(), this.delay);
             }
@@ -1030,12 +1073,12 @@
                     // Get current character
                     const currentChar = this.text.charAt(this.currentIndex);
                     const currentText = this.text.substring(0, this.currentIndex + 1);
-                    
+
                     // Update the text content
                     this.element.innerHTML = this.formatText(currentText);
-                    
+
                     this.currentIndex++;
-                    
+
                     // Variable speed for more natural typing
                     let nextDelay = this.speed;
                     if (currentChar === ' ') {
@@ -1043,7 +1086,7 @@
                     } else if (currentChar === ',' || currentChar === '.') {
                         nextDelay = this.speed * 2; // Pause at punctuation
                     }
-                    
+
                     setTimeout(() => this.type(), nextDelay);
                 } else {
                     // Typing complete - hide cursor immediately
@@ -1058,7 +1101,7 @@
                     this.cursor.style.animation = 'none';
                     this.cursor.style.opacity = '0';
                     this.cursor.style.display = 'none';
-                    
+
                     // Alternative method - remove the cursor element entirely
                     setTimeout(() => {
                         if (this.cursor && this.cursor.parentNode) {
@@ -1071,16 +1114,16 @@
             formatText(text) {
                 // Apply special styling to "Smart Links" while preserving cursor position
                 let formattedText = text.replace(
-                    /Smart Links/g, 
+                    /Smart Links/g,
                     '<span class="typewriter-word smart-links">Smart Links</span>'
                 );
-                
+
                 return formattedText;
             }
         }
 
         // Initialize typewriter effect when page loads
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const typewriterElement = document.getElementById('typewriter-text');
             if (typewriterElement) {
                 const text = "Create, Manage & Optimize Smart Links with Ease";
@@ -1092,7 +1135,7 @@
         });
 
         // Navbar scroll effect
-        window.addEventListener('scroll', function() {
+        window.addEventListener('scroll', function () {
             const navbar = document.getElementById('navbar');
             if (window.scrollY > 50) {
                 navbar.classList.add('scrolled');
@@ -1108,7 +1151,7 @@
                 const target = parseInt(counter.getAttribute('data-count'));
                 const increment = target / 100;
                 let current = 0;
-                
+
                 const timer = setInterval(() => {
                     current += increment;
                     if (current >= target) {
@@ -1140,12 +1183,12 @@
         function toggleFaq(element) {
             const faqItem = element.parentElement;
             const isActive = faqItem.classList.contains('active');
-            
+
             // Close all FAQ items
             document.querySelectorAll('.faq-item').forEach(item => {
                 item.classList.remove('active');
             });
-            
+
             // Open clicked item if it wasn't active
             if (!isActive) {
                 faqItem.classList.add('active');
@@ -1199,5 +1242,79 @@
             });
         });
     </script>
+    <!-- Chat Widget -->
+    <button class="chat-toggle" id="chatToggle">
+        <img src="{{ url_for('static', filename='img/chatbot_logo.png') }}" alt="Chat">
+    </button>
+
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <div class="chat-avatar">
+                <i class="bi bi-robot"></i>
+            </div>
+            <div class="chat-info">
+                <h4>Smart Link AI Assistant</h4>
+                <span>Online • Ready to help</span>
+            </div>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+        <div class="chat-faq-section">
+            <div class="chat-faq-title">Quick Questions</div>
+            <div class="chat-faq-buttons">
+                <button class="chat-faq-btn" onclick="sendFAQQuestion('What is Smart Link Intelligence?')">
+                    <i class="bi bi-info-circle"></i> What is this?
+                </button>
+                <button class="chat-faq-btn" onclick="sendFAQQuestion('How does it work?')">
+                    <i class="bi bi-gear"></i> How it works
+                </button>
+                <button class="chat-faq-btn" onclick="sendFAQQuestion('What are the features?')">
+                    <i class="bi bi-star"></i> Features
+                </button>
+                <button class="chat-faq-btn" onclick="sendFAQQuestion('Is it free?')">
+                    <i class="bi bi-currency-dollar"></i> Pricing
+                </button>
+                <button class="chat-faq-btn" onclick="sendFAQQuestion('Is it secure?')">
+                    <i class="bi bi-shield-check"></i> Security
+                </button>
+                <button class="chat-faq-btn" onclick="sendFAQQuestion('how to create link')">
+                    <i class="bi bi-plus-circle"></i> Create Link
+                </button>
+                <button class="chat-faq-btn" onclick="sendFAQQuestion('analytics')">
+                    <i class="bi bi-graph-up"></i> Analytics
+                </button>
+                <button class="chat-faq-btn" onclick="sendFAQQuestion('behavior rules')">
+                    <i class="bi bi-sliders"></i> Behavior Rules
+                </button>
+                <button class="chat-faq-btn" onclick="sendFAQQuestion('DDoS protection')">
+                    <i class="bi bi-shield-fill"></i> DDoS Protection
+                </button>
+                <button class="chat-faq-btn" onclick="sendFAQQuestion('LinkPro Elite')">
+                    <i class="bi bi-crown-fill"></i> Premium
+                </button>
+                <button class="chat-faq-btn" onclick="sendFAQQuestion('export analytics')">
+                    <i class="bi bi-download"></i> Export Data
+                </button>
+                <button class="chat-faq-btn" onclick="sendFAQQuestion('help')">
+                    <i class="bi bi-question-circle"></i> Support
+                </button>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Type your message...">
+            <button class="chat-send" id="chatSend">
+                <i class="bi bi-send-fill"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Chat Widget JS -->
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
 </body>
+
 </html>

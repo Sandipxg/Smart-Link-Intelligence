@@ -1,0 +1,521 @@
+{
+  "intents": [
+    {
+      "tag": "greeting",
+      "patterns": [
+        "Hi",
+        "Hello",
+        "Hey",
+        "Good morning",
+        "Good afternoon",
+        "Good evening",
+        "Greetings",
+        "What's up",
+        "Howdy",
+        "Hi there"
+      ],
+      "responses": [
+        "Hello! Welcome to Smart Link Intelligence. I'm here to help you create, manage, and optimize smart links with ease. How can I assist you today?",
+        "Hi there! I'm your Smart Link AI assistant. Ask me anything about our next-gen link management platform!",
+        "Greetings! Ready to transform your URLs into intelligent tracking links? Let me know how I can help!"
+      ]
+    },
+    {
+      "tag": "goodbye",
+      "patterns": [
+        "Bye",
+        "See you later",
+        "Goodbye",
+        "Exit",
+        "Quit",
+        "Thanks, bye",
+        "Catch you later",
+        "Until next time"
+      ],
+      "responses": [
+        "Goodbye! Thanks for using Smart Link Intelligence. Feel free to return anytime for help with your smart links!",
+        "See you later! Happy linking with Smart Link Intelligence!",
+        "Bye! Remember, we're here 24/7 to help you optimize your link management strategy."
+      ]
+    },
+    {
+      "tag": "thanks",
+      "patterns": [
+        "Thanks",
+        "Thank you",
+        "That's helpful",
+        "Awesome",
+        "Great",
+        "Perfect",
+        "Excellent",
+        "Much appreciated"
+      ],
+      "responses": [
+        "You're welcome! I'm glad I could help with your Smart Link Intelligence questions.",
+        "Happy to help! Feel free to ask if you need more information about our platform.",
+        "My pleasure! Smart Link Intelligence is here to make your link management effortless."
+      ]
+    },
+    {
+      "tag": "product_info",
+      "patterns": [
+        "What is this?",
+        "What is Smart Link Intelligence?",
+        "Tell me about the platform",
+        "What do you do?",
+        "Explain the product",
+        "What is this website about?",
+        "What services do you offer?"
+      ],
+      "responses": [
+        "Smart Link Intelligence is a next-generation link management platform that uses AI to analyze user behavior and route visitors to the most appropriate destination based on their engagement level. We transform ordinary URLs into intelligent tracking links with advanced analytics, DDoS protection, and behavior-aware routing.",
+        "We're a powerful, secure, and intelligent platform for creating behavior-aware links. Our system provides advanced analytics, enterprise-grade security, and AI-powered routing to help you optimize user experiences and track performance in real-time."
+      ]
+    },
+    {
+      "tag": "features",
+      "patterns": [
+        "What are the features?",
+        "capabilities",
+        "What can it do?",
+        "Why should I use this?",
+        "benefits",
+        "What makes you different?",
+        "key features"
+      ],
+      "responses": [
+        "Our key features include: 🛡️ Enterprise Security with 5-layer DDoS protection, 🧠 AI-Powered Routing based on user behavior, 📊 Real-Time Analytics with geographic and device data, ⚙️ Custom Behavior Rules, 💰 Smart Monetization with ad systems, and 🔧 Developer API with comprehensive documentation.",
+        "Smart Link Intelligence offers Enterprise Security, Advanced Analytics, Smart Routing, Team Collaboration, Custom Domains, API Access, Password Protection, Progressive Redirects, and Behavior-based User Classification. All designed to maximize your link performance and security."
+      ]
+    },
+    {
+      "tag": "security",
+      "patterns": [
+        "Is it secure?",
+        "DDoS protection",
+        "security features",
+        "Is it safe?",
+        "hackers",
+        "security",
+        "protection",
+        "how secure is it?"
+      ],
+      "responses": [
+        "Security is our top priority! We provide enterprise-grade 5-layer DDoS protection that includes rate limiting, burst detection, IP filtering, and automatic link protection. Our system can temporarily disable links under attack and restore them when safe, ensuring your links and data are always protected.",
+        "Yes, absolutely secure! Our 5-layer DDoS protection system automatically detects and mitigates attacks in real-time. We use advanced encryption, real-time threat detection, and enterprise-grade security measures to keep your links safe from any threats."
+      ]
+    },
+    {
+      "tag": "analytics",
+      "patterns": [
+        "analytics",
+        "tracking",
+        "what do you track?",
+        "data",
+        "statistics",
+        "metrics",
+        "reporting",
+        "insights"
+      ],
+      "responses": [
+        "We provide comprehensive real-time analytics including: 🌍 Geographic data (country, city), 📱 Device type and browser information, 💻 Operating system details, 🌐 ISP information, 👥 User behavior classification (curious, interested, engaged), ⏱️ Visit timing and patterns, and 📈 Engagement metrics with beautiful visualizations.",
+        "Our analytics dashboard tracks everything you need: visitor location, device types, browsers, engagement levels, click patterns, conversion funnels, and real-time performance metrics. All presented with beautiful visualizations and detailed reports to help you optimize your links."
+      ]
+    },
+    {
+      "tag": "how_it_works",
+      "patterns": [
+        "How does it work?",
+        "How do I start?",
+        "steps to use",
+        "guide",
+        "getting started",
+        "tutorial",
+        "how to use"
+      ],
+      "responses": [
+        "Getting started is simple! Just follow these 3 steps: 1️⃣ Create an Account - Sign up with your email and verify your identity, 2️⃣ Create Smart Links - Paste your URL, customize behavior rules, and configure settings, 3️⃣ Track & Optimize - Monitor real-time analytics and optimize for maximum engagement. It takes just minutes to get started!",
+        "Here's how Smart Link Intelligence works: First, create your account and verify your email. Then, paste any URL and our AI will create a smart link with customizable behavior rules. Finally, track performance with our real-time analytics dashboard and optimize for better results. It's that easy!"
+      ]
+    },
+    {
+      "tag": "pricing_free",
+      "patterns": [
+        "Is it free?",
+        "cost",
+        "price",
+        "pricing",
+        "how much",
+        "subscription",
+        "plans",
+        "free trial"
+      ],
+      "responses": [
+        "We offer a free tier to get you started with basic smart link features! For advanced capabilities like higher limits, custom domains, ad-free experiences, and premium analytics, we have LinkPro Elite plans available. Check our upgrade page for detailed pricing information.",
+        "Yes, you can start for free! Our free plan includes essential smart link features. For businesses and power users, we offer LinkPro Elite with premium features like unlimited links, custom domains, advanced analytics, and ad-free experiences."
+      ]
+    },
+    {
+      "tag": "stats",
+      "patterns": [
+        "uptime",
+        "how many users?",
+        "reliability",
+        "stats",
+        "users",
+        "performance",
+        "numbers"
+      ],
+      "responses": [
+        "We're proud of our impressive stats: 🚀 99.9% uptime reliability, 🔗 10+ million smart links managed, 👥 50,000+ satisfied users worldwide, and 🛡️ 5-layer DDoS protection keeping everything secure. Join thousands of users who trust Smart Link Intelligence!",
+        "Our platform serves over 50,000 users managing more than 10 million smart links with 99.9% uptime. We maintain enterprise-grade reliability with our 5-layer security system, ensuring your links are always available when you need them."
+      ]
+    },
+    {
+      "tag": "contact",
+      "patterns": [
+        "help",
+        "support",
+        "contact you",
+        "I need help",
+        "customer service",
+        "get in touch",
+        "contact support"
+      ],
+      "responses": [
+        "Need help? You can reach our support team through the Contact section on our homepage, email us directly at support@smartlink-intelligence.com, or use our contact form. We're here to help you make the most of Smart Link Intelligence!",
+        "I'm here to help right now! For additional support, you can contact our team via the contact form on our website or email support@smartlink-intelligence.com. We respond quickly to all inquiries."
+      ]
+    },
+    {
+      "tag": "behavior_rules",
+      "patterns": [
+        "behavior rules",
+        "custom rules",
+        "user behavior",
+        "routing rules",
+        "progressive redirect",
+        "behavior thresholds",
+        "visitor classification"
+      ],
+      "responses": [
+        "Behavior rules are powerful! You can create custom thresholds for visitor classification - set custom time windows, visit counts, and engagement levels to define when users are curious, interested, or highly engaged. This enables progressive redirects where different user types see different destinations.",
+        "Our behavior rules let you customize how users are classified and routed. Set your own thresholds for 'curious', 'interested', and 'engaged' users, then direct each group to different URLs for personalized experiences. Perfect for optimizing conversion funnels!"
+      ]
+    },
+    {
+      "tag": "api",
+      "patterns": [
+        "API",
+        "developer",
+        "integration",
+        "webhooks",
+        "REST API",
+        "documentation",
+        "developers"
+      ],
+      "responses": [
+        "Yes! We provide a comprehensive RESTful API with full documentation, webhooks for real-time events, and easy integration options. Perfect for developers and businesses looking to integrate smart link functionality into their applications. Check our developer documentation for details!",
+        "Our Developer API offers complete programmatic access to Smart Link Intelligence. You get RESTful endpoints, webhook support, comprehensive documentation, and easy integration tools. Build smart link functionality directly into your applications!"
+      ]
+    },
+    {
+      "tag": "password_protection",
+      "patterns": [
+        "password protection",
+        "password protected links",
+        "secure links",
+        "link password",
+        "protected access"
+      ],
+      "responses": [
+        "Password protection adds an extra security layer to your links! Visitors must enter the correct password before being redirected to the destination. Perfect for private content, exclusive offers, or internal company links. You can set unique passwords for each link.",
+        "Yes, we support password-protected links! This feature requires visitors to enter a password before accessing the destination URL. Great for securing sensitive content, member-only areas, or exclusive access links."
+      ]
+    },
+    {
+      "tag": "custom_domains",
+      "patterns": [
+        "custom domain",
+        "branded links",
+        "own domain",
+        "white label",
+        "branding"
+      ],
+      "responses": [
+        "Custom domains are available with our LinkPro Elite plans! Use your own branded domain for professional-looking links that build trust and brand recognition. Perfect for businesses wanting to maintain their brand identity in every link.",
+        "With LinkPro Elite, you can use your own custom domain for all your smart links. This creates branded, professional links that enhance trust and maintain your brand consistency across all communications."
+      ]
+    },
+    {
+      "tag": "monetization",
+      "patterns": [
+        "monetization",
+        "ads",
+        "make money",
+        "revenue",
+        "advertising",
+        "ad system"
+      ],
+      "responses": [
+        "Our smart monetization system features a grid-based ad layout with custom branding and image support. Free users see ads before redirects, while LinkPro Elite members enjoy ad-free experiences. You can also create custom ads for your own promotions!",
+        "We offer intelligent monetization through our ad system. Free tier users see relevant ads, while premium users get ad-free experiences. The system supports custom branding and promotional content to help you generate revenue from your links."
+      ]
+    },
+    {
+      "tag": "elite_features",
+      "patterns": [
+        "elite",
+        "premium",
+        "LinkPro Elite",
+        "upgrade",
+        "premium features",
+        "elite benefits"
+      ],
+      "responses": [
+        "LinkPro Elite offers premium benefits: ✨ Ad-free link experiences, 🎯 Custom domains, 📊 Advanced analytics, 🔒 Enhanced security features, ⚡ Higher usage limits, 🎨 Custom branding options, and 🚀 Priority support. Upgrade to unlock the full potential of Smart Link Intelligence!",
+        "LinkPro Elite members enjoy ad-free links, custom domains, advanced analytics, higher limits, priority support, and exclusive features. It's perfect for businesses and power users who want the complete Smart Link Intelligence experience."
+      ]
+    },
+    {
+      "tag": "uptime_reliability",
+      "patterns": [
+        "uptime",
+        "reliability",
+        "downtime",
+        "availability",
+        "server status",
+        "is it reliable?"
+      ],
+      "responses": [
+        "We maintain 99.9% uptime with enterprise-grade infrastructure! Our robust system ensures your links are always available when your audience needs them. We monitor performance 24/7 and have redundant systems to prevent any service interruptions.",
+        "Reliability is guaranteed with our 99.9% uptime track record. We use enterprise-grade servers, redundant systems, and 24/7 monitoring to ensure your smart links are always accessible to your users."
+      ]
+    },
+    {
+      "tag": "team_collaboration",
+      "patterns": [
+        "team",
+        "collaboration",
+        "multiple users",
+        "team features",
+        "sharing",
+        "team management"
+      ],
+      "responses": [
+        "Smart Link Intelligence supports team collaboration! Share links, analytics, and manage permissions across your team. Perfect for marketing teams, agencies, and businesses that need coordinated link management strategies.",
+        "Yes, we offer team collaboration features! Multiple team members can access shared dashboards, collaborate on link strategies, and manage permissions. Great for organizations that need coordinated link management."
+      ]
+    },
+    {
+      "tag": "faq_link_creation",
+      "patterns": [
+        "how to create link",
+        "create smart link",
+        "make a link",
+        "shorten url",
+        "link creation process",
+        "how do I create a link"
+      ],
+      "responses": [
+        "Creating a smart link is easy! 1️⃣ Go to your dashboard, 2️⃣ Paste your original URL in the 'Create New Smart Link' section, 3️⃣ Choose your behavior rule (Standard, Progressive, or Password Protected), 4️⃣ Optionally add a custom alias, 5️⃣ Click 'Create Smart Link'. Your link will be ready instantly with full analytics tracking!",
+        "To create a smart link: Enter your original URL, select a behavior configuration (standard redirect, progressive redirect, or password protection), customize the short code if desired, and click create. The system will generate your smart link with tracking enabled immediately!"
+      ]
+    },
+    {
+      "tag": "faq_analytics_export",
+      "patterns": [
+        "export analytics",
+        "download data",
+        "CSV export",
+        "Excel export",
+        "analytics download",
+        "export data"
+      ],
+      "responses": [
+        "You can export your analytics data in multiple formats! 📊 CSV Export: Download visitor data with IP addresses, locations, devices, and timestamps. 📈 Excel Export: Get comprehensive analytics reports with charts and insights. Both options are available from your link's analytics page with a simple click!",
+        "Analytics export is available in CSV and Excel formats. CSV includes detailed visitor logs with geographic data, device info, and behavior classification. Excel exports provide comprehensive reports with visualizations. Access both from the analytics dashboard of any link!"
+      ]
+    },
+    {
+      "tag": "faq_ddos_protection",
+      "patterns": [
+        "DDoS protection details",
+        "how does DDoS work",
+        "link protection",
+        "attack protection",
+        "security layers",
+        "what is 5-layer protection"
+      ],
+      "responses": [
+        "Our 5-layer DDoS protection works as follows: 🔒 Layer 1: Rate limiting (60 requests/minute per IP), 🛡️ Layer 2: Burst detection (blocks 100+ requests in 10 seconds), 🚫 Layer 3: IP filtering and blacklisting, ⚡ Layer 4: Automatic link protection (temporary disable during attacks), 🔄 Layer 5: Auto-recovery when threats subside. All protection is automatic and transparent!",
+        "Our DDoS protection system automatically detects suspicious activity and applies graduated responses: rate limiting for excessive requests, burst attack detection, temporary link disabling during severe attacks, and automatic recovery. The system logs all events and provides detailed protection statistics in your security dashboard."
+      ]
+    },
+    {
+      "tag": "faq_behavior_classification",
+      "patterns": [
+        "curious interested engaged",
+        "user classification",
+        "behavior types",
+        "visitor behavior",
+        "how are users classified",
+        "behavior categories"
+      ],
+      "responses": [
+        "We classify visitors into three behavior categories: 😊 CURIOUS: First-time visitors (directed to primary URL), 🤔 INTERESTED: Return visitors within your time window (directed to returning URL), 🔥 HIGHLY ENGAGED: Users with multiple clicks exceeding your threshold (directed to CTA URL). You can customize all thresholds in your behavior rules!",
+        "User behavior classification: Curious users are new visitors, Interested users return within your configured time window (default 48 hours), and Highly Engaged users have multiple interactions (default 3+ clicks). Each category can be routed to different URLs for personalized experiences. Customize thresholds in Behavior Rules section!"
+      ]
+    },
+    {
+      "tag": "faq_progressive_redirects",
+      "patterns": [
+        "progressive redirect",
+        "different URLs",
+        "multiple destinations",
+        "behavior-based routing",
+        "progressive mode",
+        "how does progressive work"
+      ],
+      "responses": [
+        "Progressive redirects route users to different URLs based on their behavior: 🎯 Primary URL: For curious (first-time) visitors, 🔄 Returning URL: For interested visitors who return within your time window, 🚀 CTA URL: For highly engaged users with multiple clicks. This creates personalized user journeys that optimize conversion rates!",
+        "Progressive mode enables behavior-based routing where each user type sees a different destination. Configure three URLs: one for new visitors, one for returning visitors, and one for highly engaged users. The system automatically routes users based on their engagement level and visit history."
+      ]
+    },
+    {
+      "tag": "faq_ads_system",
+      "patterns": [
+        "how do ads work",
+        "ad system",
+        "create ads",
+        "personalized ads",
+        "ad grid",
+        "advertising system"
+      ],
+      "responses": [
+        "Our ad system works with a smart grid layout: 📍 Position 1: Large featured ad at the top, 📍 Positions 2 & 3: Smaller side-by-side ads below. You can create custom-designed ads or upload images. Ads are shown only to free users, while LinkPro Elite members enjoy ad-free experiences. Perfect for promoting your products or services!",
+        "Create personalized ads that appear when non-premium users visit your links. Choose between custom design (with colors, icons, text) or image upload. The grid system shows 1 large ad or up to 3 ads in a grid layout. Manage all your ads from the Create Ad section with activation/deactivation controls."
+      ]
+    },
+    {
+      "tag": "faq_account_settings",
+      "patterns": [
+        "account settings",
+        "change password",
+        "update profile",
+        "account preferences",
+        "settings options",
+        "profile management"
+      ],
+      "responses": [
+        "Manage your account in Settings: 👤 Update email address and change password, ⚙️ Set default link behavior and analytics retention, 📧 Configure email notifications, 🔧 Enable auto-generated link codes, 📊 View account statistics (total links, clicks), 🗑️ Delete account option. Access Settings from your dashboard menu!",
+        "Account settings include: profile information updates, password changes, application preferences (default behaviors, notifications), analytics retention settings, and account statistics. You can also manage LinkPro Elite subscription status and delete your account if needed."
+      ]
+    },
+    {
+      "tag": "faq_link_limits",
+      "patterns": [
+        "link limits",
+        "how many links",
+        "usage limits",
+        "free plan limits",
+        "premium limits",
+        "link quotas"
+      ],
+      "responses": [
+        "📊 FREE PLAN: Unlimited link creation with basic features and ads shown to visitors. 🌟 LINKPRO ELITE: Unlimited links with ad-free experiences, custom domains, advanced analytics, and priority support. No artificial limits on link creation - create as many smart links as you need!",
+        "Both free and premium plans offer unlimited link creation! The difference is in features: free users see ads on their links, while LinkPro Elite members get ad-free experiences, custom domains, advanced analytics, and enhanced security features."
+      ]
+    },
+    {
+      "tag": "faq_data_retention",
+      "patterns": [
+        "data retention",
+        "how long data kept",
+        "analytics storage",
+        "data storage",
+        "data deletion",
+        "privacy data"
+      ],
+      "responses": [
+        "📅 Analytics data retention is configurable in your settings: 30 days, 90 days (default), 1 year, or forever. 🔒 We prioritize privacy - IP addresses are hashed for visitor tracking while maintaining geographic accuracy. 🗑️ You can delete your account and all associated data anytime from Settings. All data handling complies with privacy regulations!",
+        "Data retention options: 30/90/365 days or permanent storage (your choice in Settings). We use privacy-preserving IP hashing while maintaining location accuracy. Account deletion removes all your data permanently. Analytics include visitor behavior, geographic data, and device information."
+      ]
+    },
+    {
+      "tag": "faq_mobile_compatibility",
+      "patterns": [
+        "mobile app",
+        "mobile compatibility",
+        "smartphone access",
+        "mobile version",
+        "app download",
+        "mobile features"
+      ],
+      "responses": [
+        "📱 Smart Link Intelligence is fully mobile-optimized! Access all features through your mobile browser - no app download needed. The responsive design works perfectly on smartphones and tablets. Create links, view analytics, manage ads, and monitor security all from your mobile device!",
+        "Our platform is mobile-first designed! Full functionality available through mobile browsers with responsive design. All features work seamlessly on phones and tablets: link creation, analytics viewing, behavior rule management, and account settings. No separate app needed!"
+      ]
+    },
+    {
+      "tag": "faq_integration_options",
+      "patterns": [
+        "integrations",
+        "third party",
+        "API integration",
+        "webhook integration",
+        "connect with other tools",
+        "integration options"
+      ],
+      "responses": [
+        "🔗 Integration options include: RESTful API for programmatic link creation and management, Webhooks for real-time event notifications, CSV/Excel exports for data analysis, QR code generation for offline sharing, and embeddable analytics widgets. Perfect for connecting with your existing tools and workflows!",
+        "We offer comprehensive integration capabilities: Developer API with full documentation, webhook support for real-time events, data export options (CSV/Excel), and QR code generation. Integrate smart link functionality directly into your applications or workflows!"
+      ]
+    },
+    {
+      "tag": "faq_geographic_tracking",
+      "patterns": [
+        "location tracking",
+        "geographic data",
+        "visitor location",
+        "country tracking",
+        "city tracking",
+        "geo analytics"
+      ],
+      "responses": [
+        "🌍 Geographic tracking includes: Country and city identification, Continent-based analytics grouping, Latitude/longitude coordinates (when available), Timezone detection for local time analysis, ISP and organization data. All location data is privacy-compliant and helps you understand your global audience!",
+        "We track visitor locations at multiple levels: country, city, continent, and coordinates. This helps you understand your audience geography, optimize content for different regions, and analyze engagement patterns by location. All geographic data respects privacy while providing valuable insights!"
+      ]
+    },
+    {
+      "tag": "faq_troubleshooting",
+      "patterns": [
+        "link not working",
+        "troubleshooting",
+        "problems",
+        "issues",
+        "link broken",
+        "error messages"
+      ],
+      "responses": [
+        "🔧 Common troubleshooting steps: 1️⃣ Check if link is Active (not disabled by DDoS protection), 2️⃣ Verify original URL is accessible, 3️⃣ Clear browser cache and try again, 4️⃣ Check DDoS Protection dashboard for any blocks, 5️⃣ Contact support if issues persist. Most problems are resolved quickly!",
+        "If your link isn't working: verify the original URL is valid, check link status in your dashboard, review DDoS protection logs for any blocks, ensure the link hasn't been accidentally disabled, and try accessing from different devices/networks. Contact support for persistent issues!"
+      ]
+    },
+    {
+      "tag": "faq_bulk_operations",
+      "patterns": [
+        "bulk create",
+        "multiple links",
+        "batch operations",
+        "mass creation",
+        "bulk management",
+        "many links at once"
+      ],
+      "responses": [
+        "📦 Bulk operations: While the web interface creates links individually, our API supports bulk link creation for enterprise users. You can also export all analytics data in bulk via CSV/Excel. For large-scale link management, consider our API integration or contact support for custom solutions!",
+        "For bulk link management: use our API for programmatic bulk creation, export analytics data in bulk via CSV/Excel, and manage multiple links through the dashboard interface. Enterprise users can contact support for custom bulk operation solutions."
+      ]
+    }
+  ]
+}
