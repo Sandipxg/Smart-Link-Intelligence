@@ -1716,6 +1716,11 @@ def create_app() -> Flask:
         flash("Logged out", "info")
         return redirect(url_for("login"))
 
+    @app.route("/documentation")
+    @login_required
+    def documentation():
+        return render_template("documentation.html")
+
     @app.route("/upgrade")
     @login_required
     def upgrade():
