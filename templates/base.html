@@ -49,63 +49,80 @@
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('ddos_protection_dashboard') }}">
               <i class="bi bi-shield-check me-1"></i>Security
+              {% if g.user['membership_tier'] != 'elite_pro' %}
+              <i class="bi bi-lock-fill text-secondary ms-1 fs-6" title="Locked for your tier"></i>
+              {% endif %}
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('create_ad') }}">
               <i class="bi bi-megaphone me-1"></i>Ads
+              {% if g.user['membership_tier'] != 'elite_pro' %}
+              <i class="bi bi-lock-fill text-secondary ms-1 fs-6" title="Locked for your tier"></i>
+              {% endif %}
             </a>
           </li>
         </ul>
 
         <div class="d-flex align-items-center">
-          {% if g.user.is_premium %}
-          <span class="badge bg-warning text-dark me-3">
-            <i class="bi bi-crown-fill me-1"></i>Elite
-          </span>
-          {% endif %}
-          <div class="dropdown">
-            <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" type="button"
-              data-bs-toggle="dropdown">
-              <i class="bi bi-person-circle me-2"></i>{{ g.user.username }}
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-              {% if not g.user.is_premium %}
-              <li><a class="dropdown-item text-warning" href="{{ url_for('upgrade') }}">
-                  <i class="bi bi-star-fill me-2"></i>Upgrade to Elite
-                </a></li>
-              <li>
-                <hr class="dropdown-divider">
-              </li>
-              {% else %}
-              <li><span class="dropdown-item-text text-success">
-                  <i class="bi bi-crown-fill me-2"></i>Elite Member
-                </span></li>
-              <li>
-                <hr class="dropdown-divider">
-              </li>
-              {% endif %}
-              <li><a class="dropdown-item" href="{{ url_for('settings') }}">
-                  <i class="bi bi-gear me-2"></i>Settings
-                </a></li>
-              <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">
-                  <i class="bi bi-box-arrow-right me-2"></i>Logout
-                </a></li>
-            </ul>
+          <div class="d-flex align-items-center">
+            {% if g.user['is_premium'] %}
+            {% if g.user['membership_tier'] == 'elite_pro' %}
+            <span class="badge bg-primary text-white me-3">
+              <i class="bi bi-shield-fill-check me-1"></i>Elite Pro
+            </span>
+            {% else %}
+            <span class="badge bg-warning text-dark me-3">
+              <i class="bi bi-crown-fill me-1"></i>Elite
+            </span>
+            {% endif %}
+            {% else %}
+            <span class="badge bg-secondary text-white me-3">
+              <i class="bi bi-person me-1"></i>Free
+            </span>
+            {% endif %}
+            <div class="dropdown">
+              <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" type="button"
+                data-bs-toggle="dropdown">
+                <i class="bi bi-person-circle me-2"></i>{{ g.user.username }}
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                {% if not g.user.is_premium %}
+                <li><a class="dropdown-item text-warning" href="{{ url_for('upgrade') }}">
+                    <i class="bi bi-star-fill me-2"></i>Upgrade to Elite
+                  </a></li>
+                <li>
+                  <hr class="dropdown-divider">
+                </li>
+                {% else %}
+                <li><span class="dropdown-item-text text-success">
+                    <i class="bi bi-crown-fill me-2"></i>Elite Member
+                  </span></li>
+                <li>
+                  <hr class="dropdown-divider">
+                </li>
+                {% endif %}
+                <li><a class="dropdown-item" href="{{ url_for('settings') }}">
+                    <i class="bi bi-gear me-2"></i>Settings
+                  </a></li>
+                <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">
+                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                  </a></li>
+              </ul>
+            </div>
           </div>
+          {% else %}
+          <div class="d-flex ms-auto">
+            <a class="btn btn-outline-light btn-sm me-2" href="{{ url_for('login') }}">
+              <i class="bi bi-box-arrow-in-right me-1"></i>Login
+            </a>
+            <a class="btn btn-primary btn-sm" href="{{ url_for('signup') }}">
+              <i class="bi bi-person-plus me-1"></i>Sign up
+            </a>
+          </div>
+          {% endif %}
         </div>
-        {% else %}
-        <div class="d-flex ms-auto">
-          <a class="btn btn-outline-light btn-sm me-2" href="{{ url_for('login') }}">
-            <i class="bi bi-box-arrow-in-right me-1"></i>Login
-          </a>
-          <a class="btn btn-primary btn-sm" href="{{ url_for('signup') }}">
-            <i class="bi bi-person-plus me-1"></i>Sign up
-          </a>
-        </div>
-        {% endif %}
       </div>
-    </div>
   </nav>
   <main class="container mb-5">
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -149,7 +166,10 @@
                 <label class="form-label fw-semibold">Behavior Rule</label>
                 <select class="form-select" name="behavior_rule" id="modalBehaviorRule" onchange="toggleModalFields()">
                   <option value="standard" selected>Standard Redirect</option>
-                  <option value="progression">Progression Redirect</option>
+                  <option value="progression" {% if g.user and g.user['membership_tier']=='free' %}disabled{% endif %}>
+                    Progression Redirect {% if g.user and g.user['membership_tier'] == 'free' %}(Elite Feature 🔒){%
+                    endif %}
+                  </option>
                 </select>
               </div>
             </div>
@@ -268,63 +288,63 @@
         <span>Online • Ready to help</span>
       </div>
     </div>
-      <div class="chat-messages" id="chatMessages">
-        <div class="typing-indicator" id="typingIndicator">
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
-        </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="typing-indicator" id="typingIndicator">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
       </div>
-      <div class="chat-faq-section">
-        <div class="chat-faq-title">Quick Questions</div>
-        <div class="chat-faq-buttons">
-          <button class="chat-faq-btn" onclick="sendFAQQuestion('What is Smart Link Intelligence?')">
-            <i class="bi bi-info-circle"></i> What is this?
-          </button>
-          <button class="chat-faq-btn" onclick="sendFAQQuestion('How does it work?')">
-            <i class="bi bi-gear"></i> How it works
-          </button>
-          <button class="chat-faq-btn" onclick="sendFAQQuestion('What are the features?')">
-            <i class="bi bi-star"></i> Features
-          </button>
-          <button class="chat-faq-btn" onclick="sendFAQQuestion('Is it free?')">
-            <i class="bi bi-currency-dollar"></i> Pricing
-          </button>
-          <button class="chat-faq-btn" onclick="sendFAQQuestion('Is it secure?')">
-            <i class="bi bi-shield-check"></i> Security
-          </button>
-          <button class="chat-faq-btn" onclick="sendFAQQuestion('how to create link')">
-            <i class="bi bi-plus-circle"></i> Create Link
-          </button>
-          <button class="chat-faq-btn" onclick="sendFAQQuestion('analytics')">
-            <i class="bi bi-graph-up"></i> Analytics
-          </button>
-          <button class="chat-faq-btn" onclick="sendFAQQuestion('behavior rules')">
-            <i class="bi bi-sliders"></i> Behavior Rules
-          </button>
-          <button class="chat-faq-btn" onclick="sendFAQQuestion('DDoS protection')">
-            <i class="bi bi-shield-fill"></i> DDoS Protection
-          </button>
-          <button class="chat-faq-btn" onclick="sendFAQQuestion('LinkPro Elite')">
-            <i class="bi bi-crown-fill"></i> Premium
-          </button>
-          <button class="chat-faq-btn" onclick="sendFAQQuestion('export analytics')">
-            <i class="bi bi-download"></i> Export Data
-          </button>
-          <button class="chat-faq-btn" onclick="sendFAQQuestion('help')">
-            <i class="bi bi-question-circle"></i> Support
-          </button>
-        </div>
-      </div>
-      <div class="chat-input-area">
-        <input type="text" class="chat-input" id="chatInput" placeholder="Type your message...">
-        <button class="chat-send" id="chatSend">
-          <i class="bi bi-send-fill"></i>
+    </div>
+    <div class="chat-faq-section">
+      <div class="chat-faq-title">Quick Questions</div>
+      <div class="chat-faq-buttons">
+        <button class="chat-faq-btn" onclick="sendFAQQuestion('What is Smart Link Intelligence?')">
+          <i class="bi bi-info-circle"></i> What is this?
+        </button>
+        <button class="chat-faq-btn" onclick="sendFAQQuestion('How does it work?')">
+          <i class="bi bi-gear"></i> How it works
+        </button>
+        <button class="chat-faq-btn" onclick="sendFAQQuestion('What are the features?')">
+          <i class="bi bi-star"></i> Features
+        </button>
+        <button class="chat-faq-btn" onclick="sendFAQQuestion('Is it free?')">
+          <i class="bi bi-currency-dollar"></i> Pricing
+        </button>
+        <button class="chat-faq-btn" onclick="sendFAQQuestion('Is it secure?')">
+          <i class="bi bi-shield-check"></i> Security
+        </button>
+        <button class="chat-faq-btn" onclick="sendFAQQuestion('how to create link')">
+          <i class="bi bi-plus-circle"></i> Create Link
+        </button>
+        <button class="chat-faq-btn" onclick="sendFAQQuestion('analytics')">
+          <i class="bi bi-graph-up"></i> Analytics
+        </button>
+        <button class="chat-faq-btn" onclick="sendFAQQuestion('behavior rules')">
+          <i class="bi bi-sliders"></i> Behavior Rules
+        </button>
+        <button class="chat-faq-btn" onclick="sendFAQQuestion('DDoS protection')">
+          <i class="bi bi-shield-fill"></i> DDoS Protection
+        </button>
+        <button class="chat-faq-btn" onclick="sendFAQQuestion('LinkPro Elite')">
+          <i class="bi bi-crown-fill"></i> Premium
+        </button>
+        <button class="chat-faq-btn" onclick="sendFAQQuestion('export analytics')">
+          <i class="bi bi-download"></i> Export Data
+        </button>
+        <button class="chat-faq-btn" onclick="sendFAQQuestion('help')">
+          <i class="bi bi-question-circle"></i> Support
         </button>
       </div>
     </div>
+    <div class="chat-input-area">
+      <input type="text" class="chat-input" id="chatInput" placeholder="Type your message...">
+      <button class="chat-send" id="chatSend">
+        <i class="bi bi-send-fill"></i>
+      </button>
+    </div>
+  </div>
 
-    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
 </body>
 
 </html>

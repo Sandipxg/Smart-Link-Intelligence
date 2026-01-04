@@ -10,25 +10,54 @@
         <div>
           <h2 class="fw-bold mb-1">
             <i class="bi bi-speedometer2 me-2"></i>Dashboard
-            {% if g.user.is_premium %}
-            <span class="badge bg-warning text-dark ms-2">
-              <i class="bi bi-crown-fill me-1"></i>LinkPro Elite
+            <span
+              class="badge {% if user_tier == 'elite_pro' %}bg-primary{% elif user_tier == 'elite' %}bg-warning{% else %}bg-secondary{% endif %} text-white ms-2">
+              <i class="bi bi-crown-fill me-1"></i>{{ tier_info.name }}
             </span>
-            {% endif %}
           </h2>
-          <p class="text-muted mb-0">
-            {% if g.user.is_premium %}
-            Enjoy ad-free links and premium features with LinkPro Elite
+          <div class="mt-2">
+            <div class="d-flex align-items-center mb-1">
+              <small class="text-muted me-2">Link Limit:</small>
+              {% if user_tier == 'elite_pro' %}
+              <span class="fw-bold text-success"><i class="bi bi-infinity me-1"></i>Unlimited</span>
+              {% else %}
+              <span class="fw-bold">{{ link_count }} / {{ tier_info.max_links }}</span>
+              {% endif %}
+            </div>
+            {% if user_tier != 'elite_pro' %}
+            <div class="progress" style="height: 6px; width: 200px;">
+              <div
+                class="progress-bar {% if link_count >= tier_info.max_links %}bg-danger{% else %}bg-success{% endif %}"
+                role="progressbar" style="width: {{ (link_count / tier_info.max_links * 100)|round }}%">
+              </div>
+            </div>
+            {% endif %}
+            {% if user_tier == 'free' and link_count >= tier_info.max_links %}
+            <small class="text-danger mt-1 d-block"><i class="bi bi-exclamation-circle me-1"></i>Limit reached</small>
+            {% endif %}
+          </div>
+          <p class="text-muted mt-2 mb-0">
+            {% if user_tier == 'elite_pro' %}
+            Enjoy exclusive Elite Pro features including custom ads and DDoS protection
+            {% elif user_tier == 'elite' %}
+            Enjoy lifetime links and increased limits
             {% else %}
-            Create intelligent short links with behavioral analytics
+            Create standard links (Expires in {{ tier_info.validity_days }} days)
             {% endif %}
           </p>
         </div>
-        {% if not g.user.is_premium %}
-        <div>
+        {% if user_tier != 'elite_pro' %}
+        <div class="d-flex gap-2">
+          {% if user_tier == 'free' %}
           <a href="{{ url_for('upgrade') }}" class="btn btn-warning">
             <i class="bi bi-star-fill me-1"></i>Upgrade to Elite
           </a>
+          {% endif %}
+          {% if user_tier != 'elite_pro' %}
+          <a href="{{ url_for('upgrade') }}" class="btn btn-primary">
+            <i class="bi bi-shield-fill-check me-1"></i>Get Elite Pro
+          </a>
+          {% endif %}
         </div>
         {% endif %}
       </div>
@@ -112,8 +141,14 @@
                 <select class="form-select form-select-lg" name="behavior_rule" id="behaviorRule"
                   onchange="showHideFields()">
                   <option value="standard" selected>Standard Redirect (Same destination)</option>
-                  <option value="progression">Progressive Redirect (Different URLs for different behaviors)</option>
-                  <option value="password_protected">Password Protected (Require password to access)</option>
+                  <option value="progression" {% if user_tier=='free' %}disabled{% endif %}>
+                    Progressive Redirect {% if user_tier == 'free' %}(Elite Feature 🔒){% else %}(Different URLs for
+                    different behaviors){% endif %}
+                  </option>
+                  <option value="password_protected" {% if user_tier=='free' %}disabled{% endif %}>
+                    Password Protected {% if user_tier == 'free' %}(Elite Feature 🔒){% else %}(Require password to
+                    access){% endif %}
+                  </option>
                 </select>
               </div>
             </div>

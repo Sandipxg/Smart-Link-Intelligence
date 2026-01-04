@@ -53,6 +53,14 @@ ATTENTION_DECAY_DAYS = 14
 STATE_DECAY_DAYS = 21
 USER_SESSION_KEY = "uid"
 
+# Membership Configuration
+MEMBERSHIP_TIERS = {
+    "free": {"max_links": 10, "validity_days": 7, "name": "Free User", "custom_ads": False, "ddos_protection": False},
+    "elite": {"max_links": 35, "validity_days": None, "name": "Elite User", "custom_ads": False, "ddos_protection": False},
+    "elite_pro": {"max_links": float('inf'), "validity_days": None, "name": "Elite Pro User", "custom_ads": True, "ddos_protection": True},
+}
+
+
 # GeoIP Configuration
 GEOIP_DB_PATH = os.path.join(os.path.dirname(__file__), "GeoLite2-City.mmdb")
 GEOIP_DB_URL = "https://download.maxmind.com/app/geoip_update?edition_id=GeoLite2-City&license_key=YOUR_LICENSE_KEY&suffix=tar.gz"
@@ -172,7 +180,23 @@ def create_app() -> Flask:
         }
         
         new_link = session.pop('new_link', None)
-        return render_template("index.html", links=links, chart_data=chart_data, behavior_rules=behavior_rules, new_link=new_link)
+        
+        # Get Tier Info
+        # Convert Row to dict to use .get method
+        user_dict = dict(g.user) if g.user else {}
+        user_tier = user_dict.get("membership_tier", "free")
+        tier_info = MEMBERSHIP_TIERS.get(user_tier, MEMBERSHIP_TIERS["free"])
+        link_count = len(links)
+        
+        return render_template("index.html", 
+                               links=links, 
+                               chart_data=chart_data, 
+                               behavior_rules=behavior_rules, 
+                               new_link=new_link,
+                               tier_info=tier_info,
+                               link_count=link_count,
+                               user_tier=user_tier)
+
 
 
     @app.route("/create", methods=["POST"])
@@ -182,10 +206,46 @@ def create_app() -> Flask:
         data = {k: (request.form.get(k) or "").strip() for k in request.form.keys()}
         print(f"Form data: {data}")  # Debug
         
+        # Check Membership Limits
+        # Convert Row to dict to use .get method
+        user_dict = dict(g.user) if g.user else {}
+        user_tier = user_dict.get("membership_tier", "free")
+        # Handle case where tier might be null/empty in DB
+        if not user_tier: user_tier = "free"
+            
+        tier_rules = MEMBERSHIP_TIERS.get(user_tier, MEMBERSHIP_TIERS["free"])
+        
+        # Check link count
+        current_links_count = query_db("SELECT COUNT(*) as count FROM links WHERE user_id = ?", [g.user["id"]], one=True)["count"]
+        if current_links_count >= tier_rules["max_links"]:
+            flash(f"Limit Reached: Your {tier_rules['name']} plan allows a maximum of {tier_rules['max_links']} links. Please upgrade to create more.", "warning")
+            return redirect(url_for("index"))
+        
+        # Calculate expiration
+        if tier_rules["validity_days"]:
+            expires_at = (utcnow() + timedelta(days=tier_rules["validity_days"])).isoformat()
+        else:
+            expires_at = None
+
+        
+        # Enforce Feature Restrictions for Free Users
+        requested_rule = data.get("behavior_rule", "standard")
+        if user_tier == "free" and requested_rule in ["progression", "password_protected"]:
+            # flash(f"The '{requested_rule.replace('_', ' ').title()}' feature is locked for Free users. Defaulted to Standard.", "warning")
+            # Silently enforce or warn? User asked to "make this feature lock". 
+            # Usually strict enforcement is better.
+            data["behavior_rule"] = "standard"
+            data["returning_url"] = ""
+            data["cta_url"] = ""
+            data["password"] = ""
+            
         primary_url = data.get("primary_url")
         if not primary_url:
             flash("Primary URL is required", "danger")
             return redirect(url_for("index"))
+        
+        # Also ensure calculate expiration is already done above
+
 
         code = data.get("code") or generate_code()
         if query_db("SELECT id FROM links WHERE code = ?", [code], one=True):
@@ -212,8 +272,8 @@ def create_app() -> Flask:
                 INSERT INTO links
                     (code, primary_url, returning_url, cta_url,
                      variant_a_url, variant_b_url,
-                     behavior_rule, created_at, state, user_id, behavior_rule_id, password_hash)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     behavior_rule, created_at, state, user_id, behavior_rule_id, password_hash, expires_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 [
                     code,
@@ -228,6 +288,7 @@ def create_app() -> Flask:
                     g.user["id"],
                     behavior_rule_id,
                     password_hash,
+                    expires_at,
                 ],
             )
         except sqlite3.IntegrityError as e:
@@ -262,58 +323,77 @@ def create_app() -> Flask:
             # Always redirect to password page for password-protected links
             return redirect(url_for("password_protected", code=code))
 
+        # Check Expiration
+        if link["expires_at"]:
+            try:
+                expires_at = datetime.fromisoformat(link["expires_at"])
+                if utcnow() > expires_at:
+                    flash("This link has expired.", "warning")
+                    return redirect(url_for("landing"))
+            except ValueError:
+                pass # Invalid date format, ignore
+
         # DDoS Protection Check
+        # Only applies if link owner has DDoS protection enabled (Elite Pro)
+        link_owner = query_db("SELECT membership_tier, is_premium FROM users WHERE id = ?", [link["user_id"]], one=True)
+        tier_name = link_owner["membership_tier"] if link_owner and link_owner["membership_tier"] else "free"
+        
+        # Use simple dictionary lookup for tier name to avoid errors
+        tier_config = MEMBERSHIP_TIERS.get(tier_name, MEMBERSHIP_TIERS["free"])
+        has_ddos_protection = tier_config["ddos_protection"]
+
         # Use robust IP detection
         ip_address = get_client_ip()
         
         # Calculate IP hash for privacy-preserving tracking
         ip_hash = hash_value(ip_address)
 
-        # Check if link is under protection
-        is_protected, protection_status = ddos_protection.is_link_protected(link["id"])
-        if is_protected:
-            if protection_status == 'disabled':
-                flash("This link has been temporarily disabled due to suspicious activity.", "warning")
-                return render_template("ddos_blocked.html", 
-                                     message="Link Disabled", 
-                                     description="This link has been automatically disabled due to detected DDoS attacks.")
-            elif protection_status == 'temporary_disabled':
-                flash("This link is temporarily unavailable due to high traffic.", "warning")
-                return render_template("ddos_blocked.html", 
-                                     message="Temporarily Unavailable", 
-                                     description="This link is temporarily disabled due to unusual traffic patterns. Please try again later.")
-            elif protection_status == 'captcha_required':
-                # In a real implementation, you'd show a captcha here
-                flash("Please verify you're human to continue.", "info")
-                return render_template("ddos_blocked.html", 
-                                     message="Verification Required", 
-                                     description="Please verify you're human to access this link.")
-        
-        # Rate limiting check (using real IP)
-        rate_allowed, rate_status = ddos_protection.check_rate_limit(ip_address, link["id"])
-        if not rate_allowed:
-            if rate_status == 'rate_limited':
-                flash("Too many requests. Please slow down.", "warning")
-                return render_template("ddos_blocked.html", 
-                                     message="Rate Limited", 
-                                     description="You're making requests too quickly. Please wait a moment and try again.")
-            elif rate_status == 'burst_attack':
-                flash("Suspicious activity detected.", "danger")
-                return render_template("ddos_blocked.html", 
-                                     message="Blocked", 
-                                     description="Suspicious activity detected from your connection.")
-        
-        # DDoS Detection
-        is_ddos, ddos_reason, protection_level = ddos_protection.detect_ddos_attack(link["id"])
-        if is_ddos:
-            # Apply protection measures
-            protection_action = ddos_protection.apply_protection(link["id"], protection_level)
+        if has_ddos_protection:
+            # Check if link is under protection
+            is_protected, protection_status = ddos_protection.is_link_protected(link["id"])
+            if is_protected:
+                if protection_status == 'disabled':
+                    flash("This link has been temporarily disabled due to suspicious activity.", "warning")
+                    return render_template("ddos_blocked.html", 
+                                        message="Link Disabled", 
+                                        description="This link has been automatically disabled due to detected DDoS attacks.")
+                elif protection_status == 'temporary_disabled':
+                    flash("This link is temporarily unavailable due to high traffic.", "warning")
+                    return render_template("ddos_blocked.html", 
+                                        message="Temporarily Unavailable", 
+                                        description="This link is temporarily disabled due to unusual traffic patterns. Please try again later.")
+                elif protection_status == 'captcha_required':
+                    # In a real implementation, you'd show a captcha here
+                    flash("Please verify you're human to continue.", "info")
+                    return render_template("ddos_blocked.html", 
+                                        message="Verification Required", 
+                                        description="Please verify you're human to access this link.")
             
-            if protection_action in ['link_disabled', 'temporary_disabled']:
-                flash("This link has been automatically protected due to suspicious activity.", "warning")
-                return render_template("ddos_blocked.html", 
-                                     message="Link Protected", 
-                                     description="This link has been automatically protected due to detected attacks.")
+            # Rate limiting check (using real IP)
+            rate_allowed, rate_status = ddos_protection.check_rate_limit(ip_address, link["id"])
+            if not rate_allowed:
+                if rate_status == 'rate_limited':
+                    flash("Too many requests. Please slow down.", "warning")
+                    return render_template("ddos_blocked.html", 
+                                        message="Rate Limited", 
+                                        description="You're making requests too quickly. Please wait a moment and try again.")
+                elif rate_status == 'burst_attack':
+                    flash("Suspicious activity detected.", "danger")
+                    return render_template("ddos_blocked.html", 
+                                        message="Blocked", 
+                                        description="Suspicious activity detected from your connection.")
+            
+            # DDoS Detection
+            is_ddos, ddos_reason, protection_level = ddos_protection.detect_ddos_attack(link["id"])
+            if is_ddos:
+                # Apply protection measures
+                protection_action = ddos_protection.apply_protection(link["id"], protection_level)
+                
+                if protection_action in ['link_disabled', 'temporary_disabled']:
+                    flash("This link has been automatically protected due to suspicious activity.", "warning")
+                    return render_template("ddos_blocked.html", 
+                                        message="Link Protected", 
+                                        description="This link has been automatically protected due to detected attacks.")
 
         sess_id = ensure_session()
         user_agent = request.headers.get("User-Agent", "unknown")[:255]
@@ -402,8 +482,12 @@ def create_app() -> Flask:
         # Check if user wants to skip ads (direct parameter)
         skip_ads = request.args.get('direct', '').lower() == 'true'
         
+        # Check if user wants to skip ads (direct parameter)
+        skip_ads = request.args.get('direct', '').lower() == 'true'
+        
         # Check if the link owner is premium (skip ads for premium users)
-        link_owner = query_db("SELECT is_premium FROM users WHERE id = ?", [link["user_id"]], one=True)
+        # Note: We already fetched link_owner above, but for clarity/safety:
+        # link_owner = query_db("SELECT is_premium FROM users WHERE id = ?", [link["user_id"]], one=True)
         is_premium_link = link_owner and link_owner["is_premium"]
         
         if skip_ads or is_premium_link:
@@ -1451,6 +1535,15 @@ def create_app() -> Flask:
     @login_required
     def ddos_protection_dashboard():
         """DDoS Protection Dashboard"""
+        # Check Membership
+        # Convert Row to dict to use .get method
+        user_dict = dict(g.user) if g.user else {}
+        user_tier = user_dict.get("membership_tier", "free")
+        if not user_tier: user_tier = "free"
+        
+        if not MEMBERSHIP_TIERS.get(user_tier, MEMBERSHIP_TIERS["free"])["ddos_protection"]:
+            flash("DDoS Protection is exclusive to Elite Pro members. Please upgrade to access this feature.", "warning")
+            return redirect(url_for("index"))
         # Get user's links with protection status
         links_with_protection = query_db(
             """
@@ -1635,27 +1728,37 @@ def create_app() -> Flask:
         # For demo purposes, we'll just upgrade the user
         from datetime import datetime, timedelta
         
-        plan = request.form.get("plan", "monthly")
+        target_tier = request.form.get("plan", "elite")
         
-        # Set premium expiry based on plan
-        if plan == "monthly":
-            expires_at = (datetime.utcnow() + timedelta(days=30)).isoformat()
-        elif plan == "yearly":
-            expires_at = (datetime.utcnow() + timedelta(days=365)).isoformat()
-        else:
-            expires_at = (datetime.utcnow() + timedelta(days=30)).isoformat()
+        # Validate tier
+        if target_tier not in ["elite", "elite_pro"]:
+            target_tier = "elite"
+            
+        # Set premium expiry (Demo: 30 days)
+        expires_at = (datetime.utcnow() + timedelta(days=30)).isoformat()
         
         execute_db(
-            "UPDATE users SET is_premium = 1, premium_expires_at = ? WHERE id = ?",
-            [expires_at, g.user["id"]]
+            "UPDATE users SET is_premium = 1, membership_tier = ?, premium_expires_at = ? WHERE id = ?",
+            [target_tier, expires_at, g.user["id"]]
         )
         
-        flash("🎉 Welcome to LinkPro Elite! You now have ad-free experience and premium features.", "success")
+        tier_name = MEMBERSHIP_TIERS[target_tier]["name"]
+        flash(f"🎉 Upgraded to {tier_name}! Enjoy your new features.", "success")
         return redirect(url_for("index"))
 
     @app.route("/create-ad")
     @login_required
     def create_ad():
+        # Check Membership
+        # Convert Row to dict to use .get method
+        user_dict = dict(g.user) if g.user else {}
+        user_tier = user_dict.get("membership_tier", "free")
+        if not user_tier: user_tier = "free"
+        
+        if not MEMBERSHIP_TIERS.get(user_tier, MEMBERSHIP_TIERS["free"])["custom_ads"]:
+            flash("Custom Ads are exclusive to Elite Pro members. Please upgrade to access this feature.", "warning")
+            return redirect(url_for("index"))
+
         # Get user's existing ads
         user_ads = query_db(
             "SELECT * FROM personalized_ads WHERE user_id = ? ORDER BY created_at DESC",
@@ -1671,6 +1774,16 @@ def create_app() -> Flask:
     @app.route("/create-ad/submit", methods=["POST"])
     @login_required
     def submit_ad():
+        # Check Membership
+        # Convert Row to dict to use .get method
+        user_dict = dict(g.user) if g.user else {}
+        user_tier = user_dict.get("membership_tier", "free")
+        if not user_tier: user_tier = "free"
+        
+        if not MEMBERSHIP_TIERS.get(user_tier, MEMBERSHIP_TIERS["free"])["custom_ads"]:
+            flash("Custom Ads are exclusive to Elite Pro members.", "danger")
+            return redirect(url_for("index"))
+
         data = {k: (request.form.get(k) or "").strip() for k in request.form.keys()}
         
         ad_type = data.get("ad_type", "custom")
@@ -2329,6 +2442,10 @@ def ensure_db():
     ensure_column("visits", "ip_address", "ip_address TEXT")
     ensure_column("ddos_events", "ip_address", "ip_address TEXT")
     ensure_column("rate_limits", "ip_address", "ip_address TEXT")
+    
+    # Membership Tier Columns
+    ensure_column("users", "membership_tier", "membership_tier TEXT DEFAULT 'free'")
+    ensure_column("links", "expires_at", "expires_at TEXT")
     
     conn.commit()
     conn.close()
