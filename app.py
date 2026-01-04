@@ -87,6 +87,13 @@ def download_geoip_database():
         return False
 
 
+def get_link_password_hash(link):
+    """Safely get password hash from link row object"""
+    try:
+        return link["password_hash"] if link["password_hash"] else None
+    except (KeyError, IndexError, TypeError):
+        return None
+
 def create_app() -> Flask:
     app = Flask(__name__)
     app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET", "dev-secret-change-me")
@@ -192,6 +199,12 @@ def create_app() -> Flask:
         else:
             behavior_rule_id = None
 
+        # Handle password protection
+        password = data.get("password")
+        password_hash = None
+        if password:
+            password_hash = generate_password_hash(password)
+
         now = utcnow()
         try:
             execute_db(
@@ -199,8 +212,8 @@ def create_app() -> Flask:
                 INSERT INTO links
                     (code, primary_url, returning_url, cta_url,
                      variant_a_url, variant_b_url,
-                     behavior_rule, created_at, state, user_id, behavior_rule_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     behavior_rule, created_at, state, user_id, behavior_rule_id, password_hash)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 [
                     code,
@@ -214,6 +227,7 @@ def create_app() -> Flask:
                     "Active",
                     g.user["id"],
                     behavior_rule_id,
+                    password_hash,
                 ],
             )
         except sqlite3.IntegrityError as e:
@@ -241,6 +255,12 @@ def create_app() -> Flask:
         )
         if not link:
             abort(404)
+
+        # Check if link is password protected - ALWAYS require password
+        password_hash = get_link_password_hash(link)
+        if password_hash:
+            # Always redirect to password page for password-protected links
+            return redirect(url_for("password_protected", code=code))
 
         # DDoS Protection Check
         # Use robust IP detection
@@ -433,6 +453,117 @@ def create_app() -> Flask:
                              link=link, 
                              ads_by_position=ads_by_position,
                              active_ads_count=active_ads_count)
+
+    @app.route("/p/<code>", methods=["GET", "POST"])
+    def password_protected(code):
+        try:
+            link = query_db("SELECT * FROM links WHERE code = ?", [code], one=True)
+            if not link:
+                abort(404)
+            
+            # If link is not password protected, redirect to normal flow
+            password_hash = get_link_password_hash(link)
+            if not password_hash:
+                return redirect(url_for("redirect_link", code=code))
+            
+            if request.method == "POST":
+                password = request.form.get("password", "").strip()
+                
+                if password and password_hash and check_password_hash(password_hash, password):
+                    # Password is correct, redirect directly to the link destination
+                    # No session storage - password required every time
+                    flash("Password verified successfully!", "success")
+                    
+                    # Get the target URL based on behavior rules
+                    sess_id = ensure_session()
+                    user_agent = request.headers.get("User-Agent", "unknown")[:255]
+                    ip_address = get_client_ip()
+                    region = detect_region(ip_address)
+                    device = detect_device(user_agent)
+                    location_info = get_detailed_location(ip_address)
+                    browser = parse_browser(user_agent)
+                    os_name = parse_os(user_agent)
+                    isp_info = get_isp_info(ip_address)
+                    referrer = request.headers.get("Referer", "no referrer")[:500]
+                    now = utcnow()
+                    
+                    # Get visits for behavior classification
+                    visits = query_db(
+                        """
+                        SELECT ts FROM visits
+                        WHERE link_id = ?
+                        ORDER BY ts DESC
+                        LIMIT 20
+                        """,
+                        [link["id"]],
+                    )
+                    
+                    # Get the link owner's default behavior rule
+                    behavior_rule = query_db(
+                        """
+                        SELECT * FROM behavior_rules 
+                        WHERE user_id = ? AND is_default = 1
+                        """,
+                        [link["user_id"]], one=True
+                    )
+                    
+                    behavior, per_session_count = classify_behavior(link["id"], sess_id, visits, now, behavior_rule)
+                    suspicious = detect_suspicious(visits, now)
+                    target_url = decide_target(link, behavior, per_session_count)
+                    
+                    # Log the visit
+                    ip_hash = hash_value(ip_address)
+                    execute_db(
+                        """
+                        INSERT INTO visits
+                            (link_id, session_id, ip_hash, user_agent, ts, behavior, is_suspicious, target_url, region, device, country, city, latitude, longitude, timezone, browser, os, isp, hostname, org, referrer, ip_address)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        [
+                            link["id"],
+                            sess_id,
+                            ip_hash,
+                            user_agent,
+                            now.isoformat(),
+                            behavior,
+                            1 if suspicious else 0,
+                            target_url,
+                            region,
+                            device,
+                            location_info['country'],
+                            location_info['city'],
+                            location_info['latitude'],
+                            location_info['longitude'],
+                            location_info['timezone'],
+                            browser,
+                            os_name,
+                            isp_info['isp'],
+                            isp_info['hostname'],
+                            isp_info['org'],
+                            referrer,
+                            ip_address,
+                        ],
+                    )
+                    
+                    # Check if user wants to skip ads or if link owner is premium
+                    skip_ads = request.args.get('direct', '').lower() == 'true'
+                    link_owner = query_db("SELECT is_premium FROM users WHERE id = ?", [link["user_id"]], one=True)
+                    is_premium_link = link_owner and link_owner["is_premium"]
+                    
+                    if skip_ads or is_premium_link:
+                        return redirect(target_url)
+                    else:
+                        return redirect(url_for("show_ads", code=code, target=target_url))
+                        
+                else:
+                    flash("Incorrect password. Please try again.", "danger")
+            
+            return render_template("password_protected.html", link=link, code=code)
+            
+        except Exception as e:
+            print(f"Error in password_protected route: {e}")
+            flash("An error occurred. Please try again.", "danger")
+            return redirect(url_for("landing"))
 
     @app.route("/links/<code>")
     @login_required
@@ -2040,6 +2171,7 @@ def ensure_db():
             created_at TEXT NOT NULL,
             user_id INTEGER,
             behavior_rule_id INTEGER,
+            password_hash TEXT,
             FOREIGN KEY(user_id) REFERENCES users(id),
             FOREIGN KEY(behavior_rule_id) REFERENCES behavior_rules(id)
         )
@@ -2141,6 +2273,12 @@ def ensure_db():
     
     try:
         conn.execute("ALTER TABLE visits ADD COLUMN timezone TEXT")
+    except sqlite3.OperationalError:
+        pass  # Column already exists
+    
+    # Add password protection column to links table if it doesn't exist
+    try:
+        conn.execute("ALTER TABLE links ADD COLUMN password_hash TEXT")
     except sqlite3.OperationalError:
         pass  # Column already exists
 

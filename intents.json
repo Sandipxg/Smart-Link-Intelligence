@@ -226,11 +226,13 @@
         "password protected links",
         "secure links",
         "link password",
-        "protected access"
+        "protected access",
+        "password security",
+        "how secure are password links"
       ],
       "responses": [
-        "Password protection adds an extra security layer to your links! Visitors must enter the correct password before being redirected to the destination. Perfect for private content, exclusive offers, or internal company links. You can set unique passwords for each link.",
-        "Yes, we support password-protected links! This feature requires visitors to enter a password before accessing the destination URL. Great for securing sensitive content, member-only areas, or exclusive access links."
+        "Password protection adds maximum security to your links! 🔒 Visitors must enter the correct password EVERY TIME they access the link - no exceptions. This works even if someone copies and shares the link. Perfect for highly sensitive content, exclusive offers, or confidential information.",
+        "Our password protection is ultra-secure! 🛡️ The password is required every single time the link is accessed, from any device or location. We never store plain text passwords - only secure hashes. Even if someone gets your link, they need the password each time they visit it."
       ]
     },
     {
@@ -503,18 +505,18 @@
       ]
     },
     {
-      "tag": "faq_bulk_operations",
+      "tag": "faq_password_every_time",
       "patterns": [
-        "bulk create",
-        "multiple links",
-        "batch operations",
-        "mass creation",
-        "bulk management",
-        "many links at once"
+        "password every time",
+        "password always required",
+        "password session",
+        "remember password",
+        "password once or always",
+        "does password expire"
       ],
       "responses": [
-        "📦 Bulk operations: While the web interface creates links individually, our API supports bulk link creation for enterprise users. You can also export all analytics data in bulk via CSV/Excel. For large-scale link management, consider our API integration or contact support for custom solutions!",
-        "For bulk link management: use our API for programmatic bulk creation, export analytics data in bulk via CSV/Excel, and manage multiple links through the dashboard interface. Enterprise users can contact support for custom bulk operation solutions."
+        "� BYES! Password protection requires the password EVERY SINGLE TIME the link is accessed for maximum security. We don't store password verification in sessions or cookies. This means even if someone copies your link and shares it, each person needs the password every time they visit - providing ultimate protection for sensitive content!",
+        "Our password protection is designed for maximum security - the password is required every time, from every device, in every session. No exceptions! This ensures that even if your link gets shared or copied, unauthorized users cannot access your content without knowing the password each time."
       ]
     }
   ]
