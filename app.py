@@ -39,6 +39,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 # Import DDoS Protection
 from ddos_protection import DDoSProtection
 from chatbot import get_chat_response
+from admin_panel import admin_bp, ensure_admin_tables, track_ad_impression, track_user_activity
 
 # Configuration
 DATABASE = os.path.join(os.path.dirname(__file__), "smart_links.db")
@@ -55,9 +56,9 @@ USER_SESSION_KEY = "uid"
 
 # Membership Configuration
 MEMBERSHIP_TIERS = {
-    "free": {"max_links": 10, "validity_days": 7, "name": "Free User", "custom_ads": False, "ddos_protection": False},
-    "elite": {"max_links": 35, "validity_days": None, "name": "Elite User", "custom_ads": False, "ddos_protection": False},
-    "elite_pro": {"max_links": float('inf'), "validity_days": None, "name": "Elite Pro User", "custom_ads": True, "ddos_protection": True},
+    "free": {"max_links": 10, "validity_days": 7, "name": "Free User", "custom_ads": False, "ddos_protection": False, "ad_free": False},
+    "elite": {"max_links": 35, "validity_days": None, "name": "Elite User", "custom_ads": False, "ddos_protection": False, "ad_free": False},
+    "elite_pro": {"max_links": float('inf'), "validity_days": None, "name": "Elite Pro User", "custom_ads": True, "ddos_protection": True, "ad_free": True},
 }
 
 
@@ -116,11 +117,17 @@ def create_app() -> Flask:
 
     ensure_db()
     
+    # Initialize admin tables
+    ensure_admin_tables()
+    
     # Initialize GeoIP database
     download_geoip_database()
     
     # Initialize DDoS Protection
     ddos_protection = DDoSProtection(DATABASE)
+    
+    # Register admin blueprint
+    app.register_blueprint(admin_bp)
     
     # Ensure upload directory exists
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -300,6 +307,10 @@ def create_app() -> Flask:
             flash(f"An unexpected error occurred: {str(e)}", "danger")
             return redirect(url_for("index"))
         flash(f"Link created with code {code}", "success")
+        
+        # Track user activity
+        track_user_activity(g.user["id"], "create_link", f"Created link: {code} -> {primary_url}")
+        
         # Store full link for the success box on dashboard
         base_url = request.host_url.rstrip('/')
         session['new_link'] = f"{base_url}/r/{code}"
@@ -482,18 +493,19 @@ def create_app() -> Flask:
         # Check if user wants to skip ads (direct parameter)
         skip_ads = request.args.get('direct', '').lower() == 'true'
         
-        # Check if user wants to skip ads (direct parameter)
-        skip_ads = request.args.get('direct', '').lower() == 'true'
+        # Check if the link owner has ad-free experience (Elite Pro)
+        link_owner_tier = link_owner["membership_tier"] if link_owner and link_owner["membership_tier"] else "free"
+        link_owner_config = MEMBERSHIP_TIERS.get(link_owner_tier, MEMBERSHIP_TIERS["free"])
+        has_ad_free_experience = link_owner_config["ad_free"]
         
-        # Check if the link owner is premium (skip ads for premium users)
-        # Note: We already fetched link_owner above, but for clarity/safety:
-        # link_owner = query_db("SELECT is_premium FROM users WHERE id = ?", [link["user_id"]], one=True)
+        # Also check legacy premium status for backward compatibility
         is_premium_link = link_owner and link_owner["is_premium"]
         
-        if skip_ads or is_premium_link:
+        # Skip ads if: direct parameter, premium user, or Elite Pro user (ad-free experience)
+        if skip_ads or is_premium_link or has_ad_free_experience:
             return redirect(target_url)
         
-        # Redirect to ads page instead of direct redirect
+        # Redirect to ads page for Free and Elite users
         return redirect(url_for("show_ads", code=code, target=target_url))
 
     @app.route("/ads/<code>")
@@ -508,26 +520,50 @@ def create_app() -> Flask:
             flash("Link not found", "danger")
             return redirect(url_for("index"))
         
-        # Get active ads from the link owner only (privacy fix)
-        # This ensures users only see ads from the person who created the link they clicked
+        # Get active ads that are either:
+        # 1. From the link owner (original behavior)
+        # 2. Assigned to the link owner by admin (new targeted ads)
         ads_data = query_db(
             """
-            SELECT pa.*, u.username 
+            SELECT DISTINCT pa.*, u.username 
             FROM personalized_ads pa 
             JOIN users u ON pa.user_id = u.id 
-            WHERE pa.is_active = 1 AND pa.user_id = ?
+            LEFT JOIN ad_display_assignments ada ON pa.id = ada.ad_id
+            WHERE pa.is_active = 1 
+            AND (
+                pa.user_id = ? 
+                OR ada.target_user_id = ?
+            )
             ORDER BY pa.grid_position ASC, RANDOM()
             """,
-            [link["user_id"]]
+            [link["user_id"], link["user_id"]]
         )
         
-        # Organize ads by grid position
+        # Organize ads by grid position with random selection
         ads_by_position = {1: None, 2: None, 3: None}
         
+        # Separate ads by position
+        position_ads = {1: [], 2: [], 3: []}
         for ad in ads_data:
             position = ad["grid_position"]
-            if position in ads_by_position and ads_by_position[position] is None:
-                ads_by_position[position] = ad
+            if position in position_ads:
+                position_ads[position].append(ad)
+        
+        # Randomly select one ad per position (1 large + 2 small)
+        import random
+        for position in [1, 2, 3]:
+            if position_ads[position]:
+                selected_ad = random.choice(position_ads[position])
+                ads_by_position[position] = selected_ad
+                
+                # Track ad impression and revenue
+                ad_type = "large" if position == 1 else "small"
+                ip_address = get_client_ip()
+                try:
+                    revenue = track_ad_impression(link["id"], link["user_id"], ad_type, position, ip_address)
+                    print(f"Ad impression tracked: {ad_type} ad, revenue: ${revenue:.2f}")
+                except Exception as e:
+                    print(f"Error tracking ad impression: {e}")
         
         # Count how many ads we have
         active_ads_count = sum(1 for ad in ads_by_position.values() if ad is not None)
@@ -629,12 +665,20 @@ def create_app() -> Flask:
                         ],
                     )
                     
-                    # Check if user wants to skip ads or if link owner is premium
+                    # Check if user wants to skip ads or if link owner has ad-free experience
                     skip_ads = request.args.get('direct', '').lower() == 'true'
-                    link_owner = query_db("SELECT is_premium FROM users WHERE id = ?", [link["user_id"]], one=True)
+                    link_owner = query_db("SELECT membership_tier, is_premium FROM users WHERE id = ?", [link["user_id"]], one=True)
+                    
+                    # Check for Elite Pro ad-free experience
+                    link_owner_tier = link_owner["membership_tier"] if link_owner and link_owner["membership_tier"] else "free"
+                    link_owner_config = MEMBERSHIP_TIERS.get(link_owner_tier, MEMBERSHIP_TIERS["free"])
+                    has_ad_free_experience = link_owner_config["ad_free"]
+                    
+                    # Also check legacy premium status for backward compatibility
                     is_premium_link = link_owner and link_owner["is_premium"]
                     
-                    if skip_ads or is_premium_link:
+                    # Skip ads if: direct parameter, premium user, or Elite Pro user (ad-free experience)
+                    if skip_ads or is_premium_link or has_ad_free_experience:
                         return redirect(target_url)
                     else:
                         return redirect(url_for("show_ads", code=code, target=target_url))
@@ -656,6 +700,9 @@ def create_app() -> Flask:
             link = query_db("SELECT * FROM links WHERE code = ?", [code], one=True)
             if not link:
                 abort(404)
+
+            # Track analytics view activity
+            track_user_activity(g.user["id"], "view_analytics", f"Viewed analytics for link: {code}")
 
             # Get the behavior rule for this link
             behavior_rule = None
@@ -1362,6 +1409,10 @@ def create_app() -> Flask:
                 # Log the user in automatically
                 user = query_db("SELECT id FROM users WHERE username = ?", [username_lower], one=True)
                 session[USER_SESSION_KEY] = user["id"]
+                
+                # Track user registration activity
+                track_user_activity(user["id"], "register", f"New user registered: {username}")
+                
                 flash("🎉 Account created successfully! Welcome to Smart Link Intelligence.", "success")
                 return redirect(url_for("index"))
                 
@@ -1671,6 +1722,12 @@ def create_app() -> Flask:
                     flash(error, "danger")
                 return render_template("login.html")
 
+            # Check for admin login first
+            if username_or_email.lower() == "admin":
+                # Redirect to admin login page
+                flash("Please use the admin login page", "info")
+                return redirect(url_for("admin.admin_login"))
+
             # Try to find user by username or email
             user = None
             
@@ -1697,6 +1754,9 @@ def create_app() -> Flask:
 
             # Login successful
             session[USER_SESSION_KEY] = user["id"]
+            
+            # Track user login activity
+            track_user_activity(user["id"], "login", f"User logged in: {user['username']}")
             
             # Handle remember me functionality (extend session)
             if remember_me:

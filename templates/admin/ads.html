@@ -1,0 +1,273 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Ad Management{% endblock %}
+{% block page_title %}Ad Management{% endblock %}
+
+{% block content %}
+<!-- Ad Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body text-center">
+                <h3 class="mb-0">{{ ad_stats.total_ads }}</h3>
+                <small>Total Ads</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card users-card">
+            <div class="card-body text-center">
+                <h3 class="mb-0">{{ ad_stats.active_ads }}</h3>
+                <small>Active Ads</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card activity-card">
+            <div class="card-body text-center">
+                <h3 class="mb-0">{{ ad_stats.total_impressions }}</h3>
+                <small>Total Impressions</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card revenue-card">
+            <div class="card-body text-center">
+                <h3 class="mb-0">${{ "%.2f"|format(ad_stats.total_revenue) }}</h3>
+                <small>Total Revenue</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Actions -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <form method="GET" class="d-flex">
+            <input type="text" 
+                   class="form-control me-2" 
+                   name="search" 
+                   value="{{ search }}" 
+                   placeholder="Search ads by title or username...">
+            <button type="submit" class="btn btn-admin">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </form>
+    </div>
+    <div class="col-md-4 text-end">
+        <div class="d-grid gap-2">
+            <a href="{{ url_for('admin.export_revenue') }}" class="btn btn-outline-success">
+                <i class="fas fa-download"></i> Export Revenue
+            </a>
+            <a href="{{ url_for('admin.create_admin_ad') }}" class="btn btn-admin">
+                <i class="fas fa-plus"></i> Create Ads
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Ads Grid -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="fas fa-ad"></i> All Advertisements
+        </h5>
+        {% if search %}
+            <a href="{{ url_for('admin.ads') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-times"></i> Clear Search
+            </a>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        {% if ads %}
+            <div class="row">
+                {% for ad in ads %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 {{ 'border-success' if ad.is_active else 'border-secondary' }}">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-user"></i> {{ ad.username }}
+                            </small>
+                            <span class="badge bg-{{ 'success' if ad.is_active else 'secondary' }}">
+                                {{ 'Active' if ad.is_active else 'Inactive' }}
+                            </span>
+                        </div>
+                        
+                        {% if ad.ad_type == 'image' and ad.image_filename %}
+                            <img src="{{ url_for('uploaded_file', filename=ad.image_filename) }}" 
+                                 class="card-img-top" 
+                                 style="height: 200px; object-fit: cover;"
+                                 alt="{{ ad.title }}">
+                        {% else %}
+                            <!-- Custom ad preview -->
+                            <div class="card-img-top d-flex align-items-center justify-content-center text-white" 
+                                 style="height: 200px; background: {{ ad.background_color }}; color: {{ ad.text_color }};">
+                                <div class="text-center">
+                                    <div style="font-size: 2rem;">{{ ad.icon }}</div>
+                                    <h6 class="mt-2">{{ ad.title }}</h6>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="card-body">
+                            <h6 class="card-title">{{ ad.title }}</h6>
+                            <p class="card-text small">{{ ad.description }}</p>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-mouse-pointer"></i> {{ ad.cta_text }}
+                                </small>
+                                <span class="badge bg-info">Position {{ ad.grid_position }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-users"></i> 
+                                    <span id="assignmentCount_{{ ad.id }}">Loading...</span> users assigned
+                                </small>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">{{ ad.created_at[:10] if ad.created_at else '-' }}</small>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-warning" 
+                                            onclick="toggleAd({{ ad.id }})"
+                                            title="Toggle Active Status">
+                                        <i class="fas fa-toggle-{{ 'on' if ad.is_active else 'off' }}"></i>
+                                    </button>
+                                    <a href="{{ url_for('admin.display_ad_to_users', ad_id=ad.id) }}" 
+                                       class="btn btn-outline-primary" 
+                                       title="Display Ad to Users">
+                                        <i class="fas fa-users"></i>
+                                    </a>
+                                    <a href="{{ ad.cta_url }}" 
+                                       class="btn btn-outline-info" 
+                                       target="_blank"
+                                       title="Visit URL">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                    <button class="btn btn-outline-danger" 
+                                            onclick="deleteAd({{ ad.id }}, '{{ ad.title }}')"
+                                            title="Delete Ad">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-ad fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No advertisements found</h5>
+                {% if search %}
+                    <p class="text-muted">Try adjusting your search criteria</p>
+                {% else %}
+                    <p class="text-muted">Users haven't created any ads yet</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Revenue Information -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-info-circle"></i> Revenue Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Ad Impression Rates:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-square text-success"></i> Large Ads: <strong>$0.05</strong> per impression</li>
+                            <li><i class="fas fa-square text-info"></i> Small Ads: <strong>$0.02</strong> per impression</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Ad Selection Algorithm:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-random"></i> Random selection from active ads</li>
+                            <li><i class="fas fa-grid-3x3"></i> 1 Large ad + 2 Small ads per page</li>
+                            <li><i class="fas fa-user-shield"></i> Only link owner's ads are shown</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleAd(adId) {
+    fetch(`/admin/ads/${adId}/toggle`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Error toggling ad: ' + error);
+    });
+}
+
+function deleteAd(adId, title) {
+    if (confirm(`Are you sure you want to delete the ad "${title}"? This action cannot be undone.`)) {
+        fetch(`/admin/ads/${adId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error deleting ad: ' + error);
+        });
+    }
+}
+
+// Load assignment counts for each ad
+function loadAssignmentCounts() {
+    const assignmentElements = document.querySelectorAll('[id^="assignmentCount_"]');
+    
+    assignmentElements.forEach(element => {
+        const adId = element.id.split('_')[1];
+        
+        fetch(`/admin/ads/${adId}/assignment-count`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    element.textContent = data.count;
+                } else {
+                    element.textContent = '0';
+                }
+            })
+            .catch(error => {
+                element.textContent = '0';
+            });
+    });
+}
+
+// Load assignment counts when page loads
+document.addEventListener('DOMContentLoaded', loadAssignmentCounts);
+</script>
+{% endblock %}

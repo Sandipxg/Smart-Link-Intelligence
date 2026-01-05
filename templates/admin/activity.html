@@ -1,0 +1,273 @@
+{% extends "admin/base.html" %}
+
+{% block title %}User Activity{% endblock %}
+{% block page_title %}User Activity Monitoring{% endblock %}
+
+{% block content %}
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-md-10">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" 
+                       class="form-control" 
+                       name="user" 
+                       value="{{ user_filter }}" 
+                       placeholder="Filter by username...">
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" name="activity">
+                    <option value="">All Activities</option>
+                    <option value="login" {{ 'selected' if activity_filter == 'login' }}>Login</option>
+                    <option value="create_link" {{ 'selected' if activity_filter == 'create_link' }}>Create Link</option>
+                    <option value="view_analytics" {{ 'selected' if activity_filter == 'view_analytics' }}>View Analytics</option>
+                    <option value="create_ad" {{ 'selected' if activity_filter == 'create_ad' }}>Create Ad</option>
+                    <option value="upgrade" {{ 'selected' if activity_filter == 'upgrade' }}>Upgrade</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <div class="btn-group w-100">
+                    <button type="submit" class="btn btn-admin">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                    <a href="{{ url_for('admin.activity') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-2 text-end">
+        <button class="btn btn-outline-info" onclick="toggleAutoRefresh()">
+            <i class="fas fa-sync-alt" id="refreshIcon"></i> Auto Refresh
+        </button>
+    </div>
+</div>
+
+<!-- Activity Feed -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="fas fa-history"></i> User Activity Feed
+        </h5>
+        <div class="d-flex align-items-center">
+            <span class="badge bg-info me-2" id="activityCount">{{ activities|length }} activities</span>
+            <small class="text-muted" id="lastUpdate">Last updated: Now</small>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        {% if activities %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>User</th>
+                            <th>Activity</th>
+                            <th>Details</th>
+                            <th>IP Address</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activityTableBody">
+                        {% for activity in activities %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                        {{ activity.username[0].upper() }}
+                                    </div>
+                                    <a href="{{ url_for('admin.user_detail', user_id=activity.user_id) }}" 
+                                       class="text-decoration-none">
+                                        {{ activity.username }}
+                                    </a>
+                                </div>
+                            </td>
+                            <td>
+                                {% set badge_color = 'primary' %}
+                                {% set icon = 'circle' %}
+                                {% if activity.activity_type == 'login' %}
+                                    {% set badge_color = 'primary' %}
+                                    {% set icon = 'sign-in-alt' %}
+                                {% elif activity.activity_type == 'create_link' %}
+                                    {% set badge_color = 'success' %}
+                                    {% set icon = 'plus' %}
+                                {% elif activity.activity_type == 'view_analytics' %}
+                                    {% set badge_color = 'info' %}
+                                    {% set icon = 'chart-line' %}
+                                {% elif activity.activity_type == 'create_ad' %}
+                                    {% set badge_color = 'warning' %}
+                                    {% set icon = 'ad' %}
+                                {% elif activity.activity_type == 'upgrade' %}
+                                    {% set badge_color = 'danger' %}
+                                    {% set icon = 'crown' %}
+                                {% elif activity.activity_type == 'delete_link' %}
+                                    {% set badge_color = 'dark' %}
+                                    {% set icon = 'trash' %}
+                                {% else %}
+                                    {% set badge_color = 'secondary' %}
+                                    {% set icon = 'circle' %}
+                                {% endif %}
+                                <span class="badge bg-{{ badge_color }}">
+                                    <i class="fas fa-{{ icon }}"></i>
+                                    {{ activity.activity_type|replace('_', ' ')|title }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="text-muted">{{ activity.details or '-' }}</span>
+                            </td>
+                            <td>
+                                <small class="text-muted font-monospace">{{ activity.ip_address or '-' }}</small>
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    {{ activity.timestamp }}
+                                    <br>
+                                    <span class="text-xs">{{ activity.timestamp[:19] }}</span>
+                                </small>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No activity found</h5>
+                {% if user_filter or activity_filter %}
+                    <p class="text-muted">Try adjusting your filters</p>
+                {% else %}
+                    <p class="text-muted">User activity will appear here as it happens</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if total_pages > 1 %}
+<nav aria-label="Activity pagination" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page > 1 %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('admin.activity', page=page-1, user=user_filter, activity=activity_filter) }}">Previous</a>
+            </li>
+        {% endif %}
+        
+        {% for p in range(1, total_pages + 1) %}
+            {% if p == page %}
+                <li class="page-item active">
+                    <span class="page-link">{{ p }}</span>
+                </li>
+            {% elif p <= 3 or p >= total_pages - 2 or (p >= page - 1 and p <= page + 1) %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('admin.activity', page=p, user=user_filter, activity=activity_filter) }}">{{ p }}</a>
+                </li>
+            {% elif p == 4 or p == total_pages - 3 %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if page < total_pages %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('admin.activity', page=page+1, user=user_filter, activity=activity_filter) }}">Next</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<!-- Activity Statistics -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-chart-bar"></i> Activity Statistics</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <h4 class="text-primary">{{ activities|selectattr('activity_type', 'equalto', 'login')|list|length }}</h4>
+                        <small class="text-muted">Logins</small>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h4 class="text-success">{{ activities|selectattr('activity_type', 'equalto', 'create_link')|list|length }}</h4>
+                        <small class="text-muted">Links Created</small>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h4 class="text-info">{{ activities|selectattr('activity_type', 'equalto', 'view_analytics')|list|length }}</h4>
+                        <small class="text-muted">Analytics Views</small>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h4 class="text-warning">{{ activities|selectattr('activity_type', 'equalto', 'upgrade')|list|length }}</h4>
+                        <small class="text-muted">Upgrades</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let autoRefreshEnabled = false;
+let refreshInterval;
+
+function toggleAutoRefresh() {
+    const icon = document.getElementById('refreshIcon');
+    const button = icon.parentElement;
+    
+    if (autoRefreshEnabled) {
+        clearInterval(refreshInterval);
+        autoRefreshEnabled = false;
+        button.classList.remove('btn-success');
+        button.classList.add('btn-outline-info');
+        icon.classList.remove('fa-spin');
+    } else {
+        refreshInterval = setInterval(refreshActivity, 10000); // Refresh every 10 seconds
+        autoRefreshEnabled = true;
+        button.classList.remove('btn-outline-info');
+        button.classList.add('btn-success');
+        icon.classList.add('fa-spin');
+    }
+}
+
+function refreshActivity() {
+    // Update last update time
+    const now = new Date();
+    document.getElementById('lastUpdate').textContent = 
+        'Last updated: ' + now.toLocaleTimeString();
+    
+    // In a real implementation, you would fetch new activities via AJAX
+    // For now, we'll just update the timestamp
+}
+
+// Helper functions for activity styling (these would normally be Jinja2 filters)
+function getActivityBadgeColor(activityType) {
+    const colors = {
+        'login': 'primary',
+        'create_link': 'success',
+        'view_analytics': 'info',
+        'create_ad': 'warning',
+        'upgrade': 'danger',
+        'delete_link': 'dark'
+    };
+    return colors[activityType] || 'secondary';
+}
+
+function getActivityIcon(activityType) {
+    const icons = {
+        'login': 'sign-in-alt',
+        'create_link': 'plus',
+        'view_analytics': 'chart-line',
+        'create_ad': 'ad',
+        'upgrade': 'crown',
+        'delete_link': 'trash'
+    };
+    return icons[activityType] || 'circle';
+}
+</script>
+{% endblock %}

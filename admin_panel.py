@@ -1,0 +1,1023 @@
+"""
+Smart Link Intelligence - Comprehensive Admin Panel
+Features:
+- Complete user management (CRUD operations)
+- Ad management with revenue tracking
+- Advanced analytics with ad impression tracking
+- Activity monitoring
+- Export functionality
+- Separate admin authentication
+"""
+
+import hashlib
+import os
+import sqlite3
+import csv
+import io
+from datetime import datetime, timedelta
+from functools import wraps
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash, jsonify, Response, g
+from werkzeug.security import check_password_hash, generate_password_hash
+
+admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+
+# Add custom Jinja2 filters
+def get_activity_badge_color(activity_type):
+    """Get Bootstrap badge color for activity type"""
+    colors = {
+        'login': 'primary',
+        'create_link': 'success',
+        'view_analytics': 'info',
+        'create_ad': 'warning',
+        'upgrade': 'danger',
+        'delete_link': 'dark'
+    }
+    return colors.get(activity_type, 'secondary')
+
+def get_activity_icon(activity_type):
+    """Get FontAwesome icon for activity type"""
+    icons = {
+        'login': 'sign-in-alt',
+        'create_link': 'plus',
+        'view_analytics': 'chart-line',
+        'create_ad': 'ad',
+        'upgrade': 'crown',
+        'delete_link': 'trash'
+    }
+    return icons.get(activity_type, 'circle')
+
+# Register the filters
+admin_bp.add_app_template_filter(get_activity_badge_color, 'get_activity_badge_color')
+admin_bp.add_app_template_filter(get_activity_icon, 'get_activity_icon')
+
+# Admin configuration
+ADMIN_SESSION_KEY = "admin_uid"
+ADMIN_PASSWORD_HASH = generate_password_hash("admin123")  # Change this in production
+AD_REVENUE_RATES = {
+    "large": 0.05,  # $0.05 per large ad impression
+    "small": 0.02   # $0.02 per small ad impression
+}
+
+def admin_required(f):
+    """Decorator to require admin authentication"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get(ADMIN_SESSION_KEY):
+            flash("Admin authentication required", "danger")
+            return redirect(url_for('admin.admin_login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def get_db():
+    """Get database connection"""
+    if "db" not in g:
+        DATABASE = os.path.join(os.path.dirname(__file__), "smart_links.db")
+        g.db = sqlite3.connect(DATABASE)
+        g.db.row_factory = sqlite3.Row
+    return g.db
+
+def query_db(query: str, args=None, one=False):
+    """Execute database query"""
+    cur = get_db().execute(query, args or [])
+    rows = cur.fetchall()
+    cur.close()
+    return (rows[0] if rows else None) if one else rows
+
+def execute_db(query: str, args=None):
+    """Execute database command"""
+    db = get_db()
+    db.execute(query, args or [])
+    db.commit()
+
+def ensure_admin_tables():
+    """Ensure admin-specific tables exist"""
+    DATABASE = os.path.join(os.path.dirname(__file__), "smart_links.db")
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    
+    # Admin users table
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS admin_users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            created_at TEXT DEFAULT (datetime('now')),
+            last_login TEXT,
+            is_active INTEGER DEFAULT 1
+        )
+    """)
+    
+    # Ad impressions tracking table
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS ad_impressions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            link_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            ad_type TEXT NOT NULL,  -- 'large' or 'small'
+            ad_position INTEGER NOT NULL,  -- 1, 2, or 3
+            revenue REAL NOT NULL,
+            ip_address TEXT,
+            timestamp TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY(link_id) REFERENCES links(id),
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )
+    """)
+    
+    # Admin activity log
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS admin_activity_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            admin_id INTEGER,
+            action TEXT NOT NULL,
+            target_type TEXT,  -- 'user', 'ad', 'link', etc.
+            target_id INTEGER,
+            details TEXT,
+            timestamp TEXT DEFAULT (datetime('now')),
+            ip_address TEXT
+        )
+    """)
+    
+    # User activity tracking (enhanced)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS user_activity (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            activity_type TEXT NOT NULL,  -- 'login', 'create_link', 'view_analytics', etc.
+            details TEXT,
+            ip_address TEXT,
+            timestamp TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )
+    """)
+    
+    # Ad display assignments table - for targeted ad distribution
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS ad_display_assignments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ad_id INTEGER NOT NULL,
+            target_user_id INTEGER NOT NULL,
+            assigned_by_admin INTEGER DEFAULT 1,
+            created_at TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY(ad_id) REFERENCES personalized_ads(id) ON DELETE CASCADE,
+            FOREIGN KEY(target_user_id) REFERENCES users(id) ON DELETE CASCADE,
+            UNIQUE(ad_id, target_user_id)
+        )
+    """)
+    
+    # Create default admin user if none exists
+    admin_exists = conn.execute("SELECT COUNT(*) FROM admin_users").fetchone()[0]
+    if admin_exists == 0:
+        conn.execute(
+            "INSERT INTO admin_users (username, password_hash) VALUES (?, ?)",
+            ["admin", ADMIN_PASSWORD_HASH]
+        )
+    
+    conn.commit()
+    conn.close()
+
+@admin_bp.route('/login', methods=['GET', 'POST'])
+def admin_login():
+    """Admin login page - requires password every time"""
+    if request.method == 'POST':
+        password = request.form.get('password', '').strip()
+        
+        if not password:
+            flash("Password is required", "danger")
+            return render_template('admin/login.html')
+        
+        # Check against hardcoded admin password (always require password)
+        if check_password_hash(ADMIN_PASSWORD_HASH, password):
+            session[ADMIN_SESSION_KEY] = True
+            session.permanent = False  # Session expires when browser closes
+            
+            # Log admin login
+            log_admin_activity("admin_login", details="Admin logged in")
+            
+            flash("Welcome to Admin Panel", "success")
+            return redirect(url_for('admin.dashboard'))
+        else:
+            flash("Invalid password", "danger")
+    
+    return render_template('admin/login.html')
+
+@admin_bp.route('/logout')
+def admin_logout():
+    """Admin logout"""
+    session.pop(ADMIN_SESSION_KEY, None)
+    flash("Logged out from admin panel", "info")
+    return redirect(url_for('admin.admin_login'))
+
+@admin_bp.route('/')
+@admin_bp.route('/dashboard')
+@admin_required
+def dashboard():
+    """Admin dashboard with overview statistics"""
+    # Get overview statistics
+    stats = {
+        'total_users': query_db("SELECT COUNT(*) as count FROM users", one=True)['count'],
+        'total_links': query_db("SELECT COUNT(*) as count FROM links", one=True)['count'],
+        'total_visits': query_db("SELECT COUNT(*) as count FROM visits", one=True)['count'],
+        'total_ads': query_db("SELECT COUNT(*) as count FROM personalized_ads", one=True)['count'],
+        'active_ads': query_db("SELECT COUNT(*) as count FROM personalized_ads WHERE is_active = 1", one=True)['count'],
+        'premium_users': query_db("SELECT COUNT(*) as count FROM users WHERE is_premium = 1", one=True)['count'],
+    }
+    
+    # Calculate total revenue from ad impressions
+    revenue_data = query_db("SELECT SUM(revenue) as total FROM ad_impressions", one=True)
+    stats['total_revenue'] = revenue_data['total'] if revenue_data['total'] else 0.0
+    
+    # Get recent user registrations (last 7 days)
+    recent_users = query_db("""
+        SELECT COUNT(*) as count FROM users 
+        WHERE created_at >= datetime('now', '-7 days')
+    """, one=True)['count']
+    stats['recent_users'] = recent_users
+    
+    # Get top performing links by clicks
+    top_links = query_db("""
+        SELECT l.code, l.primary_url, u.username, u.id as user_id, COUNT(v.id) as clicks
+        FROM links l
+        JOIN users u ON l.user_id = u.id
+        LEFT JOIN visits v ON l.id = v.link_id
+        GROUP BY l.id
+        ORDER BY clicks DESC
+        LIMIT 5
+    """)
+    
+    # Get recent admin activities
+    recent_activities = query_db("""
+        SELECT * FROM admin_activity_log 
+        ORDER BY timestamp DESC 
+        LIMIT 10
+    """)
+    
+    return render_template('admin/dashboard.html', 
+                         stats=stats, 
+                         top_links=[dict(row) for row in top_links],
+                         recent_activities=[dict(row) for row in recent_activities])
+
+@admin_bp.route('/users')
+@admin_required
+def users():
+    """User management page"""
+    search = request.args.get('search', '').strip()
+    page = int(request.args.get('page', 1))
+    per_page = 20
+    
+    # Build query based on search
+    if search:
+        users_query = """
+            SELECT u.*, 
+                   COUNT(l.id) as link_count,
+                   COUNT(v.id) as total_clicks,
+                   COALESCE(SUM(ai.revenue), 0) as total_revenue
+            FROM users u
+            LEFT JOIN links l ON u.id = l.user_id
+            LEFT JOIN visits v ON l.id = v.link_id
+            LEFT JOIN ad_impressions ai ON u.id = ai.user_id
+            WHERE u.username LIKE ? OR u.email LIKE ?
+            GROUP BY u.id
+            ORDER BY u.created_at DESC
+            LIMIT ? OFFSET ?
+        """
+        search_param = f"%{search}%"
+        users_list = query_db(users_query, [search_param, search_param, per_page, (page-1)*per_page])
+        
+        total_users = query_db("""
+            SELECT COUNT(*) as count FROM users 
+            WHERE username LIKE ? OR email LIKE ?
+        """, [search_param, search_param], one=True)['count']
+    else:
+        users_query = """
+            SELECT u.*, 
+                   COUNT(l.id) as link_count,
+                   COUNT(v.id) as total_clicks,
+                   COALESCE(SUM(ai.revenue), 0) as total_revenue
+            FROM users u
+            LEFT JOIN links l ON u.id = l.user_id
+            LEFT JOIN visits v ON l.id = v.link_id
+            LEFT JOIN ad_impressions ai ON u.id = ai.user_id
+            GROUP BY u.id
+            ORDER BY u.created_at DESC
+            LIMIT ? OFFSET ?
+        """
+        users_list = query_db(users_query, [per_page, (page-1)*per_page])
+        total_users = query_db("SELECT COUNT(*) as count FROM users", one=True)['count']
+    
+    total_pages = (total_users + per_page - 1) // per_page
+    
+    return render_template('admin/users.html', 
+                         users=[dict(row) for row in users_list], 
+                         search=search,
+                         page=page,
+                         total_pages=total_pages,
+                         total_users=total_users)
+
+@admin_bp.route('/users/<int:user_id>')
+@admin_required
+def user_detail(user_id):
+    """Detailed user view"""
+    user = query_db("SELECT * FROM users WHERE id = ?", [user_id], one=True)
+    if not user:
+        flash("User not found", "danger")
+        return redirect(url_for('admin.users'))
+    
+    # Get user's links
+    links = query_db("""
+        SELECT l.*, COUNT(v.id) as clicks
+        FROM links l
+        LEFT JOIN visits v ON l.id = v.link_id
+        WHERE l.user_id = ?
+        GROUP BY l.id
+        ORDER BY l.created_at DESC
+    """, [user_id])
+    
+    # Get user's ads
+    ads = query_db("""
+        SELECT * FROM personalized_ads 
+        WHERE user_id = ? 
+        ORDER BY created_at DESC
+    """, [user_id])
+    
+    # Get user activity
+    activities = query_db("""
+        SELECT * FROM user_activity 
+        WHERE user_id = ? 
+        ORDER BY timestamp DESC 
+        LIMIT 20
+    """, [user_id])
+    
+    # Calculate revenue generated by this user
+    revenue_data = query_db("""
+        SELECT SUM(revenue) as total FROM ad_impressions 
+        WHERE user_id = ?
+    """, [user_id], one=True)
+    total_revenue = revenue_data['total'] if revenue_data['total'] else 0.0
+    
+    return render_template('admin/user_detail.html', 
+                         user=dict(user), 
+                         links=[dict(row) for row in links], 
+                         ads=[dict(row) for row in ads],
+                         activities=[dict(row) for row in activities],
+                         total_revenue=total_revenue)
+
+@admin_bp.route('/users/<int:user_id>/delete', methods=['POST'])
+@admin_required
+def delete_user(user_id):
+    """Delete a user and all associated data"""
+    user = query_db("SELECT * FROM users WHERE id = ?", [user_id], one=True)
+    if not user:
+        return jsonify({"success": False, "message": "User not found"}), 404
+    
+    try:
+        # Delete in correct order due to foreign key constraints
+        execute_db("DELETE FROM ad_impressions WHERE user_id = ?", [user_id])
+        execute_db("DELETE FROM user_activity WHERE user_id = ?", [user_id])
+        execute_db("DELETE FROM visits WHERE link_id IN (SELECT id FROM links WHERE user_id = ?)", [user_id])
+        execute_db("DELETE FROM ddos_events WHERE link_id IN (SELECT id FROM links WHERE user_id = ?)", [user_id])
+        execute_db("DELETE FROM personalized_ads WHERE user_id = ?", [user_id])
+        execute_db("DELETE FROM behavior_rules WHERE user_id = ?", [user_id])
+        execute_db("DELETE FROM links WHERE user_id = ?", [user_id])
+        execute_db("DELETE FROM users WHERE id = ?", [user_id])
+        
+        # Log admin activity
+        log_admin_activity("delete_user", "user", user_id, f"Deleted user: {user['username']}")
+        
+        return jsonify({"success": True, "message": f"User '{user['username']}' deleted successfully"})
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error deleting user: {str(e)}"}), 500
+
+@admin_bp.route('/users/<int:user_id>/toggle-premium', methods=['POST'])
+@admin_required
+def toggle_user_premium(user_id):
+    """Toggle user premium status"""
+    user = query_db("SELECT * FROM users WHERE id = ?", [user_id], one=True)
+    if not user:
+        return jsonify({"success": False, "message": "User not found"}), 404
+    
+    new_status = 0 if user['is_premium'] else 1
+    expires_at = None
+    
+    if new_status == 1:
+        # Set premium expiry to 30 days from now
+        expires_at = (datetime.utcnow() + timedelta(days=30)).isoformat()
+    
+    execute_db("""
+        UPDATE users 
+        SET is_premium = ?, premium_expires_at = ? 
+        WHERE id = ?
+    """, [new_status, expires_at, user_id])
+    
+    status_text = "activated" if new_status else "deactivated"
+    log_admin_activity("toggle_premium", "user", user_id, 
+                      f"Premium {status_text} for user: {user['username']}")
+    
+    return jsonify({
+        "success": True, 
+        "message": f"Premium {status_text} for {user['username']}",
+        "new_status": new_status
+    })
+
+@admin_bp.route('/ads')
+@admin_required
+def ads():
+    """Ad management page"""
+    search = request.args.get('search', '').strip()
+    
+    if search:
+        ads_query = """
+            SELECT pa.*, u.username
+            FROM personalized_ads pa
+            JOIN users u ON pa.user_id = u.id
+            WHERE pa.title LIKE ? OR u.username LIKE ?
+            ORDER BY pa.created_at DESC
+        """
+        search_param = f"%{search}%"
+        ads_list = query_db(ads_query, [search_param, search_param])
+    else:
+        ads_list = query_db("""
+            SELECT pa.*, u.username
+            FROM personalized_ads pa
+            JOIN users u ON pa.user_id = u.id
+            ORDER BY pa.created_at DESC
+        """)
+    
+    # Get ad statistics
+    ad_stats = {
+        'total_ads': len(ads_list),
+        'active_ads': len([ad for ad in ads_list if ad['is_active']]),
+        'inactive_ads': len([ad for ad in ads_list if not ad['is_active']]),
+    }
+    
+    # Calculate total impressions and revenue
+    impression_data = query_db("""
+        SELECT COUNT(*) as impressions, SUM(revenue) as revenue
+        FROM ad_impressions
+    """, one=True)
+    
+    ad_stats['total_impressions'] = impression_data['impressions'] if impression_data['impressions'] else 0
+    ad_stats['total_revenue'] = impression_data['revenue'] if impression_data['revenue'] else 0.0
+    
+    return render_template('admin/ads.html', 
+                         ads=[dict(row) for row in ads_list], 
+                         search=search,
+                         ad_stats=ad_stats)
+
+@admin_bp.route('/ads/create-for-user/<int:user_id>', methods=['GET', 'POST'])
+@admin_required
+def create_ad_for_user(user_id):
+    """Create ad for any user (including free users)"""
+    user = query_db("SELECT * FROM users WHERE id = ?", [user_id], one=True)
+    if not user:
+        flash("User not found", "danger")
+        return redirect(url_for('admin.users'))
+    
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        description = request.form.get('description', '').strip()
+        cta_text = request.form.get('cta_text', '').strip()
+        cta_url = request.form.get('cta_url', '').strip()
+        grid_position = int(request.form.get('grid_position', 1))
+        background_color = request.form.get('background_color', '#667eea')
+        text_color = request.form.get('text_color', '#ffffff')
+        icon = request.form.get('icon', '🚀')
+        
+        if not all([title, description, cta_text, cta_url]):
+            flash("All fields are required", "danger")
+            return render_template('admin/create_ad_for_user.html', user=user)
+        
+        execute_db("""
+            INSERT INTO personalized_ads 
+            (user_id, title, description, cta_text, cta_url, background_color, text_color, icon, grid_position)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, [user_id, title, description, cta_text, cta_url, background_color, text_color, icon, grid_position])
+        
+        log_admin_activity("create_ad", "ad", None, 
+                          f"Created ad '{title}' for user: {user['username']}")
+        
+        flash(f"Ad created successfully for {user['username']}", "success")
+        return redirect(url_for('admin.user_detail', user_id=user_id))
+    
+    return render_template('admin/create_ad_for_user.html', user=user)
+
+@admin_bp.route('/ads/create', methods=['GET', 'POST'])
+@admin_required
+def create_admin_ad():
+    """Create ads as admin (can assign to any user)"""
+    if request.method == 'POST':
+        # Get form data
+        user_id = request.form.get('user_id')
+        title = request.form.get('title', '').strip()
+        description = request.form.get('description', '').strip()
+        cta_text = request.form.get('cta_text', '').strip()
+        cta_url = request.form.get('cta_url', '').strip()
+        ad_type = request.form.get('ad_type', 'custom')
+        grid_position = int(request.form.get('grid_position', 1))
+        
+        # Validation
+        if not all([user_id, title, description, cta_text, cta_url]):
+            flash("All fields are required", "danger")
+            users = query_db("SELECT id, username, email FROM users ORDER BY username ASC")
+            return render_template('admin/create_admin_ad.html', users=users)
+        
+        # Validate URL
+        if not cta_url.startswith(('http://', 'https://')):
+            flash("Please enter a valid URL starting with http:// or https://", "danger")
+            users = query_db("SELECT id, username, email FROM users ORDER BY username ASC")
+            return render_template('admin/create_admin_ad.html', users=users)
+        
+        # Validate user exists
+        user = query_db("SELECT * FROM users WHERE id = ?", [user_id], one=True)
+        if not user:
+            flash("Selected user not found", "danger")
+            users = query_db("SELECT id, username, email FROM users ORDER BY username ASC")
+            return render_template('admin/create_admin_ad.html', users=users)
+        
+        image_filename = None
+        background_color = "#667eea"
+        text_color = "#ffffff"
+        icon = "🚀"
+        
+        if ad_type == 'image':
+            # Handle image upload
+            if 'ad_image' in request.files and request.files['ad_image'].filename != '':
+                file = request.files['ad_image']
+                # Process and save image (simplified version)
+                from werkzeug.utils import secure_filename
+                import uuid
+                filename = secure_filename(file.filename)
+                unique_filename = f"{uuid.uuid4()}_{filename}"
+                
+                # Get upload folder from app config (we need to import this)
+                upload_folder = os.path.join(os.path.dirname(__file__), "static", "uploads")
+                os.makedirs(upload_folder, exist_ok=True)
+                file.save(os.path.join(upload_folder, unique_filename))
+                image_filename = unique_filename
+        else:
+            # Handle custom ad
+            background_color = request.form.get('background_color', '#667eea')
+            text_color = request.form.get('text_color', '#ffffff')
+            icon = request.form.get('icon', '🚀')
+        
+        # Create the ad
+        execute_db("""
+            INSERT INTO personalized_ads 
+            (user_id, title, description, cta_text, cta_url, background_color, text_color, icon, grid_position, ad_type, image_filename)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, [user_id, title, description, cta_text, cta_url, background_color, text_color, icon, grid_position, ad_type, image_filename])
+        
+        log_admin_activity("create_ad", "ad", None, 
+                          f"Admin created ad '{title}' for user: {user['username']}")
+        
+        flash(f"Ad created successfully for {user['username']}", "success")
+        return redirect(url_for('admin.ads'))
+    
+    # GET request - show form
+    # Get all users for the dropdown
+    users = query_db("SELECT id, username, email FROM users ORDER BY username ASC")
+    
+    return render_template('admin/create_admin_ad.html', users=users)
+
+@admin_bp.route('/ads/<int:ad_id>/toggle', methods=['POST'])
+@admin_required
+def toggle_ad(ad_id):
+    """Toggle ad active status"""
+    ad = query_db("SELECT * FROM personalized_ads WHERE id = ?", [ad_id], one=True)
+    if not ad:
+        return jsonify({"success": False, "message": "Ad not found"}), 404
+    
+    new_status = 0 if ad['is_active'] else 1
+    execute_db("UPDATE personalized_ads SET is_active = ? WHERE id = ?", [new_status, ad_id])
+    
+    status_text = "activated" if new_status else "deactivated"
+    log_admin_activity("toggle_ad", "ad", ad_id, f"Ad {status_text}: {ad['title']}")
+    
+    return jsonify({
+        "success": True,
+        "message": f"Ad {status_text} successfully",
+        "new_status": new_status
+    })
+
+@admin_bp.route('/ads/<int:ad_id>/delete', methods=['POST'])
+@admin_required
+def delete_ad(ad_id):
+    """Delete an ad"""
+    ad = query_db("SELECT * FROM personalized_ads WHERE id = ?", [ad_id], one=True)
+    if not ad:
+        return jsonify({"success": False, "message": "Ad not found"}), 404
+    
+    # Delete ad impressions first
+    execute_db("DELETE FROM ad_impressions WHERE ad_id = ?", [ad_id])
+    execute_db("DELETE FROM personalized_ads WHERE id = ?", [ad_id])
+    
+    log_admin_activity("delete_ad", "ad", ad_id, f"Deleted ad: {ad['title']}")
+    
+    return jsonify({"success": True, "message": "Ad deleted successfully"})
+
+@admin_bp.route('/ads/<int:ad_id>/display-to-users', methods=['GET', 'POST'])
+@admin_required
+def display_ad_to_users(ad_id):
+    """Manage which users see this ad"""
+    ad = query_db("SELECT * FROM personalized_ads WHERE id = ?", [ad_id], one=True)
+    if not ad:
+        flash("Ad not found", "danger")
+        return redirect(url_for('admin.ads'))
+    
+    if request.method == 'POST':
+        # Get selected user IDs from form
+        selected_user_ids = request.form.getlist('user_ids')
+        
+        # Clear existing assignments for this ad
+        execute_db("DELETE FROM ad_display_assignments WHERE ad_id = ?", [ad_id])
+        
+        # Add new assignments
+        for user_id in selected_user_ids:
+            try:
+                execute_db("""
+                    INSERT INTO ad_display_assignments (ad_id, target_user_id)
+                    VALUES (?, ?)
+                """, [ad_id, int(user_id)])
+            except (ValueError, sqlite3.IntegrityError):
+                continue  # Skip invalid user IDs
+        
+        log_admin_activity("assign_ad_display", "ad", ad_id, 
+                          f"Assigned ad '{ad['title']}' to {len(selected_user_ids)} users")
+        
+        flash(f"Ad display settings updated for {len(selected_user_ids)} users", "success")
+        return redirect(url_for('admin.ads'))
+    
+    # GET request - show user selection form
+    # Get all non-premium users (free and elite, but not premium users)
+    all_users = query_db("""
+        SELECT id, username, email, membership_tier, is_premium, created_at
+        FROM users 
+        WHERE is_premium = 0 OR is_premium IS NULL
+        ORDER BY membership_tier DESC, username ASC
+    """)
+    
+    # Get currently assigned users for this ad
+    assigned_user_ids = [
+        row['target_user_id'] for row in query_db(
+            "SELECT target_user_id FROM ad_display_assignments WHERE ad_id = ?", 
+            [ad_id]
+        )
+    ]
+    
+    # Separate users by tier for better organization
+    free_users = []
+    elite_users = []
+    elite_pro_users = []
+    
+    for user in all_users:
+        user_dict = dict(user)
+        user_dict['is_assigned'] = user['id'] in assigned_user_ids
+        
+        tier = user['membership_tier'] if user['membership_tier'] else 'free'
+        if tier == 'elite_pro':
+            elite_pro_users.append(user_dict)
+        elif tier == 'elite':
+            elite_users.append(user_dict)
+        else:
+            free_users.append(user_dict)
+    
+    return render_template('admin/display_ad_to_users.html', 
+                         ad=ad,
+                         free_users=free_users,
+                         elite_users=elite_users,
+                         elite_pro_users=elite_pro_users,
+                         assigned_count=len(assigned_user_ids))
+
+@admin_bp.route('/ads/<int:ad_id>/assignment-count')
+@admin_required
+def get_ad_assignment_count(ad_id):
+    """Get the number of users assigned to this ad"""
+    count = query_db(
+        "SELECT COUNT(*) as count FROM ad_display_assignments WHERE ad_id = ?", 
+        [ad_id], one=True
+    )['count']
+    
+    return jsonify({"success": True, "count": count})
+
+@admin_bp.route('/analytics')
+@admin_required
+def analytics():
+    """Advanced analytics dashboard"""
+    # Date range filter
+    days = int(request.args.get('days', 30))
+    start_date = datetime.utcnow() - timedelta(days=days)
+    
+    # Revenue analytics
+    revenue_by_day = query_db("""
+        SELECT DATE(timestamp) as date, 
+               SUM(revenue) as daily_revenue,
+               COUNT(*) as impressions
+        FROM ad_impressions 
+        WHERE timestamp >= ?
+        GROUP BY DATE(timestamp)
+        ORDER BY date DESC
+    """, [start_date.isoformat()])
+    
+    # Top revenue generating users
+    top_revenue_users = query_db("""
+        SELECT u.id, u.username, u.email, 
+               SUM(ai.revenue) as total_revenue,
+               COUNT(ai.id) as impressions
+        FROM users u
+        JOIN ad_impressions ai ON u.id = ai.user_id
+        WHERE ai.timestamp >= ?
+        GROUP BY u.id
+        ORDER BY total_revenue DESC
+        LIMIT 10
+    """, [start_date.isoformat()])
+    
+    # Ad performance by type
+    ad_performance = query_db("""
+        SELECT ad_type, 
+               COUNT(*) as impressions,
+               SUM(revenue) as revenue,
+               AVG(revenue) as avg_revenue
+        FROM ad_impressions
+        WHERE timestamp >= ?
+        GROUP BY ad_type
+    """, [start_date.isoformat()])
+    
+    # User growth over time
+    user_growth = query_db("""
+        SELECT DATE(created_at) as date, COUNT(*) as new_users
+        FROM users
+        WHERE created_at >= ?
+        GROUP BY DATE(created_at)
+        ORDER BY date DESC
+    """, [start_date.isoformat()])
+    
+    # Link creation trends
+    link_trends = query_db("""
+        SELECT DATE(created_at) as date, COUNT(*) as new_links
+        FROM links
+        WHERE created_at >= ?
+        GROUP BY DATE(created_at)
+        ORDER BY date DESC
+    """, [start_date.isoformat()])
+    
+    # Calculate totals
+    total_revenue = sum(row['daily_revenue'] for row in revenue_by_day)
+    total_impressions = sum(row['impressions'] for row in revenue_by_day)
+    
+    # Clean data (explicit conversion to dicts to avoid serialization errors)
+    revenue_by_day_data = [
+        {
+            "date": row["date"],
+            "daily_revenue": row["daily_revenue"],
+            "impressions": row["impressions"]
+        } 
+        for row in revenue_by_day
+    ]
+    
+    top_revenue_users_data = [
+        {
+            "id": row["id"],
+            "username": row["username"],
+            "email": row["email"],
+            "total_revenue": row["total_revenue"],
+            "impressions": row["impressions"]
+        }
+        for row in top_revenue_users
+    ]
+    
+    ad_performance_data = [
+        {
+            "ad_type": row["ad_type"],
+            "impressions": row["impressions"],
+            "revenue": row["revenue"],
+            "avg_revenue": row["avg_revenue"]
+        }
+        for row in ad_performance
+    ]
+    
+    user_growth_data = [{"date": row["date"], "new_users": row["new_users"]} for row in user_growth]
+    link_trends_data = [{"date": row["date"], "new_links": row["new_links"]} for row in link_trends]
+    
+    return render_template('admin/analytics.html',
+                         revenue_by_day=revenue_by_day_data,
+                         top_revenue_users=top_revenue_users_data,
+                         ad_performance=ad_performance_data,
+                         user_growth=user_growth_data,
+                         link_trends=link_trends_data,
+                         total_revenue=total_revenue,
+                         total_impressions=total_impressions,
+                         days=days)
+
+@admin_bp.route('/activity')
+@admin_required
+def activity():
+    """User activity monitoring"""
+    page = int(request.args.get('page', 1))
+    per_page = 50
+    user_filter = request.args.get('user', '').strip()
+    activity_filter = request.args.get('activity', '').strip()
+    
+    # Build query
+    where_conditions = []
+    params = []
+    
+    if user_filter:
+        where_conditions.append("u.username LIKE ?")
+        params.append(f"%{user_filter}%")
+    
+    if activity_filter:
+        where_conditions.append("ua.activity_type LIKE ?")
+        params.append(f"%{activity_filter}%")
+    
+    where_clause = "WHERE " + " AND ".join(where_conditions) if where_conditions else ""
+    
+    activities = query_db(f"""
+        SELECT ua.*, u.username, ua.user_id
+        FROM user_activity ua
+        JOIN users u ON ua.user_id = u.id
+        {where_clause}
+        ORDER BY ua.timestamp DESC
+        LIMIT ? OFFSET ?
+    """, params + [per_page, (page-1)*per_page])
+    
+    # Get total count for pagination
+    total_activities = query_db(f"""
+        SELECT COUNT(*) as count
+        FROM user_activity ua
+        JOIN users u ON ua.user_id = u.id
+        {where_clause}
+    """, params, one=True)['count']
+    
+    total_pages = (total_activities + per_page - 1) // per_page
+    
+    return render_template('admin/activity.html',
+                         activities=[dict(row) for row in activities],
+                         page=page,
+                         total_pages=total_pages,
+                         user_filter=user_filter,
+                         activity_filter=activity_filter)
+
+@admin_bp.route('/export/users')
+@admin_required
+def export_users():
+    """Export users data to CSV"""
+    users_data = query_db("""
+        SELECT u.id, u.username, u.email, u.created_at, u.is_premium, u.membership_tier,
+               COUNT(l.id) as link_count,
+               COUNT(v.id) as total_clicks,
+               COALESCE(SUM(ai.revenue), 0) as total_revenue
+        FROM users u
+        LEFT JOIN links l ON u.id = l.user_id
+        LEFT JOIN visits v ON l.id = v.link_id
+        LEFT JOIN ad_impressions ai ON u.id = ai.user_id
+        GROUP BY u.id
+        ORDER BY u.created_at DESC
+    """)
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Write header
+    writer.writerow([
+        'User ID', 'Username', 'Email', 'Created At', 'Is Premium', 
+        'Membership Tier', 'Link Count', 'Total Clicks', 'Revenue Generated'
+    ])
+    
+    # Write data
+    for user in users_data:
+        writer.writerow([
+            user['id'], user['username'], user['email'], user['created_at'],
+            'Yes' if user['is_premium'] else 'No', user['membership_tier'],
+            user['link_count'], user['total_clicks'], f"${user['total_revenue']:.2f}"
+        ])
+    
+    log_admin_activity("export_users", details="Exported users data to CSV")
+    
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment; filename=users_export.csv"}
+    )
+
+@admin_bp.route('/export/revenue')
+@admin_required
+def export_revenue():
+    """Export revenue data to CSV"""
+    revenue_data = query_db("""
+        SELECT ai.*, u.username, l.code as link_code
+        FROM ad_impressions ai
+        JOIN users u ON ai.user_id = u.id
+        JOIN links l ON ai.link_id = l.id
+        ORDER BY ai.timestamp DESC
+    """)
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Write header
+    writer.writerow([
+        'Impression ID', 'Username', 'Link Code', 'Ad Type', 'Ad Position',
+        'Revenue', 'IP Address', 'Timestamp'
+    ])
+    
+    # Write data
+    for impression in revenue_data:
+        writer.writerow([
+            impression['id'], impression['username'], impression['link_code'],
+            impression['ad_type'], impression['ad_position'], f"${impression['revenue']:.2f}",
+            impression['ip_address'], impression['timestamp']
+        ])
+    
+    log_admin_activity("export_revenue", details="Exported revenue data to CSV")
+    
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment; filename=revenue_export.csv"}
+    )
+
+@admin_bp.route('/revenue', methods=['GET'])
+@admin_required
+def get_revenue_api():
+    """
+    Revenue API for admin dashboard
+    Returns:
+    - total revenue
+    - daily revenue breakdown
+    """
+    
+    # ---- Total Revenue ----
+    total_row = query_db(
+        "SELECT SUM(revenue) AS total FROM ad_impressions", 
+        one=True
+    )
+
+    total_revenue = total_row["total"] if total_row and total_row["total"] else 0.0
+
+    # ---- Revenue By Day (for charts) ----
+    daily_rows = query_db("""
+        SELECT 
+            DATE(timestamp) AS date,
+            SUM(revenue) AS amount
+        FROM ad_impressions
+        GROUP BY DATE(timestamp)
+        ORDER BY DATE(timestamp)
+    """)
+
+    # Clean data (explicit conversion to dicts to avoid serialization errors)
+    daily_revenue = [
+        {
+            "date": row["date"],
+            "amount": row["amount"]
+        }
+        for row in daily_rows
+    ]
+
+    # FINAL JSON RESPONSE (SAFE)
+    return jsonify({
+        "total_revenue": round(total_revenue, 2),
+        "daily_revenue": daily_revenue
+    })
+
+def log_admin_activity(action, target_type=None, target_id=None, details=None):
+    """Log admin activity"""
+    try:
+        ip_address = request.remote_addr if request else "system"
+        execute_db("""
+            INSERT INTO admin_activity_log 
+            (admin_id, action, target_type, target_id, details, ip_address)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, [1, action, target_type, target_id, details, ip_address])  # admin_id = 1 for simplicity
+    except Exception as e:
+        print(f"Error logging admin activity: {e}")
+
+def track_user_activity(user_id, activity_type, details=None, ip_address=None):
+    """Track user activity for admin monitoring"""
+    try:
+        if not ip_address:
+            ip_address = request.remote_addr if request else "system"
+        
+        execute_db("""
+            INSERT INTO user_activity 
+            (user_id, activity_type, details, ip_address)
+            VALUES (?, ?, ?, ?)
+        """, [user_id, activity_type, details, ip_address])
+    except Exception as e:
+        print(f"Error tracking user activity: {e}")
+
+def track_ad_impression(link_id, user_id, ad_type, ad_position, ip_address=None):
+    """Track ad impression and calculate revenue"""
+    revenue = AD_REVENUE_RATES.get(ad_type, 0.0)
+    
+    execute_db("""
+        INSERT INTO ad_impressions 
+        (link_id, user_id, ad_type, ad_position, revenue, ip_address)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, [link_id, user_id, ad_type, ad_position, revenue, ip_address])
+    
+    return revenue
+
+# Initialize admin tables when module is imported
+try:
+    ensure_admin_tables()
+except Exception as e:
+    print(f"Error initializing admin tables: {e}")

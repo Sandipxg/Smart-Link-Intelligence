@@ -1,0 +1,312 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Revenue Analytics{% endblock %}
+{% block page_title %}Revenue Analytics{% endblock %}
+
+{% block content %}
+<!-- Time Period Filter -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('admin.analytics', days=7) }}" 
+               class="btn btn-{{ 'admin' if days == 7 else 'outline-secondary' }}">7 Days</a>
+            <a href="{{ url_for('admin.analytics', days=30) }}" 
+               class="btn btn-{{ 'admin' if days == 30 else 'outline-secondary' }}">30 Days</a>
+            <a href="{{ url_for('admin.analytics', days=90) }}" 
+               class="btn btn-{{ 'admin' if days == 90 else 'outline-secondary' }}">90 Days</a>
+        </div>
+    </div>
+    <div class="col-md-6 text-end">
+        <a href="{{ url_for('admin.export_revenue') }}" class="btn btn-success">
+            <i class="fas fa-download"></i> Export Revenue Data
+        </a>
+    </div>
+</div>
+
+<!-- Revenue Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card revenue-card">
+            <div class="card-body text-center">
+                <h3 class="mb-0">${{ "%.2f"|format(total_revenue) }}</h3>
+                <small>Total Revenue ({{ days }} days)</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card activity-card">
+            <div class="card-body text-center">
+                <h3 class="mb-0">{{ total_impressions }}</h3>
+                <small>Total Impressions</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card users-card">
+            <div class="card-body text-center">
+                <h3 class="mb-0">${{ "%.3f"|format(total_revenue / total_impressions if total_impressions > 0 else 0) }}</h3>
+                <small>Avg Revenue/Impression</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body text-center">
+                <h3 class="mb-0">{{ (total_revenue / days)|round(2) if days > 0 else 0 }}</h3>
+                <small>Daily Average</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4">
+    <!-- Revenue Trend Chart -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-line"></i> Revenue Trend</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="revenueChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Ad Performance Chart -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Ad Performance</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="adPerformanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Top Revenue Users -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-trophy"></i> Top Revenue Generators</h5>
+            </div>
+            <div class="card-body">
+                {% if top_revenue_users %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Impressions</th>
+                                    <th>Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in top_revenue_users %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('admin.user_detail', user_id=user.id) }}" 
+                                           class="text-decoration-none">
+                                            {{ user.username }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ user.impressions }}</span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-success">${{ "%.2f"|format(user.total_revenue) }}</strong>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                        <p>No revenue data available</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Growth Metrics -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-area"></i> Growth Metrics</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="growthChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Revenue Breakdown -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-table"></i> Daily Revenue Breakdown</h5>
+            </div>
+            <div class="card-body">
+                {% if revenue_by_day %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Impressions</th>
+                                    <th>Revenue</th>
+                                    <th>Avg per Impression</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for day in revenue_by_day %}
+                                <tr>
+                                    <td>{{ day.date }}</td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ day.impressions }}</span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-success">${{ "%.2f"|format(day.daily_revenue) }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted">${{ "%.3f"|format(day.daily_revenue / day.impressions if day.impressions > 0 else 0) }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-calendar fa-3x mb-3"></i>
+                        <p>No revenue data for the selected period</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Prepare data for charts
+const revenueData = {{ revenue_by_day|tojson }};
+const adPerformanceData = {{ ad_performance|tojson }};
+const userGrowthData = {{ user_growth|tojson }};
+const linkTrendsData = {{ link_trends|tojson }};
+
+// Revenue Trend Chart
+const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+const revenueChart = new Chart(revenueCtx, {
+    type: 'line',
+    data: {
+        labels: revenueData.map(day => day.date),
+        datasets: [{
+            label: 'Daily Revenue',
+            data: revenueData.map(day => day.daily_revenue || 0),
+            borderColor: 'rgb(102, 126, 234)',
+            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            tension: 0.4,
+            fill: true
+        }, {
+            label: 'Impressions',
+            data: revenueData.map(day => day.impressions || 0),
+            borderColor: 'rgb(245, 87, 108)',
+            backgroundColor: 'rgba(245, 87, 108, 0.1)',
+            tension: 0.4,
+            yAxisID: 'y1'
+        }]
+    },
+    options: {
+        responsive: true,
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
+        scales: {
+            y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                title: {
+                    display: true,
+                    text: 'Revenue ($)'
+                }
+            },
+            y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                title: {
+                    display: true,
+                    text: 'Impressions'
+                },
+                grid: {
+                    drawOnChartArea: false,
+                },
+            }
+        }
+    }
+});
+
+// Ad Performance Pie Chart
+const adCtx = document.getElementById('adPerformanceChart').getContext('2d');
+const adChart = new Chart(adCtx, {
+    type: 'doughnut',
+    data: {
+        labels: adPerformanceData.map(ad => (ad.ad_type || 'Unknown').charAt(0).toUpperCase() + (ad.ad_type || 'Unknown').slice(1) + ' Ads'),
+        datasets: [{
+            data: adPerformanceData.map(ad => ad.revenue || 0),
+            backgroundColor: [
+                'rgba(102, 126, 234, 0.8)',
+                'rgba(245, 87, 108, 0.8)',
+                'rgba(67, 233, 123, 0.8)'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Growth Chart
+const growthCtx = document.getElementById('growthChart').getContext('2d');
+const growthChart = new Chart(growthCtx, {
+    type: 'bar',
+    data: {
+        labels: userGrowthData.map(day => day.date),
+        datasets: [{
+            label: 'New Users',
+            data: userGrowthData.map(day => day.new_users || 0),
+            backgroundColor: 'rgba(79, 172, 254, 0.8)'
+        }, {
+            label: 'New Links',
+            data: linkTrendsData.map(day => day.new_links || 0),
+            backgroundColor: 'rgba(67, 233, 123, 0.8)'
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

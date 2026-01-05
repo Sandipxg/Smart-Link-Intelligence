@@ -1,0 +1,360 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ user.username }} - User Details{% endblock %}
+{% block page_title %}User Details: {{ user.username }}{% endblock %}
+
+{% block content %}
+<!-- User Info Header -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <div class="avatar-lg bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3">
+                            {{ user.username[0].upper() }}
+                        </div>
+                        <h5>{{ user.username }}</h5>
+                        {% if user.is_premium %}
+                            <span class="badge bg-warning text-dark">Premium User</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Free User</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-9">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Email:</strong></td>
+                                <td>{{ user.email or 'Not provided' }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Membership:</strong></td>
+                                <td>
+                                    <span class="badge bg-{{ 'warning' if user.membership_tier == 'elite_pro' else 'info' if user.membership_tier == 'elite' else 'secondary' }}">
+                                        {{ user.membership_tier or 'free' }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Joined:</strong></td>
+                                <td>{{ user.created_at[:19] if user.created_at else 'Unknown' }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Premium Expires:</strong></td>
+                                <td>{{ user.premium_expires_at[:19] if user.premium_expires_at else 'N/A' }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Revenue Generated:</strong></td>
+                                <td><strong class="text-success">${{ "%.2f"|format(total_revenue) }}</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-warning" onclick="togglePremium({{ user.id }}, '{{ user.username }}', {{ user.is_premium }})">
+                        <i class="fas fa-crown"></i> 
+                        {{ 'Remove Premium' if user.is_premium else 'Grant Premium' }}
+                    </button>
+                    <a href="{{ url_for('admin.create_ad_for_user', user_id=user.id) }}" class="btn btn-info">
+                        <i class="fas fa-ad"></i> Create Ad for User
+                    </a>
+                    <button class="btn btn-danger" onclick="deleteUser({{ user.id }}, '{{ user.username }}')">
+                        <i class="fas fa-trash"></i> Delete User
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs for different sections -->
+<ul class="nav nav-tabs" id="userTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="links-tab" data-bs-toggle="tab" data-bs-target="#links" type="button">
+            <i class="fas fa-link"></i> Links ({{ links|length }})
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="ads-tab" data-bs-toggle="tab" data-bs-target="#ads" type="button">
+            <i class="fas fa-ad"></i> Ads ({{ ads|length }})
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity" type="button">
+            <i class="fas fa-history"></i> Activity
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="userTabsContent">
+    <!-- Links Tab -->
+    <div class="tab-pane fade show active" id="links" role="tabpanel">
+        <div class="card border-top-0">
+            <div class="card-body">
+                {% if links %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Primary URL</th>
+                                    <th>Behavior Rule</th>
+                                    <th>State</th>
+                                    <th>Clicks</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for link in links %}
+                                <tr>
+                                    <td>
+                                        <code class="bg-light px-2 py-1 rounded">{{ link.code }}</code>
+                                    </td>
+                                    <td>
+                                        <span class="text-truncate d-inline-block" style="max-width: 200px;">
+                                            {{ link.primary_url }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ link.behavior_rule }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if link.state == 'Active' else 'warning' if link.state == 'Decaying' else 'danger' }}">
+                                            {{ link.state }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ link.clicks }}</span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ link.created_at[:10] if link.created_at else '-' }}</small>
+                                    </td>
+                                    <td>
+                                        <a href="/links/{{ link.code }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                            <i class="fas fa-chart-line"></i> Analytics
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-link fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No links created yet</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Ads Tab -->
+    <div class="tab-pane fade" id="ads" role="tabpanel">
+        <div class="card border-top-0">
+            <div class="card-body">
+                {% if ads %}
+                    <div class="row">
+                        {% for ad in ads %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card {{ 'border-success' if ad.is_active else 'border-secondary' }}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title">{{ ad.title }}</h6>
+                                        <span class="badge bg-{{ 'success' if ad.is_active else 'secondary' }}">
+                                            {{ 'Active' if ad.is_active else 'Inactive' }}
+                                        </span>
+                                    </div>
+                                    <p class="card-text small">{{ ad.description }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">Position: {{ ad.grid_position }}</small>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-warning" onclick="toggleAd({{ ad.id }})">
+                                                <i class="fas fa-toggle-{{ 'on' if ad.is_active else 'off' }}"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" onclick="deleteAd({{ ad.id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-ad fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No ads created yet</p>
+                        <a href="{{ url_for('admin.create_ad_for_user', user_id=user.id) }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Create First Ad
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Tab -->
+    <div class="tab-pane fade" id="activity" role="tabpanel">
+        <div class="card border-top-0">
+            <div class="card-body">
+                {% if activities %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Activity</th>
+                                    <th>Details</th>
+                                    <th>IP Address</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for activity in activities %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-info">{{ activity.activity_type }}</span>
+                                    </td>
+                                    <td>{{ activity.details or '-' }}</td>
+                                    <td>
+                                        <small class="text-muted">{{ activity.ip_address or '-' }}</small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ activity.timestamp }}</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No activity recorded yet</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Back Button -->
+<div class="mt-4">
+    <a href="{{ url_for('admin.users') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Users
+    </a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function deleteUser(userId, username) {
+    if (confirm(`Are you sure you want to delete user "${username}"? This will permanently delete all their links, visits, and ads. This action cannot be undone.`)) {
+        fetch(`/admin/users/${userId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                window.location.href = '/admin/users';
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error deleting user: ' + error);
+        });
+    }
+}
+
+function togglePremium(userId, username, currentStatus) {
+    const action = currentStatus ? 'remove' : 'grant';
+    if (confirm(`Are you sure you want to ${action} premium access for "${username}"?`)) {
+        fetch(`/admin/users/${userId}/toggle-premium`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error toggling premium: ' + error);
+        });
+    }
+}
+
+function toggleAd(adId) {
+    fetch(`/admin/ads/${adId}/toggle`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Error toggling ad: ' + error);
+    });
+}
+
+function deleteAd(adId) {
+    if (confirm('Are you sure you want to delete this ad?')) {
+        fetch(`/admin/ads/${adId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error deleting ad: ' + error);
+        });
+    }
+}
+</script>
+
+<style>
+.avatar-lg {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
+    font-weight: bold;
+}
+</style>
+{% endblock %}
