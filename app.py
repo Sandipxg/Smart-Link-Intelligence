@@ -7,10 +7,7 @@ import uuid
 import smtplib
 import csv
 import io
-# GeoIP removed in favor of ip-api.com
-# import geoip2.database
-# import geoip2.errors
-GEOIP_AVAILABLE = False
+
 import requests
 import tarfile
 from email.message import EmailMessage
@@ -62,38 +59,7 @@ MEMBERSHIP_TIERS = {
 }
 
 
-# GeoIP Configuration
-GEOIP_DB_PATH = os.path.join(os.path.dirname(__file__), "GeoLite2-City.mmdb")
-GEOIP_DB_URL = "https://download.maxmind.com/app/geoip_update?edition_id=GeoLite2-City&license_key=YOUR_LICENSE_KEY&suffix=tar.gz"
 
-
-def download_geoip_database():
-    """Download and extract GeoLite2 database if not exists."""
-    if os.path.exists(GEOIP_DB_PATH):
-        return True
-    
-    try:
-        print("Downloading GeoLite2 database...")
-        
-        # For demo purposes, we'll use a direct download URL
-        # In production, you should register for a MaxMind account and use your license key
-        # This is a fallback URL that might work for testing
-        fallback_url = "https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb"
-        
-        response = requests.get(fallback_url, stream=True)
-        response.raise_for_status()
-        
-        with open(GEOIP_DB_PATH, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
-        
-        print(f"GeoLite2 database downloaded to {GEOIP_DB_PATH}")
-        return True
-        
-    except Exception as e:
-        print(f"Failed to download GeoIP database: {e}")
-        print("Using fallback location detection...")
-        return False
 
 
 def get_link_password_hash(link):
@@ -120,8 +86,7 @@ def create_app() -> Flask:
     # Initialize admin tables
     ensure_admin_tables()
     
-    # Initialize GeoIP database
-    download_geoip_database()
+
     
     # Initialize DDoS Protection
     ddos_protection = DDoSProtection(DATABASE)
