@@ -1,0 +1,230 @@
+{% extends "admin/base.html" %}
+
+{% block title %}User Management{% endblock %}
+{% block page_title %}User Management{% endblock %}
+
+{% block content %}
+<!-- Search and Filters -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <form method="GET" class="d-flex">
+            <input type="text" 
+                   class="form-control me-2" 
+                   name="search" 
+                   value="{{ search }}" 
+                   placeholder="Search users by username or email...">
+            <button type="submit" class="btn btn-admin">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </form>
+    </div>
+    <div class="col-md-4 text-end">
+        <div class="btn-group">
+            <a href="{{ url_for('admin.export_users') }}" class="btn btn-outline-success">
+                <i class="fas fa-download"></i> Export CSV
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="fas fa-users"></i> Users 
+            <span class="badge bg-primary">{{ total_users }}</span>
+        </h5>
+        {% if search %}
+            <a href="{{ url_for('admin.users') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-times"></i> Clear Search
+            </a>
+        {% endif %}
+    </div>
+    <div class="card-body p-0">
+        {% if users %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Membership</th>
+                            <th>Links</th>
+                            <th>Clicks</th>
+                            <th>Revenue</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                        {{ user.username[0].upper() }}
+                                    </div>
+                                    <div>
+                                        <strong>{{ user.username }}</strong>
+                                        {% if user.is_premium %}
+                                            <span class="badge bg-warning text-dark ms-1">Premium</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ user.email or 'No email' }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ 'warning' if user.membership_tier == 'elite_pro' else 'info' if user.membership_tier == 'elite' else 'secondary' }}">
+                                    {{ user.membership_tier or 'free' }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary">{{ user.link_count }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success">{{ user.total_clicks }}</span>
+                            </td>
+                            <td>
+                                <strong class="text-success">${{ "%.2f"|format(user.total_revenue) }}</strong>
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ user.created_at[:10] if user.created_at else '-' }}</small>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('admin.user_detail', user_id=user.id) }}" 
+                                       class="btn btn-outline-primary" 
+                                       title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button class="btn btn-outline-warning" 
+                                            onclick="togglePremium({{ user.id }}, '{{ user.username }}', {{ user.is_premium }})"
+                                            title="Toggle Premium">
+                                        <i class="fas fa-crown"></i>
+                                    </button>
+                                    <a href="{{ url_for('admin.create_ad_for_user', user_id=user.id) }}" 
+                                       class="btn btn-outline-info" 
+                                       title="Create Ad">
+                                        <i class="fas fa-ad"></i>
+                                    </a>
+                                    <button class="btn btn-outline-danger" 
+                                            onclick="deleteUser({{ user.id }}, '{{ user.username }}')"
+                                            title="Delete User">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No users found</h5>
+                {% if search %}
+                    <p class="text-muted">Try adjusting your search criteria</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if total_pages > 1 %}
+<nav aria-label="Users pagination" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page > 1 %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('admin.users', page=page-1, search=search) }}">Previous</a>
+            </li>
+        {% endif %}
+        
+        {% for p in range(1, total_pages + 1) %}
+            {% if p == page %}
+                <li class="page-item active">
+                    <span class="page-link">{{ p }}</span>
+                </li>
+            {% elif p <= 3 or p >= total_pages - 2 or (p >= page - 1 and p <= page + 1) %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('admin.users', page=p, search=search) }}">{{ p }}</a>
+                </li>
+            {% elif p == 4 or p == total_pages - 3 %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if page < total_pages %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('admin.users', page=page+1, search=search) }}">Next</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function deleteUser(userId, username) {
+    if (confirm(`Are you sure you want to delete user "${username}"? This will permanently delete all their links, visits, and ads. This action cannot be undone.`)) {
+        fetch(`/admin/users/${userId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error deleting user: ' + error);
+        });
+    }
+}
+
+function togglePremium(userId, username, currentStatus) {
+    const action = currentStatus ? 'remove' : 'grant';
+    if (confirm(`Are you sure you want to ${action} premium access for "${username}"?`)) {
+        fetch(`/admin/users/${userId}/toggle-premium`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error toggling premium: ' + error);
+        });
+    }
+}
+</script>
+
+<style>
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    font-weight: bold;
+}
+</style>
+{% endblock %}

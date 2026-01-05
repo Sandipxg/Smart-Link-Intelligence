@@ -1,0 +1,230 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stats-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">Total Users</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ stats.total_users }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <small><i class="fas fa-plus"></i> {{ stats.recent_users }} new this week</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card revenue-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">Total Revenue</div>
+                        <div class="h5 mb-0 font-weight-bold">${{ "%.2f"|format(stats.total_revenue) }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-dollar-sign fa-2x"></i>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <small><i class="fas fa-chart-line"></i> From ad impressions</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card users-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">Smart Links</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ stats.total_links }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-link fa-2x"></i>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <small><i class="fas fa-mouse-pointer"></i> {{ stats.total_visits }} total clicks</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card activity-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">Active Ads</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ stats.active_ads }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-ad fa-2x"></i>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <small><i class="fas fa-chart-pie"></i> {{ stats.total_ads }} total ads</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Premium Users & Quick Actions -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-fire"></i> Top Performing Links</h5>
+                <a href="{{ url_for('admin.analytics') }}" class="btn btn-sm btn-admin">
+                    <i class="fas fa-chart-line"></i> View Analytics
+                </a>
+            </div>
+            <div class="card-body">
+                {% if top_links %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Owner</th>
+                                    <th>URL</th>
+                                    <th>Clicks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for link in top_links %}
+                                <tr>
+                                    <td>
+                                        <code class="bg-light px-2 py-1 rounded">{{ link.code }}</code>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('admin.user_detail', user_id=link.user_id) }}" 
+                                           class="text-decoration-none">
+                                            {{ link.username }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="text-truncate d-inline-block" style="max-width: 200px;">
+                                            {{ link.primary_url }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ link.clicks }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-chart-line fa-3x mb-3"></i>
+                        <p>No link data available yet</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-crown"></i> Premium Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Premium Users</span>
+                    <span class="badge bg-warning text-dark">{{ stats.premium_users }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Free Users</span>
+                    <span class="badge bg-secondary">{{ stats.total_users - stats.premium_users }}</span>
+                </div>
+                <hr>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('admin.users') }}" class="btn btn-admin btn-sm">
+                        <i class="fas fa-users"></i> Manage Users
+                    </a>
+                    <a href="{{ url_for('admin.ads') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-ad"></i> Manage Ads
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Admin Activities -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-history"></i> Recent Admin Activities</h5>
+                <a href="{{ url_for('admin.activity') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-list"></i> View All
+                </a>
+            </div>
+            <div class="card-body">
+                {% if recent_activities %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Action</th>
+                                    <th>Details</th>
+                                    <th>Time</th>
+                                    <th>IP</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for activity in recent_activities %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-info">{{ activity.action }}</span>
+                                    </td>
+                                    <td>{{ activity.details or '-' }}</td>
+                                    <td>
+                                        <small class="text-muted">{{ activity.timestamp }}</small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ activity.ip_address or '-' }}</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-history fa-3x mb-3"></i>
+                        <p>No recent activities</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-refresh dashboard every 30 seconds
+setTimeout(function() {
+    location.reload();
+}, 30000);
+</script>
+{% endblock %}

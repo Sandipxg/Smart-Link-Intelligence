@@ -162,7 +162,8 @@
                 </span>
               </td>
               <td>
-                {% if g.user.is_premium %}
+                {% set user_tier = g.user.membership_tier if g.user.membership_tier else 'free' %}
+                {% if user_tier == 'elite_pro' %}
                 <span class="badge bg-warning text-dark">
                   <i class="bi bi-crown-fill me-1"></i>Ad-Free
                 </span>
