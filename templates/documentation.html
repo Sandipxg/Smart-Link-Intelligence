@@ -1,0 +1,1215 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .doc-section {
+        margin-bottom: 4rem;
+        scroll-margin-top: 80px;
+    }
+
+    .doc-section h2 {
+        color: #2c3e50;
+        border-bottom: 3px solid #3498db;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .doc-section h3 {
+        color: #34495e;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .doc-section h4 {
+        color: #7f8c8d;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .screenshot {
+        width: 100%;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        margin: 1.5rem 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .screenshot:hover {
+        transform: scale(1.02);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .feature-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+
+    .badge-elite {
+        background: linear-gradient(135deg, #f39c12, #e67e22);
+        color: white;
+    }
+
+    .badge-elite-pro {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+    }
+
+    .info-box {
+        background: #e8f4f8;
+        border-left: 4px solid #3498db;
+        padding: 1rem 1.5rem;
+        margin: 1rem 0;
+        border-radius: 4px;
+    }
+
+    .warning-box {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 1rem 1.5rem;
+        margin: 1rem 0;
+        border-radius: 4px;
+    }
+
+    .success-box {
+        background: #d4edda;
+        border-left: 4px solid #28a745;
+        padding: 1rem 1.5rem;
+        margin: 1rem 0;
+        border-radius: 4px;
+    }
+
+    .feature-list {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .feature-list li {
+        padding: 0.5rem 0;
+        padding-left: 2rem;
+        position: relative;
+    }
+
+    .feature-list li:before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #28a745;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    .step-number {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        background: #3498db;
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 30px;
+        font-weight: bold;
+        margin-right: 0.5rem;
+    }
+
+    .sidebar {
+        position: sticky;
+        top: 80px;
+        max-height: calc(100vh - 100px);
+        overflow-y: auto;
+    }
+
+    .sidebar .list-group-item {
+        border: none;
+        border-left: 3px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .sidebar .list-group-item:hover {
+        background: #f8f9fa;
+        border-left-color: #3498db;
+    }
+
+    .sidebar .list-group-item.active {
+        background: #e3f2fd;
+        border-left-color: #3498db;
+        color: #2980b9;
+        font-weight: 600;
+    }
+
+    .table-comparison {
+        margin: 2rem 0;
+    }
+
+    .table-comparison th {
+        background: #f8f9fa;
+        font-weight: 600;
+    }
+
+    code {
+        background: #f4f4f4;
+        padding: 0.2rem 0.4rem;
+        border-radius: 3px;
+        font-size: 0.9em;
+        color: #e83e8c;
+    }
+
+    .toc-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3 mb-4">
+            <div class="sidebar">
+                <div class="list-group">
+                    <a href="#getting-started" class="list-group-item list-group-item-action active">
+                        <i class="bi bi-rocket-takeoff me-2"></i>Getting Started
+                    </a>
+                    <a href="#account-management" class="list-group-item list-group-item-action">
+                        <i class="bi bi-person-circle me-2"></i>Account Management
+                    </a>
+                    <a href="#dashboard" class="list-group-item list-group-item-action">
+                        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                    </a>
+                    <a href="#creating-links" class="list-group-item list-group-item-action">
+                        <i class="bi bi-link-45deg me-2"></i>Creating Links
+                    </a>
+                    <a href="#redirect-modes" class="list-group-item list-group-item-action">
+                        <i class="bi bi-signpost-split me-2"></i>Redirect Modes
+                    </a>
+                    <a href="#analytics" class="list-group-item list-group-item-action">
+                        <i class="bi bi-graph-up me-2"></i>Analytics & Insights
+                    </a>
+                    <a href="#behavior-rules" class="list-group-item list-group-item-action">
+                        <i class="bi bi-sliders me-2"></i>Behavior Rules
+                    </a>
+                    <a href="#custom-ads" class="list-group-item list-group-item-action">
+                        <i class="bi bi-megaphone me-2"></i>Custom Ads
+                    </a>
+                    <a href="#ddos-protection" class="list-group-item list-group-item-action">
+                        <i class="bi bi-shield-check me-2"></i>DDoS Protection
+                    </a>
+                    <a href="#membership" class="list-group-item list-group-item-action">
+                        <i class="bi bi-gem me-2"></i>Membership Tiers
+                    </a>
+                    <a href="#settings" class="list-group-item list-group-item-action">
+                        <i class="bi bi-gear me-2"></i>Settings
+                    </a>
+                    <a href="#visitor-experience" class="list-group-item list-group-item-action">
+                        <i class="bi bi-eye me-2"></i>Visitor Experience
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- Header -->
+            <div class="mb-5">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="bi bi-book text-primary me-3"></i>Complete Documentation
+                </h1>
+                <p class="lead text-muted">
+                    Everything you need to know about Smart Link Intelligence - from basic setup to advanced features.
+                </p>
+            </div>
+
+            <!-- Getting Started -->
+            <section id="getting-started" class="doc-section">
+                <h2><i class="bi bi-rocket-takeoff me-2"></i>Getting Started</h2>
+
+                <p class="lead">
+                    Welcome to <strong>Smart Link Intelligence</strong>, a powerful platform that transforms ordinary
+                    URLs into intelligent tracking links with advanced features like behavioral routing, password
+                    protection, custom advertising, and enterprise-grade DDoS protection.
+                </p>
+
+                <img src="{{ url_for('static', filename='screenshots/screenshot_landing.png') }}" alt="Landing Page"
+                    class="screenshot">
+
+                <h3>Key Platform Features</h3>
+                <ul class="feature-list">
+                    <li><strong>Behavior-Aware Routing:</strong> Redirect visitors to different URLs based on their
+                        engagement level</li>
+                    <li><strong>Advanced Analytics:</strong> Track every aspect of your link performance with detailed
+                        graphs and insights</li>
+                    <li><strong>DDoS Protection:</strong> Enterprise-grade security to protect your links from malicious
+                        traffic</li>
+                    <li><strong>AI-Powered Intelligence:</strong> Smart algorithms analyze visitor behavior patterns
+                    </li>
+                    <li><strong>Custom Advertising:</strong> Monetize your links with custom interstitial ads</li>
+                    <li><strong>Password Protection:</strong> Secure your links with password authentication</li>
+                </ul>
+            </section>
+
+            <!-- Account Management -->
+            <section id="account-management" class="doc-section">
+                <h2><i class="bi bi-person-circle me-2"></i>Account Management</h2>
+
+                <h3>Creating Your Account</h3>
+                <p>Getting started with Smart Link Intelligence is simple and straightforward.</p>
+
+                <img src="{{ url_for('static', filename='screenshots/screenshot_signup.png') }}" alt="Sign Up Page"
+                    class="screenshot">
+
+                <h4>Sign Up Process:</h4>
+
+                <div class="mb-3">
+                    <span class="step-number">1</span><strong>Username Selection</strong>
+                    <ul>
+                        <li>Choose a unique username (3-20 characters)</li>
+                        <li>Only letters, numbers, and underscores allowed</li>
+                        <li>Real-time availability checking ensures uniqueness</li>
+                    </ul>
+                </div>
+
+                <div class="mb-3">
+                    <span class="step-number">2</span><strong>Email Address</strong>
+                    <ul>
+                        <li>Provide a valid email address</li>
+                        <li>Used for account recovery and notifications</li>
+                        <li>Real-time validation ensures correct format</li>
+                    </ul>
+                </div>
+
+                <div class="mb-3">
+                    <span class="step-number">3</span><strong>Password Security</strong>
+                    <ul>
+                        <li>Minimum 8 characters required</li>
+                        <li>Must include: uppercase, lowercase, number, and special character</li>
+                        <li>Password strength indicator shows real-time feedback</li>
+                        <li>Visual indicators for each requirement</li>
+                    </ul>
+                </div>
+
+                <div class="mb-3">
+                    <span class="step-number">4</span><strong>Terms & Privacy</strong>
+                    <ul>
+                        <li>Review and accept Terms of Service</li>
+                        <li>Review and accept Privacy Policy</li>
+                    </ul>
+                </div>
+
+                <div class="mb-3">
+                    <span class="step-number">5</span><strong>Account Creation</strong>
+                    <ul>
+                        <li>Click "Create Account" to complete registration</li>
+                        <li>Automatic login after successful registration</li>
+                        <li>Redirected to dashboard immediately</li>
+                    </ul>
+                </div>
+
+                <h3 class="mt-5">Logging In</h3>
+                <img src="{{ url_for('static', filename='screenshots/screenshot_login.png') }}" alt="Login Page"
+                    class="screenshot">
+
+                <div class="info-box">
+                    <h5><i class="bi bi-info-circle me-2"></i>Login Features</h5>
+                    <ul class="mb-0">
+                        <li><strong>Flexible Authentication:</strong> Login with username or email</li>
+                        <li><strong>Password Visibility Toggle:</strong> Click eye icon to show/hide password</li>
+                        <li><strong>Remember Me:</strong> Stay logged in across sessions</li>
+                        <li><strong>Forgot Password:</strong> Easy recovery via email</li>
+                        <li><strong>Secure Sessions:</strong> Industry-standard security protocols</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Dashboard -->
+            <section id="dashboard" class="doc-section">
+                <h2><i class="bi bi-speedometer2 me-2"></i>Dashboard Overview</h2>
+                <p>Your dashboard is the command center for all your smart links and analytics.</p>
+
+                <img src="{{ url_for('static', filename='screenshots/screenshot_dashboard.png') }}" alt="Dashboard"
+                    class="screenshot">
+
+                <h3>Dashboard Components</h3>
+
+                <h4>1. Membership Status</h4>
+                <ul>
+                    <li><strong>Tier Badge:</strong> Displayed in top-right showing current plan (Free, Elite, Elite
+                        Pro)</li>
+                    <li><strong>Link Usage Tracker:</strong> Shows links created vs. plan limit (e.g., "3 / 10")</li>
+                    <li><strong>Expiration Notice:</strong> Free users see "Expires in 7 days" reminder</li>
+                    <li><strong>Upgrade Buttons:</strong> Quick access to upgrade membership</li>
+                </ul>
+
+                <h4>2. Create New Smart Link Section</h4>
+
+                <p><strong>Original URL Field:</strong></p>
+                <ul>
+                    <li>Enter the full destination URL you want to shorten and track</li>
+                    <li>Supports any valid HTTP/HTTPS URL</li>
+                    <li>Automatic validation ensures correct format</li>
+                </ul>
+
+                <p><strong>Custom Alias (Optional):</strong></p>
+                <ul>
+                    <li>Create a memorable short code for your link</li>
+                    <li>Leave blank for auto-generated random code</li>
+                    <li>Must be unique across the platform</li>
+                    <li>Example: <code>my-custom-link</code> creates <code>yourdomain.com/my-custom-link</code></li>
+                </ul>
+
+                <p><strong>Behavior Thresholds:</strong></p>
+                <ul>
+                    <li>Select from custom behavior rules or use defaults</li>
+                    <li>Determines when visitors are "Interested" or "Highly Engaged"</li>
+                    <li>Click "Manage Rules" to create custom patterns</li>
+                </ul>
+
+                <p><strong>Redirect Configuration:</strong></p>
+                <ul>
+                    <li>Choose how visitors are redirected</li>
+                    <li>Three modes: Standard, Progressive, Password Protected</li>
+                    <li>Elite features locked with 🔒 icon for Free users</li>
+                </ul>
+            </section>
+
+            <!-- Creating Links -->
+            <section id="creating-links" class="doc-section">
+                <h2><i class="bi bi-link-45deg me-2"></i>Creating Smart Links</h2>
+                <p>Smart Link Intelligence offers three powerful redirect modes to suit different use cases.</p>
+            </section>
+
+            <!-- Redirect Modes -->
+            <section id="redirect-modes" class="doc-section">
+                <h2><i class="bi bi-signpost-split me-2"></i>Redirect Modes Explained</h2>
+
+                <img src="{{ url_for('static', filename='screenshots/screenshot_redirect_modes.png') }}"
+                    alt="Redirect Modes" class="screenshot">
+
+                <h3>1. Standard Redirect <span class="badge bg-success">All Users</span></h3>
+
+                <div class="success-box">
+                    <h5>What It Does:</h5>
+                    <p class="mb-0">Direct, immediate redirect to your destination URL with no intermediate pages or
+                        delays. Perfect for simple link shortening and tracking.</p>
+                </div>
+
+                <p><strong>Best For:</strong></p>
+                <ul>
+                    <li>General link sharing</li>
+                    <li>Social media posts</li>
+                    <li>Email campaigns</li>
+                    <li>Basic click tracking</li>
+                </ul>
+
+                <p><strong>How It Works:</strong></p>
+                <ol>
+                    <li>Visitor clicks your short link</li>
+                    <li>System logs the visit (IP, device, browser, location, etc.)</li>
+                    <li>Visitor immediately redirected to destination URL</li>
+                    <li>Analytics updated in real-time</li>
+                </ol>
+
+                <hr class="my-5">
+
+                <h3>2. Progressive Redirect <span class="feature-badge badge-elite">Elite & Elite Pro</span></h3>
+
+                <img src="{{ url_for('static', filename='screenshots/screenshot_progressive.png') }}"
+                    alt="Progressive Redirect" class="screenshot">
+
+                <div class="info-box">
+                    <h5>What It Does:</h5>
+                    <p class="mb-0">Intelligent routing system that sends visitors to different URLs based on their
+                        engagement level and behavior patterns.</p>
+                </div>
+
+                <h4>Configuration Fields:</h4>
+
+                <p><strong>Returning Visitor URL:</strong></p>
+                <ul>
+                    <li>URL for visitors who return within configured time window</li>
+                    <li>Example: Send returning visitors to special offer page</li>
+                    <li>Triggered when user visits again within "Returning Window"</li>
+                </ul>
+
+                <p><strong>CTA URL (Highly Engaged):</strong></p>
+                <ul>
+                    <li>URL for highly engaged users who click multiple times</li>
+                    <li>Example: Send engaged users to premium product or sign-up page</li>
+                    <li>Triggered when user clicks multiple times (based on behavior rule)</li>
+                </ul>
+
+                <h4>Behavior Classification:</h4>
+
+                <div class="row g-3 my-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-primary">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">🙂 Curious</h5>
+                                <p class="card-text small">First-time visitors → Primary URL</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-warning">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">🔄 Interested</h5>
+                                <p class="card-text small">Returning visitors (2+ visits in 48h) → Returning URL</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-success">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">🔥 Highly Engaged</h5>
+                                <p class="card-text small">Multiple clicks (3+) → CTA URL</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <h5><i class="bi bi-lightbulb me-2"></i>Real-World Example:</h5>
+                    <p><strong>SaaS Product Promotion:</strong></p>
+                    <ul class="mb-0">
+                        <li><strong>Primary URL:</strong> Product features page</li>
+                        <li><strong>Returning URL:</strong> Pricing page for interested users</li>
+                        <li><strong>CTA URL:</strong> Sign-up with special discount</li>
+                    </ul>
+                </div>
+
+                <p><strong>Best For:</strong></p>
+                <ul>
+                    <li>Sales funnels</li>
+                    <li>Lead nurturing campaigns</li>
+                    <li>Content marketing with progressive disclosure</li>
+                    <li>A/B testing conversion paths</li>
+                </ul>
+
+                <hr class="my-5">
+
+                <h3>3. Password Protected <span class="feature-badge badge-elite">Elite & Elite Pro</span></h3>
+
+                <img src="{{ url_for('static', filename='screenshots/screenshot_password.png') }}"
+                    alt="Password Protected" class="screenshot">
+
+                <div class="info-box">
+                    <h5>What It Does:</h5>
+                    <p class="mb-0">Adds authentication layer requiring visitors to enter password before accessing
+                        destination URL.</p>
+                </div>
+
+                <h4>Configuration:</h4>
+                <p><strong>Access Password Field:</strong></p>
+                <ul>
+                    <li>Set password that visitors must enter</li>
+                    <li>Password securely hashed and stored</li>
+                    <li>No character limits, but memorable passwords work best</li>
+                    <li><strong>Important:</strong> Remember this password - you'll need to share it</li>
+                </ul>
+
+                <h4>Security Features:</h4>
+                <ul>
+                    <li>Passwords hashed using industry-standard bcrypt encryption</li>
+                    <li>Password required every time link is accessed</li>
+                    <li>Failed attempts logged for security monitoring</li>
+                    <li>No password recovery - must remember or reset</li>
+                </ul>
+
+                <p><strong>Best For:</strong></p>
+                <ul>
+                    <li>Private content sharing</li>
+                    <li>Exclusive offers for specific audiences</li>
+                    <li>Internal team resources</li>
+                    <li>Beta testing links</li>
+                    <li>VIP access to events or content</li>
+                    <li>Client-specific deliverables</li>
+                </ul>
+            </section>
+
+            <!-- Analytics -->
+            <section id="analytics" class="doc-section">
+                <h2><i class="bi bi-graph-up me-2"></i>Analytics & Insights</h2>
+                <p>Comprehensive analytics to help you understand your audience and optimize campaigns.</p>
+
+                <h3>Analytics Overview Page</h3>
+                <img src="{{ url_for('static', filename='screenshots/screenshot_analytics_overview.png') }}"
+                    alt="Analytics Overview" class="screenshot">
+
+                <h4>Overview Dashboard Components:</h4>
+
+                <p><strong>Link Status Overview:</strong></p>
+                <ul>
+                    <li><strong>Active Links</strong> (Green): Currently receiving traffic</li>
+                    <li><strong>High Interest Links</strong> (Blue): Above-average engagement</li>
+                    <li><strong>Decaying Links</strong> (Yellow): Declining traffic</li>
+                    <li><strong>Inactive Links</strong> (Red): No recent traffic</li>
+                </ul>
+
+                <p><strong>Performance Metrics:</strong></p>
+                <ul>
+                    <li><strong>Total Links:</strong> Count of all created links</li>
+                    <li><strong>Total Clicks:</strong> Aggregate clicks across all links</li>
+                    <li><strong>Avg Clicks/Link:</strong> Mean performance metric</li>
+                </ul>
+
+                <h3 class="mt-5">Individual Link Analytics</h3>
+
+                <h4>Analytics Header</h4>
+                <img src="{{ url_for('static', filename='screenshots/screenshot_analytics_header.png') }}"
+                    alt="Analytics Header" class="screenshot">
+
+                <p><strong>Header Information:</strong></p>
+                <ul>
+                    <li><strong>Short Code:</strong> Link's unique identifier</li>
+                    <li><strong>Original URL:</strong> Destination URL (clickable)</li>
+                    <li><strong>Created Date:</strong> Timestamp of creation</li>
+                    <li><strong>Status Badge:</strong> Current state</li>
+                </ul>
+
+                <p><strong>Export Options:</strong></p>
+                <ul>
+                    <li><strong>Download CSV:</strong> Export raw visitor data</li>
+                    <li><strong>Copy CSV Link:</strong> Shareable export link</li>
+                    <li><strong>QR Code:</strong> Scannable code for mobile</li>
+                </ul>
+
+                <p><strong>Trust Score (0-100):</strong></p>
+                <ul>
+                    <li><strong>70-100</strong> (Green): High quality engagement</li>
+                    <li><strong>40-69</strong> (Yellow): Moderate quality</li>
+                    <li><strong>0-39</strong> (Red): Low quality or suspicious</li>
+                </ul>
+
+                <h4 class="mt-4">Advanced Analytics Graphs</h4>
+                <img src="{{ url_for('static', filename='screenshots/screenshot_analytics_graphs1.png') }}"
+                    alt="Analytics Graphs 1" class="screenshot">
+
+                <div class="row g-3 my-3">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">📉 Attention Decay Analysis</h6>
+                                <p class="card-text small">Tracks how engagement changes over time to identify when
+                                    interest drops.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">⏰ Click Frequency Patterns</h6>
+                                <p class="card-text small">Identifies peak activity times to optimize posting schedules.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">🎯 User Intent Classification</h6>
+                                <p class="card-text small">Behavioral segmentation: Curious (57%), Interested (14%),
+                                    Engaged (29%).</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">🛡️ Traffic Quality Assessment</h6>
+                                <p class="card-text small">Distinguishes human vs. automated traffic for fraud
+                                    detection.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <img src="{{ url_for('static', filename='screenshots/screenshot_analytics_graphs2.png') }}"
+                    alt="Analytics Graphs 2" class="screenshot">
+
+                <div class="row g-3 my-3">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">📈 Engagement Trends</h6>
+                                <p class="card-text small">Track engagement growth over time to predict future
+                                    performance.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">📱 Users by Device</h6>
+                                <p class="card-text small">Device distribution (Desktop 71%, Mobile 57%) for
+                                    optimization.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">🌍 Users by Continent</h6>
+                                <p class="card-text small">Geographic distribution to understand global reach.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">🌐 Users by ISP</h6>
+                                <p class="card-text small">Internet Service Provider analysis for network patterns.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h4 class="mt-4">Detailed Visitor Log</h4>
+                <img src="{{ url_for('static', filename='screenshots/screenshot_visitor_log.png') }}" alt="Visitor Log"
+                    class="screenshot">
+
+                <p><strong>Visitor Log Columns:</strong></p>
+                <ul>
+                    <li><strong>Srno:</strong> Sequential visit number</li>
+                    <li><strong>Time:</strong> Exact timestamp (YYYY-MM-DD HH:MM:SS)</li>
+                    <li><strong>IP Address:</strong> Visitor's IP (hashed for privacy)</li>
+                    <li><strong>Country & City:</strong> Geographic location</li>
+                    <li><strong>Browser:</strong> Browser name and version</li>
+                    <li><strong>ISP:</strong> Internet Service Provider</li>
+                    <li><strong>Coordinate:</strong> Latitude/longitude (clickable map)</li>
+                </ul>
+
+                <div class="info-box">
+                    <h5><i class="bi bi-shield-check me-2"></i>Privacy & Security</h5>
+                    <ul class="mb-0">
+                        <li>IP addresses hashed for user privacy</li>
+                        <li>Data retention follows plan's analytics period</li>
+                        <li>GDPR and privacy-compliant data handling</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Behavior Rules -->
+            <section id="behavior-rules" class="doc-section">
+                <h2><i class="bi bi-sliders me-2"></i>Behavior Rules</h2>
+                <p>Customize how visitors are classified based on engagement patterns.</p>
+
+                <img src="{{ url_for('static', filename='screenshots/screenshot_behavior_rules.png') }}"
+                    alt="Behavior Rules" class="screenshot">
+
+                <h3>Understanding Behavior Rules</h3>
+                <p>Behavior Rules define thresholds that determine when visitors transition from "Curious" to
+                    "Interested" to "Highly Engaged."</p>
+
+                <div class="row g-3 my-4">
+                    <div class="col-md-4">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <div class="display-4">🙂</div>
+                                <h5 class="card-title">Curious</h5>
+                                <p class="card-text small">First-time visitors → Primary URL</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <div class="display-4">🔄</div>
+                                <h5 class="card-title">Interested</h5>
+                                <p class="card-text small">Return visitors → Returning URL<br>2+ visits in 48h (default)
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <div class="display-4">🔥</div>
+                                <h5 class="card-title">Highly Engaged</h5>
+                                <p class="card-text small">Multiple clicks → CTA URL<br>3+ clicks (default)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="mt-5">Creating Custom Rules</h3>
+                <img src="{{ url_for('static', filename='screenshots/screenshot_create_rule.png') }}" alt="Create Rule"
+                    class="screenshot">
+
+                <h4>Rule Configuration:</h4>
+
+                <p><strong>1. Rule Name:</strong></p>
+                <ul>
+                    <li>Descriptive name for your rule</li>
+                    <li>Examples: "E-commerce Rule", "Blog Rule", "SaaS Funnel"</li>
+                </ul>
+
+                <p><strong>2. Returning Window (Hours):</strong></p>
+                <ul>
+                    <li>Time window to consider visitor as "returning"</li>
+                    <li>Short (12-24h): Fast-paced campaigns, flash sales</li>
+                    <li>Medium (48-72h): Standard marketing campaigns</li>
+                    <li>Long (168h/1 week): Long-term nurturing, education</li>
+                </ul>
+
+                <p><strong>3. Interested Threshold (Visits):</strong></p>
+                <ul>
+                    <li>Number of visits needed to be "Interested"</li>
+                    <li>Low (1-2): Quick qualification, impulse products</li>
+                    <li>High (3-5): Complex products, high-consideration</li>
+                </ul>
+
+                <p><strong>4. Engaged Threshold (Clicks):</strong></p>
+                <ul>
+                    <li>Total clicks needed to be "Highly Engaged"</li>
+                    <li>Low (2-3): Quick conversion paths</li>
+                    <li>High (5-10): Complex sales cycles, enterprise</li>
+                </ul>
+
+                <div class="warning-box">
+                    <h5><i class="bi bi-lightbulb me-2"></i>Example Rules:</h5>
+                    <p><strong>E-commerce Flash Sale:</strong> 12h window, 1 visit, 2 clicks</p>
+                    <p><strong>SaaS Free Trial:</strong> 72h window, 2 visits, 4 clicks</p>
+                    <p class="mb-0"><strong>Educational Content:</strong> 168h window, 3 visits, 5 clicks</p>
+                </div>
+            </section>
+
+            <!-- Custom Ads -->
+            <section id="custom-ads" class="doc-section">
+                <h2><i class="bi bi-megaphone me-2"></i>Custom Ads <span class="feature-badge badge-elite-pro">Elite
+                        Pro</span></h2>
+
+                <div class="warning-box">
+                    <h5><i class="bi bi-star-fill me-2"></i>Elite Pro Exclusive</h5>
+                    <p class="mb-0">Custom Ads allow you to monetize your links or promote your own products with custom
+                        interstitial advertisements.</p>
+                </div>
+
+                <h3>Creating Custom Ads</h3>
+                <img src="{{ url_for('static', filename='screenshots/screenshot_create_ad.png') }}" alt="Create Ad"
+                    class="screenshot">
+
+                <h4>Ad Creation Options:</h4>
+
+                <p><strong>Ad Type:</strong></p>
+                <ul>
+                    <li><strong>Custom Design:</strong> Create with custom text and styling</li>
+                    <li><strong>Upload Image:</strong> Use pre-designed ad graphics</li>
+                </ul>
+
+                <p><strong>Ad Content (Custom Design):</strong></p>
+                <ul>
+                    <li><strong>Ad Title:</strong> Main headline (max 80 characters)</li>
+                    <li><strong>Call-to-Action:</strong> Button text (max 20 characters)</li>
+                    <li><strong>Description:</strong> Detailed copy (max 140 characters)</li>
+                    <li><strong>Target URL:</strong> Where visitors go when clicking</li>
+                </ul>
+
+                <p><strong>Customize Appearance:</strong></p>
+                <ul>
+                    <li><strong>Background Color:</strong> Ad background (hex color picker)</li>
+                    <li><strong>Text Color:</strong> Text elements color</li>
+                    <li><strong>Icon:</strong> Visual icon (Rocket, Gift, Star, etc.)</li>
+                </ul>
+
+                <p><strong>Ad Placement:</strong></p>
+                <ul>
+                    <li><strong>Position 1 - Large (Top):</strong> Most prominent, full-width</li>
+                    <li><strong>Positions 2-4:</strong> Secondary placements</li>
+                </ul>
+
+                <h3 class="mt-5">Managing Your Ads</h3>
+                <img src="{{ url_for('static', filename='screenshots/screenshot_ads_list.png') }}" alt="Ads List"
+                    class="screenshot">
+
+                <p><strong>Ad Management Features:</strong></p>
+                <ul>
+                    <li><strong>Preview:</strong> Visual thumbnail of your ad</li>
+                    <li><strong>Status Toggle:</strong> Active/Inactive control</li>
+                    <li><strong>Edit:</strong> Modify ad content and settings</li>
+                    <li><strong>Delete:</strong> Permanently remove ads</li>
+                    <li><strong>Analytics:</strong> Track ad performance</li>
+                </ul>
+            </section>
+
+            <!-- DDoS Protection -->
+            <section id="ddos-protection" class="doc-section">
+                <h2><i class="bi bi-shield-check me-2"></i>DDoS Protection <span
+                        class="feature-badge badge-elite-pro">Elite Pro</span></h2>
+
+                <div class="warning-box">
+                    <h5><i class="bi bi-shield-fill me-2"></i>Elite Pro Exclusive</h5>
+                    <p class="mb-0">Enterprise-grade security to protect your links from malicious traffic and bot
+                        attacks.</p>
+                </div>
+
+                <img src="{{ url_for('static', filename='screenshots/screenshot_ddos_dashboard.png') }}"
+                    alt="DDoS Dashboard" class="screenshot">
+
+                <h3>What Is DDoS Protection?</h3>
+                <p>Automatically detects and mitigates malicious traffic patterns that could:</p>
+                <ul>
+                    <li>Skew analytics with fake clicks</li>
+                    <li>Overwhelm destination servers</li>
+                    <li>Waste bandwidth and resources</li>
+                    <li>Compromise data integrity</li>
+                </ul>
+
+                <h4>Dashboard Metrics:</h4>
+                <ul>
+                    <li><strong>Protected Links:</strong> Links with active protection</li>
+                    <li><strong>Under Protection:</strong> Links in heightened security mode</li>
+                    <li><strong>Disabled Links:</strong> Temporarily disabled due to attacks</li>
+                    <li><strong>Total Events:</strong> Cumulative security incidents</li>
+                </ul>
+
+                <h3 class="mt-4">Protection Levels</h3>
+                <img src="{{ url_for('static', filename='screenshots/screenshot_ddos_events.png') }}" alt="DDoS Events"
+                    class="screenshot">
+
+                <table class="table table-bordered table-comparison">
+                    <thead>
+                        <tr>
+                            <th>Level</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                            <th>Impact</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge bg-success">Level 0</span></td>
+                            <td>Normal Operation</td>
+                            <td>No threats detected</td>
+                            <td>No visitor impact</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-info">Level 1-2</span></td>
+                            <td>Monitoring Increased</td>
+                            <td>Enhanced analysis, rate limiting</td>
+                            <td>Minimal impact</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-warning">Level 3</span></td>
+                            <td>Captcha Required</td>
+                            <td>Visitors must complete CAPTCHA</td>
+                            <td>Bots blocked</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-danger">Level 4</span></td>
+                            <td>Temporary Disable</td>
+                            <td>Link disabled for 1 hour</td>
+                            <td>Auto-recovery</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-dark">Level 5</span></td>
+                            <td>Manual Recovery</td>
+                            <td>Link disabled indefinitely</td>
+                            <td>Requires manual review</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>How It Works:</h4>
+                <ul>
+                    <li><strong>Rate Limiting:</strong> Monitors clicks per IP per time period</li>
+                    <li><strong>Burst Detection:</strong> Identifies sudden traffic spikes</li>
+                    <li><strong>Pattern Analysis:</strong> Detects bot-like behaviors</li>
+                    <li><strong>IP Reputation:</strong> Cross-references known malicious IPs</li>
+                    <li><strong>Behavioral Analysis:</strong> Identifies non-human patterns</li>
+                </ul>
+            </section>
+
+            <!-- Membership -->
+            <section id="membership" class="doc-section">
+                <h2><i class="bi bi-gem me-2"></i>Membership Tiers</h2>
+                <p>Choose the plan that fits your needs and budget.</p>
+
+                <img src="{{ url_for('static', filename='screenshots/screenshot_upgrade.png') }}" alt="Membership Tiers"
+                    class="screenshot">
+
+                <table class="table table-bordered table-hover table-comparison">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Feature</th>
+                            <th>Free ($0/mo)</th>
+                            <th>Elite ($9/mo)</th>
+                            <th>Elite Pro ($19/mo)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Smart Links</strong></td>
+                            <td>10</td>
+                            <td>35</td>
+                            <td><strong>Unlimited</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Link Validity</strong></td>
+                            <td>7 Days</td>
+                            <td>Lifetime</td>
+                            <td>Lifetime</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Advanced Analytics</strong></td>
+                            <td><i class="bi bi-check-circle text-success"></i></td>
+                            <td><i class="bi bi-check-circle text-success"></i></td>
+                            <td><i class="bi bi-check-circle text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Progressive Redirects</strong></td>
+                            <td><i class="bi bi-x-circle text-danger"></i></td>
+                            <td><i class="bi bi-check-circle text-success"></i></td>
+                            <td><i class="bi bi-check-circle text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Password Protection</strong></td>
+                            <td><i class="bi bi-x-circle text-danger"></i></td>
+                            <td><i class="bi bi-check-circle text-success"></i></td>
+                            <td><i class="bi bi-check-circle text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Custom Ads</strong></td>
+                            <td><i class="bi bi-x-circle text-danger"></i></td>
+                            <td><i class="bi bi-x-circle text-danger"></i></td>
+                            <td><i class="bi bi-check-circle text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td><strong>DDoS Protection</strong></td>
+                            <td><i class="bi bi-x-circle text-danger"></i></td>
+                            <td><i class="bi bi-x-circle text-danger"></i></td>
+                            <td><i class="bi bi-check-circle text-success"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box">
+                    <h5><i class="bi bi-info-circle me-2"></i>Standard Features</h5>
+                    <p class="mb-0">All plans include: QR code generation, click tracking, basic geographic data, link
+                        management dashboard, and email support.</p>
+                </div>
+            </section>
+
+            <!-- Settings -->
+            <section id="settings" class="doc-section">
+                <h2><i class="bi bi-gear me-2"></i>Account Settings</h2>
+                <p>Manage your account preferences, security, and application settings.</p>
+
+                <img src="{{ url_for('static', filename='screenshots/screenshot_settings.png') }}" alt="Settings"
+                    class="screenshot">
+
+                <h3>Account Information</h3>
+                <ul>
+                    <li><strong>Username:</strong> Permanent identifier (cannot be changed)</li>
+                    <li><strong>Email:</strong> Used for notifications and recovery</li>
+                </ul>
+
+                <h3>Change Password</h3>
+                <ul>
+                    <li>Enter current password to authorize change</li>
+                    <li>New password must meet security requirements</li>
+                    <li>Leave blank to keep current password</li>
+                </ul>
+
+                <h3>Application Preferences</h3>
+                <ul>
+                    <li><strong>Default Link Behavior:</strong> Standard, Progressive, or Protected</li>
+                    <li><strong>Analytics Retention:</strong> 30, 60, 90, 180 days, or Forever</li>
+                    <li><strong>Email Notifications:</strong> Toggle on/off</li>
+                    <li><strong>Auto-generate Codes:</strong> Automatic short code creation</li>
+                </ul>
+
+                <h3>Quick Actions</h3>
+                <ul>
+                    <li><strong>Upgrade to Elite:</strong> Access premium features</li>
+                    <li><strong>Create Ad:</strong> Quick ad creation (Elite Pro)</li>
+                    <li><strong>Delete Account:</strong> Permanently remove account</li>
+                </ul>
+            </section>
+
+            <!-- Visitor Experience -->
+            <section id="visitor-experience" class="doc-section">
+                <h2><i class="bi bi-eye me-2"></i>Visitor Experience</h2>
+                <p>Understanding what your visitors see helps optimize your links and campaigns.</p>
+
+                <h3>Password Protected Links</h3>
+                <img src="{{ url_for('static', filename='screenshots/screenshot_password_visitor.png') }}"
+                    alt="Password Visitor View" class="screenshot">
+
+                <p><strong>What Visitors See:</strong></p>
+                <ul>
+                    <li>🔒 Lock icon and "Password Required" heading</li>
+                    <li>Protected link identifier</li>
+                    <li>Security notice about repeated password requirement</li>
+                    <li>Password entry field with visibility toggle</li>
+                    <li>"Access Link" button to submit password</li>
+                    <li>"Secured by Smart Link Intelligence" footer</li>
+                </ul>
+
+                <h3 class="mt-5">Custom Interstitial Ads</h3>
+                <img src="{{ url_for('static', filename='screenshots/screenshot_ad_visitor.png') }}"
+                    alt="Ad Visitor View" class="screenshot">
+
+                <p><strong>Interstitial Ad Experience:</strong></p>
+                <ul>
+                    <li><strong>Skip Option:</strong> "→ Redirect Me" button (may have countdown)</li>
+                    <li><strong>Ad Display:</strong> Large, prominent ad card with custom styling</li>
+                    <li><strong>Platform Promotion:</strong> "Want your ads here?" banner</li>
+                    <li>Clean, professional, mobile-responsive design</li>
+                    <li>Fast loading (< 1 second)</li>
+                    <li>Non-intrusive with skip available</li>
+                </ul>
+            </section>
+
+            <!-- Best Practices -->
+            <section id="best-practices" class="doc-section">
+                <h2><i class="bi bi-lightbulb me-2"></i>Best Practices & Tips</h2>
+
+                <h3>Creating Effective Links</h3>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">✅ Do</h5>
+                                <ul class="mb-0">
+                                    <li>Use memorable, relevant aliases</li>
+                                    <li>Monitor analytics regularly</li>
+                                    <li>Test different behavior thresholds</li>
+                                    <li>Optimize for your audience</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">❌ Don't</h5>
+                                <ul class="mb-0">
+                                    <li>Use random, unmemorable codes</li>
+                                    <li>Ignore trust score warnings</li>
+                                    <li>Set unrealistic behavior thresholds</li>
+                                    <li>Neglect mobile optimization</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="mt-4">Security Best Practices</h3>
+                <ul>
+                    <li>Use strong, unique passwords for your account</li>
+                    <li>Enable DDoS Protection for high-traffic links (Elite Pro)</li>
+                    <li>Monitor security events regularly</li>
+                    <li>Use Password Protection for sensitive content</li>
+                    <li>Review account activity periodically</li>
+                </ul>
+
+                <h3 class="mt-4">Maximizing ROI</h3>
+                <ul>
+                    <li>Use Progressive Redirects for sales funnels</li>
+                    <li>Monetize traffic with Custom Ads (Elite Pro)</li>
+                    <li>Analyze geographic data for targeting</li>
+                    <li>Track click-through rates and optimize</li>
+                    <li>Test different behavior rules for conversion</li>
+                </ul>
+            </section>
+
+            <!-- Support -->
+            <section id="support" class="doc-section">
+                <h2><i class="bi bi-question-circle me-2"></i>Support & Resources</h2>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <i class="bi bi-book display-4 text-primary"></i>
+                                <h5 class="card-title mt-3">Documentation</h5>
+                                <p class="card-text">Comprehensive guides and tutorials</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <i class="bi bi-envelope display-4 text-primary"></i>
+                                <h5 class="card-title mt-3">Email Support</h5>
+                                <p class="card-text">24-48 hour response time</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <i class="bi bi-people display-4 text-primary"></i>
+                                <h5 class="card-title mt-3">Community</h5>
+                                <p class="card-text">User forum and feature requests</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="success-box mt-4">
+                    <h5><i class="bi bi-check-circle me-2"></i>Need Help?</h5>
+                    <p class="mb-0">Contact our support team at <strong>support@smartlinkintelligence.com</strong> for
+                        assistance.</p>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <div class="text-center mt-5 pt-5 border-top">
+                <p class="text-muted">
+                    <strong>Smart Link Intelligence</strong> - Transform your URLs into intelligent experiences
+                </p>
+                <p class="text-muted small">
+                    Documentation Version 1.0 | Last Updated: January 2026
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Smooth scroll for sidebar links
+    document.querySelectorAll('.sidebar a').forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            // Remove active class from all links
+            document.querySelectorAll('.sidebar a').forEach(l => l.classList.remove('active'));
+
+            // Add active class to clicked link
+            this.classList.add('active');
+
+            // Smooth scroll to section
+            const targetId = this.getAttribute('href');
+            const targetSection = document.querySelector(targetId);
+            if (targetSection) {
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
+    // Update active link on scroll
+    window.addEventListener('scroll', function () {
+        const sections = document.querySelectorAll('.doc-section');
+        const scrollPos = window.scrollY + 100;
+
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.offsetHeight;
+            const sectionId = section.getAttribute('id');
+
+            if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
+                document.querySelectorAll('.sidebar a').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${sectionId}`) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}
