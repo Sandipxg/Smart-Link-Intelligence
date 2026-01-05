@@ -12,14 +12,15 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-uppercase mb-1">Total Users</div>
-                        <div class="h5 mb-0 font-weight-bold">{{ stats.total_users }}</div>
+                        <div class="h5 mb-0 font-weight-bold" data-stat="total_users">{{ stats.total_users }}</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-users fa-2x"></i>
                     </div>
                 </div>
                 <div class="mt-2">
-                    <small><i class="fas fa-plus"></i> {{ stats.recent_users }} new this week</small>
+                    <small><i class="fas fa-plus"></i> <span data-stat="recent_users">{{ stats.recent_users }}</span>
+                        new this week</small>
                 </div>
             </div>
         </div>
@@ -31,7 +32,8 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-uppercase mb-1">Total Revenue</div>
-                        <div class="h5 mb-0 font-weight-bold">${{ "%.2f"|format(stats.total_revenue) }}</div>
+                        <div class="h5 mb-0 font-weight-bold" data-stat="total_revenue">${{
+                            "%.2f"|format(stats.total_revenue) }}</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-dollar-sign fa-2x"></i>
@@ -50,14 +52,15 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-uppercase mb-1">Smart Links</div>
-                        <div class="h5 mb-0 font-weight-bold">{{ stats.total_links }}</div>
+                        <div class="h5 mb-0 font-weight-bold" data-stat="total_links">{{ stats.total_links }}</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-link fa-2x"></i>
                     </div>
                 </div>
                 <div class="mt-2">
-                    <small><i class="fas fa-mouse-pointer"></i> {{ stats.total_visits }} total clicks</small>
+                    <small><i class="fas fa-mouse-pointer"></i> <span data-stat="total_visits">{{ stats.total_visits
+                            }}</span> total clicks</small>
                 </div>
             </div>
         </div>
@@ -69,14 +72,15 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-uppercase mb-1">Active Ads</div>
-                        <div class="h5 mb-0 font-weight-bold">{{ stats.active_ads }}</div>
+                        <div class="h5 mb-0 font-weight-bold" data-stat="active_ads">{{ stats.active_ads }}</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-ad fa-2x"></i>
                     </div>
                 </div>
                 <div class="mt-2">
-                    <small><i class="fas fa-chart-pie"></i> {{ stats.total_ads }} total ads</small>
+                    <small><i class="fas fa-chart-pie"></i> <span data-stat="total_ads">{{ stats.total_ads }}</span>
+                        total ads</small>
                 </div>
             </div>
         </div>
@@ -95,46 +99,46 @@
             </div>
             <div class="card-body">
                 {% if top_links %}
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Code</th>
-                                    <th>Owner</th>
-                                    <th>URL</th>
-                                    <th>Clicks</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for link in top_links %}
-                                <tr>
-                                    <td>
-                                        <code class="bg-light px-2 py-1 rounded">{{ link.code }}</code>
-                                    </td>
-                                    <td>
-                                        <a href="{{ url_for('admin.user_detail', user_id=link.user_id) }}" 
-                                           class="text-decoration-none">
-                                            {{ link.username }}
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <span class="text-truncate d-inline-block" style="max-width: 200px;">
-                                            {{ link.primary_url }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-primary">{{ link.clicks }}</span>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Owner</th>
+                                <th>URL</th>
+                                <th>Clicks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for link in top_links %}
+                            <tr>
+                                <td>
+                                    <code class="bg-light px-2 py-1 rounded">{{ link.code }}</code>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('admin.user_detail', user_id=link.user_id) }}"
+                                        class="text-decoration-none">
+                                        {{ link.username }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="text-truncate d-inline-block" style="max-width: 200px;">
+                                        {{ link.primary_url }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">{{ link.clicks }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                    <div class="text-center text-muted py-4">
-                        <i class="fas fa-chart-line fa-3x mb-3"></i>
-                        <p>No link data available yet</p>
-                    </div>
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-chart-line fa-3x mb-3"></i>
+                    <p>No link data available yet</p>
+                </div>
                 {% endif %}
             </div>
         </div>
@@ -180,39 +184,39 @@
             </div>
             <div class="card-body">
                 {% if recent_activities %}
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Action</th>
-                                    <th>Details</th>
-                                    <th>Time</th>
-                                    <th>IP</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for activity in recent_activities %}
-                                <tr>
-                                    <td>
-                                        <span class="badge bg-info">{{ activity.action }}</span>
-                                    </td>
-                                    <td>{{ activity.details or '-' }}</td>
-                                    <td>
-                                        <small class="text-muted">{{ activity.timestamp }}</small>
-                                    </td>
-                                    <td>
-                                        <small class="text-muted">{{ activity.ip_address or '-' }}</small>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>Details</th>
+                                <th>Time</th>
+                                <th>IP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for activity in recent_activities %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-info">{{ activity.action }}</span>
+                                </td>
+                                <td>{{ activity.details or '-' }}</td>
+                                <td>
+                                    <small class="text-muted">{{ activity.timestamp }}</small>
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ activity.ip_address or '-' }}</small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                    <div class="text-center text-muted py-4">
-                        <i class="fas fa-history fa-3x mb-3"></i>
-                        <p>No recent activities</p>
-                    </div>
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-history fa-3x mb-3"></i>
+                    <p>No recent activities</p>
+                </div>
                 {% endif %}
             </div>
         </div>
@@ -222,9 +226,110 @@
 
 {% block scripts %}
 <script>
-// Auto-refresh dashboard every 30 seconds
-setTimeout(function() {
-    location.reload();
-}, 30000);
+    // Real-time dashboard updates using AJAX polling
+    let updateInterval;
+    let isUpdating = false;
+
+    function updateLiveStats() {
+        if (isUpdating) return; // Prevent concurrent updates
+        isUpdating = true;
+
+        fetch('/admin/api/stats/live')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const stats = data.stats;
+
+                    // Update stat cards with smooth animation
+                    updateStatCard('total_users', stats.total_users);
+                    updateStatCard('total_revenue', '$' + stats.total_revenue.toFixed(2));
+                    updateStatCard('total_links', stats.total_links);
+                    updateStatCard('active_ads', stats.active_ads);
+                    updateStatCard('recent_users', stats.recent_users);
+                    updateStatCard('total_visits', stats.total_visits);
+                    updateStatCard('total_ads', stats.total_ads);
+
+                    // Update last refresh time
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString();
+                    updateLastRefresh(timeStr);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating stats:', error);
+            })
+            .finally(() => {
+                isUpdating = false;
+            });
+    }
+
+    function updateStatCard(id, value) {
+        const elements = document.querySelectorAll(`[data-stat="${id}"]`);
+        elements.forEach(element => {
+            if (element.textContent !== value.toString()) {
+                // Add pulse animation on change
+                element.classList.add('stat-updated');
+                element.textContent = value;
+                setTimeout(() => {
+                    element.classList.remove('stat-updated');
+                }, 1000);
+            }
+        });
+    }
+
+    function updateLastRefresh(timeStr) {
+        let refreshElement = document.getElementById('last-refresh');
+        if (!refreshElement) {
+            // Create refresh indicator if it doesn't exist
+            const container = document.querySelector('.container-fluid');
+            if (container) {
+                refreshElement = document.createElement('div');
+                refreshElement.id = 'last-refresh';
+                refreshElement.className = 'text-muted small text-end mt-2';
+                refreshElement.innerHTML = '<i class="fas fa-sync-alt"></i> Last updated: <span id="refresh-time"></span>';
+                container.insertBefore(refreshElement, container.firstChild);
+            }
+        }
+        const timeElement = document.getElementById('refresh-time');
+        if (timeElement) {
+            timeElement.textContent = timeStr;
+        }
+    }
+
+    // Start polling every 5 seconds
+    updateInterval = setInterval(updateLiveStats, 5000);
+
+    // Initial update after 2 seconds
+    setTimeout(updateLiveStats, 2000);
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        if (updateInterval) {
+            clearInterval(updateInterval);
+        }
+    });
+
+    // Add CSS for animation
+    const style = document.createElement('style');
+    style.textContent = `
+    .stat-updated {
+        animation: pulse 0.5s ease-in-out;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); color: #28a745; }
+    }
+    
+    #last-refresh {
+        opacity: 0.7;
+        transition: opacity 0.3s;
+    }
+    
+    #last-refresh:hover {
+        opacity: 1;
+    }
+`;
+    document.head.appendChild(style);
 </script>
 {% endblock %}

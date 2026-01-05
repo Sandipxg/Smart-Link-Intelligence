@@ -149,6 +149,18 @@ def create_app() -> Flask:
             return redirect(url_for("index"))
         return render_template("landing.html")
 
+    @app.route("/maintenance")
+    def maintenance():
+        """Public maintenance page"""
+        # unexpected error handling if table doesn't exist yet
+        try:
+            msg_setting = query_db("SELECT setting_value FROM system_settings WHERE setting_key = 'maintenance_message'", one=True)
+            message = msg_setting['setting_value'] if msg_setting else "We are currently performing scheduled maintenance. We will be back shortly."
+        except:
+            message = "We are currently performing scheduled maintenance. We will be back shortly."
+            
+        return render_template("maintenance.html", maintenance_message=message, now=datetime.now())
+
     @app.route("/dashboard")
     @login_required
     def index():
@@ -560,7 +572,7 @@ def create_app() -> Flask:
                 ad_type = "large" if position == 1 else "small"
                 ip_address = get_client_ip()
                 try:
-                    revenue = track_ad_impression(link["id"], link["user_id"], ad_type, position, ip_address)
+                    revenue = track_ad_impression(link["id"], link["user_id"], ad_type, position, ip_address, selected_ad['id'])
                     print(f"Ad impression tracked: {ad_type} ad, revenue: ${revenue:.2f}")
                 except Exception as e:
                     print(f"Error tracking ad impression: {e}")
@@ -2543,6 +2555,31 @@ def _before_request():
     if uid:
         user = query_db("SELECT * FROM users WHERE id = ?", [uid], one=True)
         g.user = user
+
+    # Maintenance Mode Check
+    try:
+        maintenance_setting = query_db("SELECT setting_value FROM system_settings WHERE setting_key = 'maintenance_mode'", one=True)
+        if maintenance_setting and maintenance_setting['setting_value'] == '1':
+            # Direct check for admin session
+            is_admin = session.get('admin_id') is not None
+            
+            # Exemptions:
+            # 1. Static files (css, js, images)
+            # 2. Admin routes (so admins can login and manage)
+            # 3. The maintenance page itself
+            # 4. Admin login page specifically
+            
+            is_exempt = (
+                (request.endpoint and 'static' in request.endpoint) or
+                request.path.startswith('/admin') or
+                request.endpoint == 'maintenance'
+            )
+            
+            if not (is_admin or is_exempt):
+                return redirect(url_for('maintenance'))
+    except Exception:
+        # Fail gracefully if DB table doesn't exist or query fails
+        pass
 
 
 def _teardown(_exc):

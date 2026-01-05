@@ -58,6 +58,19 @@ AD_REVENUE_RATES = {
     "small": 0.02   # $0.02 per small ad impression
 }
 
+@admin_bp.before_request
+def load_user_context():
+    """Load regular user context if logged in (for admin reference)"""
+    from flask import session as flask_session
+    if 'uid' in flask_session:
+        try:
+            g.current_user = query_db("SELECT * FROM users WHERE id = ?", [flask_session['uid']], one=True)
+        except Exception as e:
+            g.current_user = None
+            print(f"Error loading user context: {e}")
+    else:
+        g.current_user = None
+
 def admin_required(f):
     """Decorator to require admin authentication"""
     @wraps(f)
@@ -69,11 +82,18 @@ def admin_required(f):
     return decorated_function
 
 def get_db():
-    """Get database connection"""
+    """Enhanced database connection with pooling and WAL mode"""
     if "db" not in g:
         DATABASE = os.path.join(os.path.dirname(__file__), "smart_links.db")
-        g.db = sqlite3.connect(DATABASE)
+        g.db = sqlite3.connect(DATABASE, check_same_thread=False, timeout=10.0)
         g.db.row_factory = sqlite3.Row
+        # Enable WAL mode for better concurrent access
+        try:
+            g.db.execute("PRAGMA journal_mode=WAL")
+            g.db.execute("PRAGMA synchronous=NORMAL")
+            g.db.execute("PRAGMA cache_size=-64000")  # 64MB cache
+        except Exception as e:
+            print(f"Warning: Could not set PRAGMA settings: {e}")
     return g.db
 
 def query_db(query: str, args=None, one=False):
@@ -117,9 +137,11 @@ def ensure_admin_tables():
             ad_position INTEGER NOT NULL,  -- 1, 2, or 3
             revenue REAL NOT NULL,
             ip_address TEXT,
+            ad_id INTEGER,
             timestamp TEXT DEFAULT (datetime('now')),
             FOREIGN KEY(link_id) REFERENCES links(id),
-            FOREIGN KEY(user_id) REFERENCES users(id)
+            FOREIGN KEY(user_id) REFERENCES users(id),
+            FOREIGN KEY(ad_id) REFERENCES personalized_ads(id)
         )
     """)
     
@@ -161,6 +183,14 @@ def ensure_admin_tables():
             FOREIGN KEY(ad_id) REFERENCES personalized_ads(id) ON DELETE CASCADE,
             FOREIGN KEY(target_user_id) REFERENCES users(id) ON DELETE CASCADE,
             UNIQUE(ad_id, target_user_id)
+        )
+    """)
+
+    # System settings table (key-value storage for site-wide configs)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS system_settings (
+            setting_key TEXT PRIMARY KEY,
+            setting_value TEXT
         )
     """)
     
@@ -256,6 +286,120 @@ def dashboard():
                          top_links=[dict(row) for row in top_links],
                          recent_activities=[dict(row) for row in recent_activities])
 
+@admin_bp.route('/api/stats/live')
+@admin_required
+def live_stats():
+    """Return current statistics in JSON for AJAX polling"""
+    try:
+        stats = {
+            'total_users': query_db("SELECT COUNT(*) as count FROM users", one=True)['count'],
+            'total_links': query_db("SELECT COUNT(*) as count FROM links", one=True)['count'],
+            'total_visits': query_db("SELECT COUNT(*) as count FROM visits", one=True)['count'],
+            'total_ads': query_db("SELECT COUNT(*) as count FROM personalized_ads", one=True)['count'],
+            'active_ads': query_db("SELECT COUNT(*) as count FROM personalized_ads WHERE is_active = 1", one=True)['count'],
+            'premium_users': query_db("SELECT COUNT(*) as count FROM users WHERE is_premium = 1", one=True)['count'],
+        }
+        
+        # Calculate total revenue
+        revenue_data = query_db("SELECT SUM(revenue) as total FROM ad_impressions", one=True)
+        stats['total_revenue'] = float(revenue_data['total']) if revenue_data['total'] else 0.0
+        
+        # Get recent user registrations (last 7 days)
+        recent_users = query_db("""
+            SELECT COUNT(*) as count FROM users 
+            WHERE created_at >= datetime('now', '-7 days')
+        """, one=True)['count']
+        stats['recent_users'] = recent_users
+        
+        # Get recent activity count (last hour)
+        recent_activity_count = query_db("""
+            SELECT COUNT(*) as count FROM user_activity 
+            WHERE timestamp >= datetime('now', '-1 hour')
+        """, one=True)['count']
+        stats['recent_activity_count'] = recent_activity_count
+        
+        return jsonify({
+            'success': True,
+            'stats': stats,
+            'timestamp': datetime.utcnow().isoformat()
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@admin_bp.route('/api/activities/recent')
+@admin_required
+def recent_activities_api():
+    """Get recent user activities for live feed"""
+    try:
+        limit = int(request.args.get('limit', 10))
+        
+        activities = query_db("""
+            SELECT ua.*, u.username
+            FROM user_activity ua
+            JOIN users u ON ua.user_id = u.id
+            ORDER BY ua.timestamp DESC
+            LIMIT ?
+        """, [limit])
+        
+        return jsonify({
+            'success': True,
+            'activities': [dict(row) for row in activities],
+            'count': len(activities)
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@admin_bp.route('/api/revenue/live')
+@admin_required
+def live_revenue():
+    """Get live revenue statistics"""
+    try:
+        # Total revenue
+        total_revenue = query_db("SELECT SUM(revenue) as total FROM ad_impressions", one=True)
+        total = float(total_revenue['total']) if total_revenue['total'] else 0.0
+        
+        # Today's revenue
+        today_revenue = query_db("""
+            SELECT SUM(revenue) as total FROM ad_impressions 
+            WHERE DATE(timestamp) = DATE('now')
+        """, one=True)
+        today = float(today_revenue['total']) if today_revenue['total'] else 0.0
+        
+        # This week's revenue
+        week_revenue = query_db("""
+            SELECT SUM(revenue) as total FROM ad_impressions 
+            WHERE timestamp >= datetime('now', '-7 days')
+        """, one=True)
+        week = float(week_revenue['total']) if week_revenue['total'] else 0.0
+        
+        # Impression count today
+        impressions_today = query_db("""
+            SELECT COUNT(*) as count FROM ad_impressions 
+            WHERE DATE(timestamp) = DATE('now')
+        """, one=True)['count']
+        
+        return jsonify({
+            'success': True,
+            'revenue': {
+                'total': round(total, 2),
+                'today': round(today, 2),
+                'week': round(week, 2),
+                'impressions_today': impressions_today
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 @admin_bp.route('/users')
 @admin_required
 def users():
@@ -267,16 +411,12 @@ def users():
     # Build query based on search
     if search:
         users_query = """
-            SELECT u.*, 
-                   COUNT(l.id) as link_count,
-                   COUNT(v.id) as total_clicks,
-                   COALESCE(SUM(ai.revenue), 0) as total_revenue
+            SELECT u.*,
+                   (SELECT COUNT(*) FROM links l WHERE l.user_id = u.id) as link_count,
+                   (SELECT COUNT(*) FROM visits v JOIN links l ON v.link_id = l.id WHERE l.user_id = u.id) as total_clicks,
+                   (SELECT COALESCE(SUM(revenue), 0) FROM ad_impressions ai WHERE ai.user_id = u.id) as total_revenue
             FROM users u
-            LEFT JOIN links l ON u.id = l.user_id
-            LEFT JOIN visits v ON l.id = v.link_id
-            LEFT JOIN ad_impressions ai ON u.id = ai.user_id
             WHERE u.username LIKE ? OR u.email LIKE ?
-            GROUP BY u.id
             ORDER BY u.created_at DESC
             LIMIT ? OFFSET ?
         """
@@ -289,15 +429,11 @@ def users():
         """, [search_param, search_param], one=True)['count']
     else:
         users_query = """
-            SELECT u.*, 
-                   COUNT(l.id) as link_count,
-                   COUNT(v.id) as total_clicks,
-                   COALESCE(SUM(ai.revenue), 0) as total_revenue
+            SELECT u.*,
+                   (SELECT COUNT(*) FROM links l WHERE l.user_id = u.id) as link_count,
+                   (SELECT COUNT(*) FROM visits v JOIN links l ON v.link_id = l.id WHERE l.user_id = u.id) as total_clicks,
+                   (SELECT COALESCE(SUM(revenue), 0) FROM ad_impressions ai WHERE ai.user_id = u.id) as total_revenue
             FROM users u
-            LEFT JOIN links l ON u.id = l.user_id
-            LEFT JOIN visits v ON l.id = v.link_id
-            LEFT JOIN ad_impressions ai ON u.id = ai.user_id
-            GROUP BY u.id
             ORDER BY u.created_at DESC
             LIMIT ? OFFSET ?
         """
@@ -332,12 +468,23 @@ def user_detail(user_id):
         ORDER BY l.created_at DESC
     """, [user_id])
     
-    # Get user's ads
-    ads = query_db("""
-        SELECT * FROM personalized_ads 
-        WHERE user_id = ? 
-        ORDER BY created_at DESC
-    """, [user_id])
+    # Get ads based on membership tier
+    if user['membership_tier'] == 'elite_pro':
+        # Elite Pro: Only show ads created by the user
+        ads = query_db("""
+            SELECT * FROM personalized_ads 
+            WHERE user_id = ? 
+            ORDER BY created_at DESC
+        """, [user_id])
+    else:
+        # Free/Elite: Show ads created for them + ads assigned to them
+        ads = query_db("""
+            SELECT DISTINCT pa.* 
+            FROM personalized_ads pa 
+            LEFT JOIN ad_display_assignments ada ON pa.id = ada.ad_id
+            WHERE pa.user_id = ? OR ada.target_user_id = ?
+            ORDER BY pa.created_at DESC
+        """, [user_id, user_id])
     
     # Get user activity
     activities = query_db("""
@@ -397,25 +544,37 @@ def toggle_user_premium(user_id):
     
     new_status = 0 if user['is_premium'] else 1
     expires_at = None
+    new_tier = 'free'
     
     if new_status == 1:
+        # Get tier from request, default to elite
+        data = request.get_json() or {}
+        requested_tier = data.get('tier', 'elite')
+        
+        # Validate tier
+        if requested_tier in ['elite', 'elite_pro']:
+            new_tier = requested_tier
+        else:
+            new_tier = 'elite'
+            
         # Set premium expiry to 30 days from now
         expires_at = (datetime.utcnow() + timedelta(days=30)).isoformat()
     
     execute_db("""
         UPDATE users 
-        SET is_premium = ?, premium_expires_at = ? 
+        SET is_premium = ?, premium_expires_at = ?, membership_tier = ?
         WHERE id = ?
-    """, [new_status, expires_at, user_id])
+    """, [new_status, expires_at, new_tier, user_id])
     
-    status_text = "activated" if new_status else "deactivated"
+    status_text = f"activated ({new_tier})" if new_status else "deactivated"
     log_admin_activity("toggle_premium", "user", user_id, 
                       f"Premium {status_text} for user: {user['username']}")
     
     return jsonify({
         "success": True, 
         "message": f"Premium {status_text} for {user['username']}",
-        "new_status": new_status
+        "new_status": new_status,
+        "new_tier": new_tier
     })
 
 @admin_bp.route('/ads')
@@ -861,15 +1020,11 @@ def activity():
 def export_users():
     """Export users data to CSV"""
     users_data = query_db("""
-        SELECT u.id, u.username, u.email, u.created_at, u.is_premium, u.membership_tier,
-               COUNT(l.id) as link_count,
-               COUNT(v.id) as total_clicks,
-               COALESCE(SUM(ai.revenue), 0) as total_revenue
+        SELECT u.username, u.email, u.membership_tier, u.created_at,
+               (SELECT COUNT(*) FROM links l WHERE l.user_id = u.id) as link_count,
+               (SELECT COUNT(*) FROM visits v JOIN links l ON v.link_id = l.id WHERE l.user_id = u.id) as total_clicks,
+               (SELECT COALESCE(SUM(revenue), 0) FROM ad_impressions ai WHERE ai.user_id = u.id) as total_revenue
         FROM users u
-        LEFT JOIN links l ON u.id = l.user_id
-        LEFT JOIN visits v ON l.id = v.link_id
-        LEFT JOIN ad_impressions ai ON u.id = ai.user_id
-        GROUP BY u.id
         ORDER BY u.created_at DESC
     """)
     
@@ -878,16 +1033,19 @@ def export_users():
     
     # Write header
     writer.writerow([
-        'User ID', 'Username', 'Email', 'Created At', 'Is Premium', 
-        'Membership Tier', 'Link Count', 'Total Clicks', 'Revenue Generated'
+        'User', 'Email', 'Membership', 'Links', 'Clicks', 'Revenue', 'Joined'
     ])
     
     # Write data
     for user in users_data:
         writer.writerow([
-            user['id'], user['username'], user['email'], user['created_at'],
-            'Yes' if user['is_premium'] else 'No', user['membership_tier'],
-            user['link_count'], user['total_clicks'], f"${user['total_revenue']:.2f}"
+            user['username'], 
+            user['email'], 
+            user['membership_tier'] or 'free', 
+            user['link_count'], 
+            user['total_clicks'], 
+            f"${user['total_revenue']:.2f}",
+            user['created_at'][:10] if user['created_at'] else '-'
         ])
     
     log_admin_activity("export_users", details="Exported users data to CSV")
@@ -901,13 +1059,17 @@ def export_users():
 @admin_bp.route('/export/revenue')
 @admin_required
 def export_revenue():
-    """Export revenue data to CSV"""
+    """Export revenue data to CSV (Ad Summary)"""
+    # Get all ads with their total revenue and impressions
     revenue_data = query_db("""
-        SELECT ai.*, u.username, l.code as link_code
-        FROM ad_impressions ai
-        JOIN users u ON ai.user_id = u.id
-        JOIN links l ON ai.link_id = l.id
-        ORDER BY ai.timestamp DESC
+        SELECT pa.title, u.username, pa.is_active,
+               COALESCE(COUNT(ai.id), 0) as impressions,
+               COALESCE(SUM(ai.revenue), 0) as total_revenue
+        FROM personalized_ads pa
+        JOIN users u ON pa.user_id = u.id
+        LEFT JOIN ad_impressions ai ON pa.id = ai.ad_id
+        GROUP BY pa.id
+        ORDER BY total_revenue DESC
     """)
     
     output = io.StringIO()
@@ -915,25 +1077,58 @@ def export_revenue():
     
     # Write header
     writer.writerow([
-        'Impression ID', 'Username', 'Link Code', 'Ad Type', 'Ad Position',
-        'Revenue', 'IP Address', 'Timestamp'
+        'SrNo', 'Title', 'Created By', 'Status', 'Impressions', 'Revenue'
     ])
     
     # Write data
-    for impression in revenue_data:
+    for i, ad in enumerate(revenue_data, 1):
+        status = 'Active' if ad['is_active'] else 'Not Active'
         writer.writerow([
-            impression['id'], impression['username'], impression['link_code'],
-            impression['ad_type'], impression['ad_position'], f"${impression['revenue']:.2f}",
-            impression['ip_address'], impression['timestamp']
+            i,
+            ad['title'],
+            ad['username'],
+            status,
+            ad['impressions'],
+            f"${ad['total_revenue']:.2f}"
         ])
     
-    log_admin_activity("export_revenue", details="Exported revenue data to CSV")
+    log_admin_activity("export_revenue", details="Exported revenue summary to CSV")
     
     return Response(
         output.getvalue(),
         mimetype="text/csv",
-        headers={"Content-disposition": "attachment; filename=revenue_export.csv"}
+        headers={"Content-disposition": "attachment; filename=ad_revenue_report.csv"}
     )
+
+@admin_bp.route('/maintenance', methods=['GET', 'POST'])
+@admin_required
+def maintenance():
+    """Site Maintenance Settings"""
+    if request.method == 'POST':
+        maintenance_mode = request.form.get('maintenance_mode') == 'on'
+        message = request.form.get('maintenance_message', '').strip()
+        
+        # Save settings
+        execute_db("INSERT OR REPLACE INTO system_settings (setting_key, setting_value) VALUES (?, ?)", 
+                  ['maintenance_mode', '1' if maintenance_mode else '0'])
+        execute_db("INSERT OR REPLACE INTO system_settings (setting_key, setting_value) VALUES (?, ?)", 
+                  ['maintenance_message', message])
+        
+        status = "enabled" if maintenance_mode else "disabled"
+        log_admin_activity("maintenance_update", details=f"Maintenance mode {status}")
+        flash(f"Maintenance mode {status} successfully", "success")
+        return redirect(url_for('admin.maintenance'))
+    
+    # Get current settings
+    mode_setting = query_db("SELECT setting_value FROM system_settings WHERE setting_key = 'maintenance_mode'", one=True)
+    msg_setting = query_db("SELECT setting_value FROM system_settings WHERE setting_key = 'maintenance_message'", one=True)
+    
+    is_maintenance_on = mode_setting['setting_value'] == '1' if mode_setting else False
+    maintenance_message = msg_setting['setting_value'] if msg_setting else "We are currently performing scheduled maintenance. We should be back shortly."
+    
+    return render_template('admin/maintenance.html', 
+                         is_maintenance_on=is_maintenance_on,
+                         maintenance_message=maintenance_message)
 
 @admin_bp.route('/revenue', methods=['GET'])
 @admin_required
@@ -1004,15 +1199,15 @@ def track_user_activity(user_id, activity_type, details=None, ip_address=None):
     except Exception as e:
         print(f"Error tracking user activity: {e}")
 
-def track_ad_impression(link_id, user_id, ad_type, ad_position, ip_address=None):
+def track_ad_impression(link_id, user_id, ad_type, ad_position, ip_address=None, ad_id=None):
     """Track ad impression and calculate revenue"""
     revenue = AD_REVENUE_RATES.get(ad_type, 0.0)
     
     execute_db("""
         INSERT INTO ad_impressions 
-        (link_id, user_id, ad_type, ad_position, revenue, ip_address)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, [link_id, user_id, ad_type, ad_position, revenue, ip_address])
+        (link_id, user_id, ad_type, ad_position, revenue, ip_address, ad_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, [link_id, user_id, ad_type, ad_position, revenue, ip_address, ad_id])
     
     return revenue
 

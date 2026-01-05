@@ -1,0 +1,55 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Site Maintenance{% endblock %}
+{% block page_title %}Site Maintenance Settings{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 col-lg-6 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0">
+                    <i class="fas fa-tools text-primary me-2"></i> Maintenance Mode Configuration
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-4">
+                        <label class="form-label d-block fw-bold mb-3">System Status</label>
+                        <div
+                            class="form-check form-switch p-0 border rounded p-3 d-flex align-items-center justify-content-between">
+                            <label class="form-check-label ms-2" for="maintenanceModeSwitch">
+                                <span class="d-block fw-bold">Enable Maintenance Mode</span>
+                                <small class="text-muted">When enabled, only admins can access the site.</small>
+                            </label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input fs-4" type="checkbox" id="maintenanceModeSwitch"
+                                    name="maintenance_mode" {{ 'checked' if is_maintenance_on else '' }}>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="maintenanceMessage" class="form-label fw-bold">Maintenance Message</label>
+                        <textarea class="form-control" id="maintenanceMessage" name="maintenance_message" rows="4"
+                            placeholder="Enter the message to display to users...">{{ maintenance_message }}</textarea>
+                        <div class="form-text">This message will be displayed on the public maintenance page.</div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="alert alert-info mt-4">
+            <h6 class="alert-heading"><i class="fas fa-info-circle"></i> Note</h6>
+            <p class="mb-0">As an administrator, you will still be able to access the site fully even when maintenance
+                mode is enabled. Open an Incognito/Private window to preview the maintenance page.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

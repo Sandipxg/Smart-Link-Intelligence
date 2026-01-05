@@ -1,0 +1,20 @@
+User ID,Username,Email,Created At,Is Premium,Membership Tier,Link Count,Total Clicks,Revenue Generated
+20,premiumuser,premium@example.com,2026-01-05T00:17:44.019637,Yes,elite_pro,0,0,$0.00
+19,testuser2,test2@example.com,2026-01-05T00:17:44.019566,Yes,elite,0,0,$0.00
+18,testuser1,test1@example.com,2026-01-05T00:17:43.978096,No,free,0,0,$0.00
+21,test,john.student@college.com,2026-01-05 04:01:32,No,free,1,0,$0.00
+17,power_user,power@example.com,2026-01-04T18:37:15.334276,Yes,elite_pro,0,0,$0.00
+16,test_user,test@example.com,2026-01-04T18:37:15.103002,No,free,0,0,$0.00
+15,premium_user,premium@example.com,2026-01-04T18:37:14.844526,Yes,elite_pro,0,0,$0.00
+14,jane_smith,jane@example.com,2026-01-04T18:37:14.631060,Yes,elite,0,0,$0.00
+13,john_doe,john@example.com,2026-01-04T18:37:14.338598,No,free,0,0,$0.00
+10,brooo,brooo@gmail.com,2026-01-03 04:32:04,No,free,28750,28750,$809.60
+9,kscs,kirosa6617@bulmp3.com,2025-12-27 08:57:00,Yes,free,13038,13038,$375.24
+8,maahi,maahi@gmail.com,2025-12-27 08:31:02,Yes,free,18744,18744,$580.80
+7,sandipp,sandipgodhani3@gmail.com,2025-12-27 07:26:53,Yes,free,6525,6525,$219.24
+6,sandip,sandipgodhani3@gmail.com,2025-12-27 07:23:18,Yes,free,4071,4071,$131.10
+5,testuser,,2025-12-25 07:04:50,No,free,6324,6324,$212.16
+4,name,,2025-12-24 13:30:57,Yes,free,226730,226730,$6923.56
+3,kuldeep,,2025-12-24 13:29:59,No,free,0,0,$0.00
+2,efdfdd,,2025-12-24 10:50:37,No,free,0,0,$0.00
+1,ku;dedee,,2025-12-24 09:30:09,No,free,17640,17640,$550.20
