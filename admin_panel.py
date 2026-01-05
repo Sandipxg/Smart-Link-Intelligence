@@ -673,24 +673,32 @@ def create_admin_ad():
         ad_type = request.form.get('ad_type', 'custom')
         grid_position = int(request.form.get('grid_position', 1))
         
-        # Validation
+        # If user_id is not provided, try to find a default user
+        if not user_id:
+            # Try to find 'System' user, then 'admin', or just the first user
+            default_user = query_db("SELECT id FROM users WHERE username = 'System' OR username = 'admin' OR username = 'Admin' ORDER BY (CASE WHEN username = 'System' THEN 0 WHEN username LIKE 'admin%' THEN 1 ELSE 2 END) ASC LIMIT 1", one=True)
+            
+            if default_user:
+                user_id = default_user['id']
+            else:
+                flash("No users found in database. Cannot create ad.", "danger")
+                return redirect(url_for('admin.ads'))
+
+        # Validation (user_id is now handled)
         if not all([user_id, title, description, cta_text, cta_url]):
             flash("All fields are required", "danger")
-            users = query_db("SELECT id, username, email FROM users ORDER BY username ASC")
-            return render_template('admin/create_admin_ad.html', users=users)
+            return render_template('admin/create_admin_ad.html')
         
         # Validate URL
         if not cta_url.startswith(('http://', 'https://')):
             flash("Please enter a valid URL starting with http:// or https://", "danger")
-            users = query_db("SELECT id, username, email FROM users ORDER BY username ASC")
-            return render_template('admin/create_admin_ad.html', users=users)
+            return render_template('admin/create_admin_ad.html')
         
         # Validate user exists
         user = query_db("SELECT * FROM users WHERE id = ?", [user_id], one=True)
         if not user:
             flash("Selected user not found", "danger")
-            users = query_db("SELECT id, username, email FROM users ORDER BY username ASC")
-            return render_template('admin/create_admin_ad.html', users=users)
+            return render_template('admin/create_admin_ad.html')
         
         image_filename = None
         background_color = "#667eea"
@@ -731,11 +739,7 @@ def create_admin_ad():
         flash(f"Ad created successfully for {user['username']}", "success")
         return redirect(url_for('admin.ads'))
     
-    # GET request - show form
-    # Get all users for the dropdown
-    users = query_db("SELECT id, username, email FROM users ORDER BY username ASC")
-    
-    return render_template('admin/create_admin_ad.html', users=users)
+    return render_template('admin/create_admin_ad.html')
 
 @admin_bp.route('/ads/<int:ad_id>/toggle', methods=['POST'])
 @admin_required
@@ -810,7 +814,7 @@ def display_ad_to_users(ad_id):
     all_users = query_db("""
         SELECT id, username, email, membership_tier, is_premium, created_at
         FROM users 
-        WHERE is_premium = 0 OR is_premium IS NULL
+        WHERE (is_premium = 0 OR is_premium IS NULL) AND username != 'System'
         ORDER BY membership_tier DESC, username ASC
     """)
     

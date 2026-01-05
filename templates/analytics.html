@@ -32,9 +32,15 @@
 
         <!-- Navigation -->
         <div class="d-flex align-items-center gap-2">
+          {% if is_admin %}
+          <a href="{{ url_for('admin.user_detail', user_id=link.user_id) }}" class="btn btn-outline-secondary btn-sm">
+            ← Back to User
+          </a>
+          {% else %}
           <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-sm">
             ← Dashboard
           </a>
+          {% endif %}
           {% if g.user %}
           <span class="text-muted small">{{ g.user.username }}</span>
           <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Logout</a>

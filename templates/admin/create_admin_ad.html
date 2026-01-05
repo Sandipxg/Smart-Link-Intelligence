@@ -14,19 +14,6 @@
             </div>
             <div class="card-body">
                 <form method="POST" enctype="multipart/form-data" id="adForm">
-                    <!-- User Selection -->
-                    <div class="mb-3">
-                        <label for="user_id" class="form-label">
-                            <i class="fas fa-user"></i> Assign to User *
-                        </label>
-                        <select class="form-select" id="user_id" name="user_id" required>
-                            <option value="">Select a user...</option>
-                            {% for user in users %}
-                                <option value="{{ user.id }}">{{ user.username }} ({{ user.email }})</option>
-                            {% endfor %}
-                        </select>
-                        <div class="form-text">Select which user this ad will be assigned to</div>
-                    </div>
 
                     <!-- Ad Type Selection -->
                     <div class="mb-3">
@@ -36,7 +23,8 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="ad_type" id="custom_ad" value="custom" checked>
+                                    <input class="form-check-input" type="radio" name="ad_type" id="custom_ad"
+                                        value="custom" checked>
                                     <label class="form-check-label" for="custom_ad">
                                         <i class="fas fa-paint-brush"></i> Custom Design
                                     </label>
@@ -44,7 +32,8 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="ad_type" id="image_ad" value="image">
+                                    <input class="form-check-input" type="radio" name="ad_type" id="image_ad"
+                                        value="image">
                                     <label class="form-check-label" for="image_ad">
                                         <i class="fas fa-image"></i> Image Upload
                                     </label>
@@ -60,7 +49,8 @@
                                 <label for="title" class="form-label">
                                     <i class="fas fa-heading"></i> Ad Title *
                                 </label>
-                                <input type="text" class="form-control" id="title" name="title" required maxlength="100">
+                                <input type="text" class="form-control" id="title" name="title" required
+                                    maxlength="100">
                                 <div class="form-text">Maximum 100 characters</div>
                             </div>
                         </div>
@@ -82,7 +72,8 @@
                         <label for="description" class="form-label">
                             <i class="fas fa-align-left"></i> Description *
                         </label>
-                        <textarea class="form-control" id="description" name="description" rows="3" required maxlength="200"></textarea>
+                        <textarea class="form-control" id="description" name="description" rows="3" required
+                            maxlength="200"></textarea>
                         <div class="form-text">Maximum 200 characters</div>
                     </div>
 
@@ -93,7 +84,8 @@
                                 <label for="cta_text" class="form-label">
                                     <i class="fas fa-mouse-pointer"></i> Button Text *
                                 </label>
-                                <input type="text" class="form-control" id="cta_text" name="cta_text" required maxlength="50">
+                                <input type="text" class="form-control" id="cta_text" name="cta_text" required
+                                    maxlength="50">
                                 <div class="form-text">Maximum 50 characters</div>
                             </div>
                         </div>
@@ -112,14 +104,15 @@
                     <div id="customAdOptions">
                         <hr>
                         <h6><i class="fas fa-palette"></i> Custom Design Options</h6>
-                        
+
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label for="icon" class="form-label">
                                         <i class="fas fa-smile"></i> Icon/Emoji
                                     </label>
-                                    <input type="text" class="form-control" id="icon" name="icon" value="🚀" maxlength="10">
+                                    <input type="text" class="form-control" id="icon" name="icon" value="🚀"
+                                        maxlength="10">
                                     <div class="form-text">Emoji or short text</div>
                                 </div>
                             </div>
@@ -128,7 +121,8 @@
                                     <label for="background_color" class="form-label">
                                         <i class="fas fa-fill-drip"></i> Background Color
                                     </label>
-                                    <input type="color" class="form-control form-control-color" id="background_color" name="background_color" value="#667eea">
+                                    <input type="color" class="form-control form-control-color" id="background_color"
+                                        name="background_color" value="#667eea">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -136,7 +130,8 @@
                                     <label for="text_color" class="form-label">
                                         <i class="fas fa-font"></i> Text Color
                                     </label>
-                                    <input type="color" class="form-control form-control-color" id="text_color" name="text_color" value="#ffffff">
+                                    <input type="color" class="form-control form-control-color" id="text_color"
+                                        name="text_color" value="#ffffff">
                                 </div>
                             </div>
                         </div>
@@ -146,7 +141,7 @@
                     <div id="imageAdOptions" style="display: none;">
                         <hr>
                         <h6><i class="fas fa-image"></i> Image Upload</h6>
-                        
+
                         <div class="mb-3">
                             <label for="ad_image" class="form-label">
                                 <i class="fas fa-upload"></i> Upload Image
@@ -162,11 +157,13 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="card" id="adPreview">
-                                <div class="card-body text-center" id="previewContent" style="background: #667eea; color: #ffffff; min-height: 150px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                                <div class="card-body text-center" id="previewContent"
+                                    style="background: #667eea; color: #ffffff; min-height: 150px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
                                     <div style="font-size: 2rem;" id="previewIcon">🚀</div>
                                     <h6 class="mt-2" id="previewTitle">Your Ad Title</h6>
                                     <p class="small" id="previewDescription">Your ad description will appear here</p>
-                                    <button type="button" class="btn btn-light btn-sm" id="previewButton">Click Here</button>
+                                    <button type="button" class="btn btn-light btn-sm" id="previewButton">Click
+                                        Here</button>
                                 </div>
                             </div>
                         </div>
@@ -202,128 +199,128 @@
 
 {% block scripts %}
 <script>
-// Toggle between custom and image ad options
-document.querySelectorAll('input[name="ad_type"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-        const customOptions = document.getElementById('customAdOptions');
-        const imageOptions = document.getElementById('imageAdOptions');
-        
-        if (this.value === 'custom') {
-            customOptions.style.display = 'block';
-            imageOptions.style.display = 'none';
-            document.getElementById('ad_image').required = false;
-        } else {
-            customOptions.style.display = 'none';
-            imageOptions.style.display = 'block';
-            document.getElementById('ad_image').required = true;
-        }
-        updatePreview();
+    // Toggle between custom and image ad options
+    document.querySelectorAll('input[name="ad_type"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            const customOptions = document.getElementById('customAdOptions');
+            const imageOptions = document.getElementById('imageAdOptions');
+
+            if (this.value === 'custom') {
+                customOptions.style.display = 'block';
+                imageOptions.style.display = 'none';
+                document.getElementById('ad_image').required = false;
+            } else {
+                customOptions.style.display = 'none';
+                imageOptions.style.display = 'block';
+                document.getElementById('ad_image').required = true;
+            }
+            updatePreview();
+        });
     });
-});
 
-// Live preview updates
-function updatePreview() {
-    const title = document.getElementById('title').value || 'Your Ad Title';
-    const description = document.getElementById('description').value || 'Your ad description will appear here';
-    const icon = document.getElementById('icon').value || '🚀';
-    const backgroundColor = document.getElementById('background_color').value;
-    const textColor = document.getElementById('text_color').value;
-    const ctaText = document.getElementById('cta_text').value || 'Click Here';
-    
-    const previewContent = document.getElementById('previewContent');
-    const previewIcon = document.getElementById('previewIcon');
-    const previewTitle = document.getElementById('previewTitle');
-    const previewDescription = document.getElementById('previewDescription');
-    const previewButton = document.getElementById('previewButton');
-    
-    // Update content
-    previewIcon.textContent = icon;
-    previewTitle.textContent = title;
-    previewDescription.textContent = description;
-    previewButton.textContent = ctaText;
-    
-    // Update colors
-    previewContent.style.background = backgroundColor;
-    previewContent.style.color = textColor;
-}
+    // Live preview updates
+    function updatePreview() {
+        const title = document.getElementById('title').value || 'Your Ad Title';
+        const description = document.getElementById('description').value || 'Your ad description will appear here';
+        const icon = document.getElementById('icon').value || '🚀';
+        const backgroundColor = document.getElementById('background_color').value;
+        const textColor = document.getElementById('text_color').value;
+        const ctaText = document.getElementById('cta_text').value || 'Click Here';
 
-// Add event listeners for live preview
-document.getElementById('title').addEventListener('input', updatePreview);
-document.getElementById('description').addEventListener('input', updatePreview);
-document.getElementById('icon').addEventListener('input', updatePreview);
-document.getElementById('background_color').addEventListener('input', updatePreview);
-document.getElementById('text_color').addEventListener('input', updatePreview);
-document.getElementById('cta_text').addEventListener('input', updatePreview);
+        const previewContent = document.getElementById('previewContent');
+        const previewIcon = document.getElementById('previewIcon');
+        const previewTitle = document.getElementById('previewTitle');
+        const previewDescription = document.getElementById('previewDescription');
+        const previewButton = document.getElementById('previewButton');
 
-// Form validation
-document.getElementById('adForm').addEventListener('submit', function(e) {
-    const adType = document.querySelector('input[name="ad_type"]:checked').value;
-    const imageFile = document.getElementById('ad_image').files[0];
-    
-    if (adType === 'image' && !imageFile) {
-        e.preventDefault();
-        alert('Please select an image file for image-type advertisements.');
-        return false;
+        // Update content
+        previewIcon.textContent = icon;
+        previewTitle.textContent = title;
+        previewDescription.textContent = description;
+        previewButton.textContent = ctaText;
+
+        // Update colors
+        previewContent.style.background = backgroundColor;
+        previewContent.style.color = textColor;
     }
-    
-    // Validate URL
-    const url = document.getElementById('cta_url').value;
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        e.preventDefault();
-        alert('Please enter a valid URL starting with http:// or https://');
-        return false;
-    }
-});
 
-// Character counters
-function addCharacterCounter(inputId, maxLength) {
-    const input = document.getElementById(inputId);
-    const helpText = input.nextElementSibling;
-    
-    input.addEventListener('input', function() {
-        const remaining = maxLength - this.value.length;
-        helpText.textContent = `${remaining} characters remaining`;
-        
-        if (remaining < 0) {
-            helpText.classList.add('text-danger');
-        } else {
-            helpText.classList.remove('text-danger');
+    // Add event listeners for live preview
+    document.getElementById('title').addEventListener('input', updatePreview);
+    document.getElementById('description').addEventListener('input', updatePreview);
+    document.getElementById('icon').addEventListener('input', updatePreview);
+    document.getElementById('background_color').addEventListener('input', updatePreview);
+    document.getElementById('text_color').addEventListener('input', updatePreview);
+    document.getElementById('cta_text').addEventListener('input', updatePreview);
+
+    // Form validation
+    document.getElementById('adForm').addEventListener('submit', function (e) {
+        const adType = document.querySelector('input[name="ad_type"]:checked').value;
+        const imageFile = document.getElementById('ad_image').files[0];
+
+        if (adType === 'image' && !imageFile) {
+            e.preventDefault();
+            alert('Please select an image file for image-type advertisements.');
+            return false;
+        }
+
+        // Validate URL
+        const url = document.getElementById('cta_url').value;
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            e.preventDefault();
+            alert('Please enter a valid URL starting with http:// or https://');
+            return false;
         }
     });
-}
 
-// Add character counters
-addCharacterCounter('title', 100);
-addCharacterCounter('description', 200);
-addCharacterCounter('cta_text', 50);
+    // Character counters
+    function addCharacterCounter(inputId, maxLength) {
+        const input = document.getElementById(inputId);
+        const helpText = input.nextElementSibling;
+
+        input.addEventListener('input', function () {
+            const remaining = maxLength - this.value.length;
+            helpText.textContent = `${remaining} characters remaining`;
+
+            if (remaining < 0) {
+                helpText.classList.add('text-danger');
+            } else {
+                helpText.classList.remove('text-danger');
+            }
+        });
+    }
+
+    // Add character counters
+    addCharacterCounter('title', 100);
+    addCharacterCounter('description', 200);
+    addCharacterCounter('cta_text', 50);
 </script>
 
 <style>
-.form-control-color {
-    width: 100%;
-    height: 38px;
-}
+    .form-control-color {
+        width: 100%;
+        height: 38px;
+    }
 
-#adPreview {
-    border: 2px dashed #dee2e6;
-}
+    #adPreview {
+        border: 2px dashed #dee2e6;
+    }
 
-.alert-info {
-    background-color: #e7f3ff;
-    border-color: #b8daff;
-    color: #004085;
-}
+    .alert-info {
+        background-color: #e7f3ff;
+        border-color: #b8daff;
+        color: #004085;
+    }
 
-.btn-admin {
-    background-color: #6f42c1;
-    border-color: #6f42c1;
-    color: white;
-}
+    .btn-admin {
+        background-color: #6f42c1;
+        border-color: #6f42c1;
+        color: white;
+    }
 
-.btn-admin:hover {
-    background-color: #5a359a;
-    border-color: #5a359a;
-    color: white;
-}
+    .btn-admin:hover {
+        background-color: #5a359a;
+        border-color: #5a359a;
+        color: white;
+    }
 </style>
 {% endblock %}

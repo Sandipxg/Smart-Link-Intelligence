@@ -15,21 +15,19 @@
             </div>
             <div class="card-body p-0">
                 {% if ad.ad_type == 'image' and ad.image_filename %}
-                    <img src="{{ url_for('uploaded_file', filename=ad.image_filename) }}" 
-                         class="card-img-top" 
-                         style="height: 200px; object-fit: cover;"
-                         alt="{{ ad.title }}">
+                <img src="{{ url_for('uploaded_file', filename=ad.image_filename) }}" class="card-img-top"
+                    style="height: 200px; object-fit: cover;" alt="{{ ad.title }}">
                 {% else %}
-                    <!-- Custom ad preview -->
-                    <div class="d-flex align-items-center justify-content-center text-white" 
-                         style="height: 200px; background-color: {{ ad.background_color }}; color: {{ ad.text_color }};">
-                        <div class="text-center">
-                            <div style="font-size: 2rem;">{{ ad.icon }}</div>
-                            <h6 class="mt-2">{{ ad.title }}</h6>
-                        </div>
+                <!-- Custom ad preview -->
+                <div class="d-flex align-items-center justify-content-center text-white"
+                    style="height: 200px; background-color: {{ ad.background_color }}; color: {{ ad.text_color }};">
+                    <div class="text-center">
+                        <div style="font-size: 2rem;">{{ ad.icon }}</div>
+                        <h6 class="mt-2">{{ ad.title }}</h6>
                     </div>
+                </div>
                 {% endif %}
-                
+
                 <div class="p-3">
                     <h6 class="card-title">{{ ad.title }}</h6>
                     <p class="card-text small">{{ ad.description }}</p>
@@ -65,14 +63,6 @@
                             <i class="fas fa-square"></i> Clear All
                         </button>
                     </div>
-                    <div class="btn-group btn-group-sm ms-2" role="group">
-                        <button type="button" class="btn btn-outline-success" onclick="selectAllFree()">
-                            <i class="fas fa-user-check"></i> Select All Free
-                        </button>
-                        <button type="button" class="btn btn-outline-warning" onclick="clearAllFree()">
-                            <i class="fas fa-user-times"></i> Clear All Free
-                        </button>
-                    </div>
                 </div>
                 <div class="card-body">
                     <!-- Search Filter -->
@@ -81,8 +71,8 @@
                             <span class="input-group-text">
                                 <i class="fas fa-search"></i>
                             </span>
-                            <input type="text" class="form-control" id="userSearch" 
-                                   placeholder="Search users by username or email...">
+                            <input type="text" class="form-control" id="userSearch"
+                                placeholder="Search users by username or email...">
                         </div>
                     </div>
 
@@ -93,80 +83,47 @@
                             <label class="btn btn-outline-secondary" for="showFree">
                                 <i class="fas fa-user"></i> Free Users ({{ free_users|length }})
                             </label>
-                            
+
                             <input type="checkbox" class="btn-check" id="showElite" checked>
                             <label class="btn btn-outline-warning" for="showElite">
                                 <i class="fas fa-star"></i> Elite Users ({{ elite_users|length }})
                             </label>
-                            
-                            <input type="checkbox" class="btn-check" id="showElitePro" checked>
-                            <label class="btn btn-outline-danger" for="showElitePro">
-                                <i class="fas fa-crown"></i> Elite Pro Users ({{ elite_pro_users|length }})
-                            </label>
+
                         </div>
                         <div class="mt-2">
                             <small class="text-muted">
-                                <i class="fas fa-info-circle"></i> 
-                                <strong>Free & Elite:</strong> See ads | 
-                                <strong>Elite Pro:</strong> Ad-free experience
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Free & Elite:</strong> See ads
                             </small>
                         </div>
                     </div>
 
                     <!-- User Lists -->
                     <div class="row">
-                        <!-- Elite Pro Users -->
-                        {% if elite_pro_users %}
-                        <div class="col-12 mb-4" id="eliteProSection">
-                            <h6 class="text-danger">
-                                <i class="fas fa-crown"></i> Elite Pro Users ({{ elite_pro_users|length }}) - Ad-Free Experience
-                            </h6>
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle"></i> 
-                                <strong>Note:</strong> Elite Pro users have ad-free experience. Assigning ads to them won't show ads on their links.
-                            </div>
-                            <div class="row">
-                                {% for user in elite_pro_users %}
-                                <div class="col-md-6 mb-2 user-item" data-tier="elite_pro" data-username="{{ (user.username or '').lower() }}" data-email="{{ (user.email or '').lower() }}">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="user_ids" 
-                                               value="{{ user.id }}" id="user_{{ user.id }}"
-                                               {{ 'checked' if user.is_assigned }}>
-                                        <label class="form-check-label d-flex align-items-center" for="user_{{ user.id }}">
-                                            <div class="avatar-sm bg-danger text-white rounded-circle d-flex align-items-center justify-content-center me-2">
-                                                {{ (user.username or 'U')[0].upper() }}
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <div class="fw-bold">{{ user.username or 'Unknown User' }}</div>
-                                                <small class="text-muted">{{ user.email or 'No email' }}</small>
-                                                <div><span class="badge bg-success">Ad-Free Experience</span></div>
-                                            </div>
-                                            {% if user.is_assigned %}
-                                                <span class="badge bg-warning ms-auto">Assigned (No Effect)</span>
-                                            {% endif %}
-                                        </label>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% endif %}
 
                         <!-- Elite Users -->
                         {% if elite_users %}
                         <div class="col-12 mb-4" id="eliteSection">
-                            <h6 class="text-warning">
-                                <i class="fas fa-star"></i> Elite Users ({{ elite_users|length }}) - With Ads Experience
-                            </h6>
+                            <div class="d-flex align-items-center mb-3">
+                                <h6 class="text-warning mb-0 border-end pe-3 me-3">
+                                    <i class="fas fa-star"></i> Elite Users ({{ elite_users|length }})
+                                </h6>
+                                <input class="form-check-input section-selector" type="checkbox" id="selectAllElite"
+                                    data-target-tier="elite" title="Select All Elite">
+                            </div>
                             <div class="row">
                                 {% for user in elite_users %}
-                                <div class="col-md-6 mb-2 user-item" data-tier="elite" data-username="{{ (user.username or '').lower() }}" data-email="{{ (user.email or '').lower() }}">
+                                <div class="col-md-6 mb-2 user-item" data-tier="elite"
+                                    data-username="{{ (user.username or '').lower() }}"
+                                    data-email="{{ (user.email or '').lower() }}">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="user_ids" 
-                                               value="{{ user.id }}" id="user_{{ user.id }}"
-                                               {{ 'checked' if user.is_assigned }}>
-                                        <label class="form-check-label d-flex align-items-center" for="user_{{ user.id }}">
-                                            <div class="avatar-sm bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                        <input class="form-check-input" type="checkbox" name="user_ids"
+                                            value="{{ user.id }}" id="user_{{ user.id }}" {{ 'checked' if
+                                            user.is_assigned }}>
+                                        <label class="form-check-label d-flex align-items-center"
+                                            for="user_{{ user.id }}">
+                                            <div
+                                                class="avatar-sm bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-2">
                                                 {{ (user.username or 'U')[0].upper() }}
                                             </div>
                                             <div class="flex-grow-1">
@@ -175,7 +132,7 @@
                                                 <div><span class="badge bg-warning">With Ads</span></div>
                                             </div>
                                             {% if user.is_assigned %}
-                                                <span class="badge bg-success ms-auto">Assigned</span>
+                                            <span class="badge bg-success ms-auto">Assigned</span>
                                             {% endif %}
                                         </label>
                                     </div>
@@ -188,18 +145,26 @@
                         <!-- Free Users -->
                         {% if free_users %}
                         <div class="col-12 mb-4" id="freeSection">
-                            <h6 class="text-secondary">
-                                <i class="fas fa-user"></i> Free Users ({{ free_users|length }}) - With Ads Experience
-                            </h6>
+                            <div class="d-flex align-items-center mb-3">
+                                <h6 class="text-secondary mb-0 border-end pe-3 me-3">
+                                    <i class="fas fa-user"></i> Free Users ({{ free_users|length }})
+                                </h6>
+                                <input class="form-check-input section-selector" type="checkbox" id="selectAllFree"
+                                    data-target-tier="free" title="Select All Free">
+                            </div>
                             <div class="row">
                                 {% for user in free_users %}
-                                <div class="col-md-6 mb-2 user-item" data-tier="free" data-username="{{ (user.username or '').lower() }}" data-email="{{ (user.email or '').lower() }}">
+                                <div class="col-md-6 mb-2 user-item" data-tier="free"
+                                    data-username="{{ (user.username or '').lower() }}"
+                                    data-email="{{ (user.email or '').lower() }}">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="user_ids" 
-                                               value="{{ user.id }}" id="user_{{ user.id }}"
-                                               {{ 'checked' if user.is_assigned }}>
-                                        <label class="form-check-label d-flex align-items-center" for="user_{{ user.id }}">
-                                            <div class="avatar-sm bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                        <input class="form-check-input" type="checkbox" name="user_ids"
+                                            value="{{ user.id }}" id="user_{{ user.id }}" {{ 'checked' if
+                                            user.is_assigned }}>
+                                        <label class="form-check-label d-flex align-items-center"
+                                            for="user_{{ user.id }}">
+                                            <div
+                                                class="avatar-sm bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
                                                 {{ (user.username or 'U')[0].upper() }}
                                             </div>
                                             <div class="flex-grow-1">
@@ -208,7 +173,7 @@
                                                 <div><span class="badge bg-secondary">With Ads</span></div>
                                             </div>
                                             {% if user.is_assigned %}
-                                                <span class="badge bg-success ms-auto">Assigned</span>
+                                            <span class="badge bg-success ms-auto">Assigned</span>
                                             {% endif %}
                                         </label>
                                     </div>
@@ -227,7 +192,7 @@
                     </div>
                     {% endif %}
                 </div>
-                
+
                 <div class="card-footer">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
@@ -253,156 +218,150 @@
 
 {% block scripts %}
 <script>
-// Update selected count
-function updateSelectedCount() {
-    const checkedBoxes = document.querySelectorAll('input[name="user_ids"]:checked');
-    document.getElementById('selectedCount').textContent = checkedBoxes.length;
-}
+    // Update selected count
+    function updateSelectedCount() {
+        const checkedBoxes = document.querySelectorAll('input[name="user_ids"]:checked');
+        document.getElementById('selectedCount').textContent = checkedBoxes.length;
+    }
 
-// Select all users
-function selectAll() {
-    const visibleCheckboxes = document.querySelectorAll('.user-item:not([style*="display: none"]) input[name="user_ids"]');
-    visibleCheckboxes.forEach(checkbox => {
-        checkbox.checked = true;
-    });
-    updateSelectedCount();
-}
-
-// Clear all selections
-function clearAll() {
-    const checkboxes = document.querySelectorAll('input[name="user_ids"]');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = false;
-    });
-    updateSelectedCount();
-}
-
-// Select all free users only
-function selectAllFree() {
-    const freeCheckboxes = document.querySelectorAll('.user-item[data-tier="free"]:not([style*="display: none"]) input[name="user_ids"]');
-    freeCheckboxes.forEach(checkbox => {
-        checkbox.checked = true;
-    });
-    updateSelectedCount();
-}
-
-// Clear all free user selections
-function clearAllFree() {
-    const freeCheckboxes = document.querySelectorAll('.user-item[data-tier="free"] input[name="user_ids"]');
-    freeCheckboxes.forEach(checkbox => {
-        checkbox.checked = false;
-    });
-    updateSelectedCount();
-}
-
-// Search functionality
-document.getElementById('userSearch').addEventListener('input', function() {
-    const searchTerm = this.value.toLowerCase();
-    const userItems = document.querySelectorAll('.user-item');
-    
-    userItems.forEach(item => {
-        const username = item.dataset.username;
-        const email = item.dataset.email;
-        
-        if (username.includes(searchTerm) || email.includes(searchTerm)) {
-            item.style.display = '';
-        } else {
-            item.style.display = 'none';
-        }
-    });
-});
-
-// Tier filtering
-function toggleTierVisibility() {
-    const showFree = document.getElementById('showFree').checked;
-    const showElite = document.getElementById('showElite').checked;
-    const showElitePro = document.getElementById('showElitePro').checked;
-    
-    // Toggle sections
-    const freeSection = document.getElementById('freeSection');
-    const eliteSection = document.getElementById('eliteSection');
-    const eliteProSection = document.getElementById('eliteProSection');
-    
-    if (freeSection) freeSection.style.display = showFree ? '' : 'none';
-    if (eliteSection) eliteSection.style.display = showElite ? '' : 'none';
-    if (eliteProSection) eliteProSection.style.display = showElitePro ? '' : 'none';
-}
-
-// Add event listeners for tier filters
-document.getElementById('showFree').addEventListener('change', toggleTierVisibility);
-document.getElementById('showElite').addEventListener('change', toggleTierVisibility);
-document.getElementById('showElitePro').addEventListener('change', toggleTierVisibility);
-
-// Add event listeners for checkboxes
-document.addEventListener('change', function(e) {
-    if (e.target.name === 'user_ids') {
+    // Select all users
+    function selectAll() {
+        const visibleCheckboxes = document.querySelectorAll('.user-item:not([style*="display: none"]) input[name="user_ids"]');
+        visibleCheckboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
         updateSelectedCount();
     }
-});
 
-// Form validation
-document.getElementById('userSelectionForm').addEventListener('submit', function(e) {
-    const checkedBoxes = document.querySelectorAll('input[name="user_ids"]:checked');
-    if (checkedBoxes.length === 0) {
-        e.preventDefault();
-        alert('Please select at least one user to display this ad to.');
-        return false;
+    // Clear all selections
+    function clearAll() {
+        const checkboxes = document.querySelectorAll('input[name="user_ids"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        updateSelectedCount();
     }
-});
 
-// Initialize
-updateSelectedCount();
+    // Search functionality
+    document.getElementById('userSearch').addEventListener('input', function () {
+        const searchTerm = this.value.toLowerCase();
+        const userItems = document.querySelectorAll('.user-item');
+
+        userItems.forEach(item => {
+            const username = item.dataset.username;
+            const email = item.dataset.email;
+
+            if (username.includes(searchTerm) || email.includes(searchTerm)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+
+    // Tier filtering
+    function toggleTierVisibility() {
+        const showFree = document.getElementById('showFree').checked;
+        const showElite = document.getElementById('showElite').checked;
+
+        // Toggle sections
+        const freeSection = document.getElementById('freeSection');
+        const eliteSection = document.getElementById('eliteSection');
+
+        if (freeSection) freeSection.style.display = showFree ? '' : 'none';
+        if (eliteSection) eliteSection.style.display = showElite ? '' : 'none';
+    }
+
+    // Add event listeners for tier filters
+    document.getElementById('showFree').addEventListener('change', toggleTierVisibility);
+    document.getElementById('showElite').addEventListener('change', toggleTierVisibility);
+
+    // Add event listeners for checkboxes
+    document.addEventListener('change', function (e) {
+        if (e.target.name === 'user_ids') {
+            updateSelectedCount();
+        }
+    });
+
+    // Form validation
+    document.getElementById('userSelectionForm').addEventListener('submit', function (e) {
+        const checkedBoxes = document.querySelectorAll('input[name="user_ids"]:checked');
+        if (checkedBoxes.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one user to display this ad to.');
+            return false;
+        }
+    });
+
+    // Section-level "Select All" checkboxes
+    document.querySelectorAll('.section-selector').forEach(selector => {
+        selector.addEventListener('change', function () {
+            const tier = this.dataset.targetTier;
+            const isChecked = this.checked;
+            // Only select visible checkboxes in this section
+            const sectionSelector = `.user-item[data-tier="${tier}"]:not([style*="display: none"]) input[name="user_ids"]`;
+            const checkboxes = document.querySelectorAll(sectionSelector);
+
+            checkboxes.forEach(cb => {
+                cb.checked = isChecked;
+            });
+            updateSelectedCount();
+        });
+    });
+
+    // Initialize
+    updateSelectedCount();
 </script>
 
 <style>
-.avatar-sm {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
-    font-weight: bold;
-}
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+        font-weight: bold;
+    }
 
-.form-check-label {
-    cursor: pointer;
-    width: 100%;
-}
+    .form-check-label {
+        cursor: pointer;
+        width: 100%;
+    }
 
-.form-check {
-    padding: 0.5rem;
-    border: 1px solid #dee2e6;
-    border-radius: 0.375rem;
-    transition: all 0.2s;
-}
+    .form-check {
+        padding: 0.5rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        transition: all 0.2s;
+    }
 
-.form-check:hover {
-    background-color: #f8f9fa;
-    border-color: #6f42c1;
-}
+    .form-check:hover {
+        background-color: #f8f9fa;
+        border-color: #6f42c1;
+    }
 
-.form-check-input:checked + .form-check-label {
-    background-color: #e7f3ff;
-}
+    .form-check-input:checked+.form-check-label {
+        background-color: #e7f3ff;
+    }
 
-.btn-admin {
-    background-color: #6f42c1;
-    border-color: #6f42c1;
-    color: white;
-}
+    .btn-admin {
+        background-color: #6f42c1;
+        border-color: #6f42c1;
+        color: white;
+    }
 
-.btn-admin:hover {
-    background-color: #5a359a;
-    border-color: #5a359a;
-    color: white;
-}
+    .btn-admin:hover {
+        background-color: #5a359a;
+        border-color: #5a359a;
+        color: white;
+    }
 
-.sticky-top {
-    z-index: 1020;
-}
+    .sticky-top {
+        z-index: 1020;
+    }
 
-.btn-check:checked + .btn {
-    background-color: #6f42c1;
-    border-color: #6f42c1;
-    color: white;
-}
+    .btn-check:checked+.btn {
+        background-color: #6f42c1;
+        border-color: #6f42c1;
+        color: white;
+    }
 </style>
 {% endblock %}

@@ -36,7 +36,17 @@ from werkzeug.security import check_password_hash, generate_password_hash
 # Import DDoS Protection
 from ddos_protection import DDoSProtection
 from chatbot import get_chat_response
-from admin_panel import admin_bp, ensure_admin_tables, track_ad_impression, track_user_activity
+
+from admin_panel import admin_bp, ensure_admin_tables, track_ad_impression, track_user_activity, log_admin_activity
+
+def login_or_admin_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if not g.get("user") and not session.get("admin_uid"):
+            flash("Please log in to continue", "warning")
+            return redirect(url_for("login"))
+        return fn(*args, **kwargs)
+    return wrapper
 
 # Configuration
 DATABASE = os.path.join(os.path.dirname(__file__), "smart_links.db")
@@ -498,18 +508,19 @@ def create_app() -> Flask:
             return redirect(url_for("index"))
         
         # Get active ads that are either:
-        # 1. From the link owner (original behavior)
-        # 2. Assigned to the link owner by admin (new targeted ads)
+        # 1. Owned by the user AND have no specific assignments (personal ads)
+        # 2. Specifically assigned to this user via ad_display_assignments
         ads_data = query_db(
             """
             SELECT DISTINCT pa.*, u.username 
             FROM personalized_ads pa 
             JOIN users u ON pa.user_id = u.id 
-            LEFT JOIN ad_display_assignments ada ON pa.id = ada.ad_id
             WHERE pa.is_active = 1 
             AND (
-                pa.user_id = ? 
-                OR ada.target_user_id = ?
+                -- Case 1: Ad is owned by user AND has no specific targeting assignments
+                (pa.user_id = ? AND NOT EXISTS (SELECT 1 FROM ad_display_assignments WHERE ad_id = pa.id))
+                -- Case 2: Ad is specifically assigned to this user
+                OR pa.id IN (SELECT ad_id FROM ad_display_assignments WHERE target_user_id = ?)
             )
             ORDER BY pa.grid_position ASC, RANDOM()
             """,
@@ -671,15 +682,18 @@ def create_app() -> Flask:
             return redirect(url_for("landing"))
 
     @app.route("/links/<code>")
-    @login_required
+    @login_or_admin_required
     def analytics(code):
+        is_admin = session.get("admin_uid") is not None
         try:
             link = query_db("SELECT * FROM links WHERE code = ?", [code], one=True)
             if not link:
                 abort(404)
 
-            # Track analytics view activity
-            track_user_activity(g.user["id"], "view_analytics", f"Viewed analytics for link: {code}")
+            if g.get("user"):
+                track_user_activity(g.user["id"], "view_analytics", f"Viewed analytics for link: {code}")
+            elif is_admin:
+                 log_admin_activity("view_analytics", "link", link["id"], f"Viewed analytics for link {code}")
 
             # Get the behavior rule for this link
             behavior_rule = None
@@ -1004,6 +1018,7 @@ def create_app() -> Flask:
                 behavior_rule=behavior_rule,
                 detailed_visitors=detailed_visitors,
                 isp_data=isp_data,
+                is_admin=is_admin,
             )
         except Exception as e:
             import traceback
