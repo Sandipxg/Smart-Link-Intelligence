@@ -127,6 +127,10 @@ def create_app() -> Flask:
     @app.route("/maintenance")
     def maintenance():
         """Public maintenance page"""
+        # Clear user session to force re-login after maintenance
+        session.pop(USER_SESSION_KEY, None)
+        g.user = None
+        
         # unexpected error handling if table doesn't exist yet
         try:
             msg_setting = query_db("SELECT setting_value FROM system_settings WHERE setting_key = 'maintenance_message'", one=True)
@@ -2556,6 +2560,9 @@ def _before_request():
             )
             
             if not (is_admin or is_exempt):
+                # Clear user session to force re-login after maintenance
+                session.pop(USER_SESSION_KEY, None)
+                g.user = None
                 return redirect(url_for('maintenance'))
     except Exception:
         # Fail gracefully if DB table doesn't exist or query fails
