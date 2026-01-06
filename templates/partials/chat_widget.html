@@ -1,0 +1,77 @@
+<!-- Chat Widget Toggle -->
+<button class="chat-toggle" id="chatToggle">
+    <img src="{{ url_for('static', filename='img/chatbot_logo.png') }}" alt="Chat">
+</button>
+
+<!-- Chat Window -->
+<div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+        <div class="chat-avatar">
+            <i class="bi bi-robot"></i>
+        </div>
+        <div class="chat-info">
+            <h4>Smart Link AI Assistant</h4>
+            <span>Online • Ready to help</span>
+        </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        <!-- Messages will be injected here -->
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="chat-faq-section">
+        <div class="chat-faq-title">Quick Questions</div>
+        <div class="chat-faq-buttons">
+            <button class="chat-faq-btn" onclick="sendFAQQuestion('What is Smart Link Intelligence?')">
+                <i class="bi bi-info-circle"></i> What is this?
+            </button>
+            <button class="chat-faq-btn" onclick="sendFAQQuestion('How does it work?')">
+                <i class="bi bi-gear"></i> How it works
+            </button>
+            <button class="chat-faq-btn" onclick="sendFAQQuestion('What are the features?')">
+                <i class="bi bi-star"></i> Features
+            </button>
+            <button class="chat-faq-btn" onclick="sendFAQQuestion('Is it free?')">
+                <i class="bi bi-currency-dollar"></i> Pricing
+            </button>
+            <button class="chat-faq-btn" onclick="sendFAQQuestion('Is it secure?')">
+                <i class="bi bi-shield-check"></i> Security
+            </button>
+            <button class="chat-faq-btn" onclick="sendFAQQuestion('how to create link')">
+                <i class="bi bi-plus-circle"></i> Create Link
+            </button>
+            <button class="chat-faq-btn" onclick="sendFAQQuestion('analytics')">
+                <i class="bi bi-graph-up"></i> Analytics
+            </button>
+            <button class="chat-faq-btn" onclick="sendFAQQuestion('behavior rules')">
+                <i class="bi bi-sliders"></i> Behavior Rules
+            </button>
+            <button class="chat-faq-btn" onclick="sendFAQQuestion('DDoS protection')">
+                <i class="bi bi-shield-fill"></i> DDoS Protection
+            </button>
+            <button class="chat-faq-btn" onclick="sendFAQQuestion('LinkPro Elite')">
+                <i class="bi bi-crown-fill"></i> Premium
+            </button>
+            <button class="chat-faq-btn" onclick="sendFAQQuestion('export analytics')">
+                <i class="bi bi-download"></i> Export Data
+            </button>
+            <button class="chat-faq-btn" onclick="sendFAQQuestion('help')">
+                <i class="bi bi-question-circle"></i> Support
+            </button>
+        </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="chat-input-area">
+        <input type="text" class="chat-input" id="chatInput" placeholder="Type your message...">
+        <button class="chat-send" id="chatSend">
+            <i class="bi bi-send-fill"></i>
+        </button>
+    </div>
+</div>

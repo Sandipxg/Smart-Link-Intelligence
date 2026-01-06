@@ -1,0 +1,17 @@
+.user-checkbox-list .form-check:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 4px;
+}
+
+.user-checkbox-list label {
+    cursor: pointer;
+}
+
+.form-check-input:checked+.form-check-label span {
+    font-weight: bold;
+    color: var(--bs-primary);
+}
+
+.sticky-top {
+    z-index: 10;
+}

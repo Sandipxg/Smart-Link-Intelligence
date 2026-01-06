@@ -408,12 +408,7 @@
     }
 </script>
 
-<style>
-    .avatar-lg {
-        width: 80px;
-        height: 80px;
-        font-size: 32px;
-        font-weight: bold;
-    }
-</style>
+{% block extra_head %}
+<link href="{{ url_for('static', filename='css/admin_user_detail.css') }}" rel="stylesheet">
+{% endblock %}
 {% endblock %}

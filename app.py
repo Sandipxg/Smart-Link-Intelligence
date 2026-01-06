@@ -118,6 +118,11 @@ def create_app() -> Flask:
             return jsonify({"error": "No message provided"}), 400
         
         response = get_chat_response(message)
+        
+        # Track AI chat activity
+        if g.user:
+            track_user_activity(g.user["id"], "use_ai_chat", "Interacted with AI chatbot")
+            
         return jsonify({"response": response})
 
     @app.route("/")
@@ -188,6 +193,9 @@ def create_app() -> Flask:
         user_tier = user_dict.get("membership_tier", "free")
         tier_info = MEMBERSHIP_TIERS.get(user_tier, MEMBERSHIP_TIERS["free"])
         link_count = len(links)
+        
+        # Track dashboard view
+        track_user_activity(g.user["id"], "view_dashboard", "Viewed main dashboard")
         
         return render_template("index.html", 
                                links=links, 
@@ -517,48 +525,59 @@ def create_app() -> Flask:
         # Get active ads that are either:
         # 1. Owned by the user AND have no specific assignments (personal ads)
         # 2. Specifically assigned to this user via ad_display_assignments
+        # 3. Global Ads (owned by no one/admin)
         ads_data = query_db(
             """
-            SELECT DISTINCT pa.*, u.username 
+            SELECT DISTINCT pa.*, COALESCE(u.username, 'System') as username 
             FROM personalized_ads pa 
-            JOIN users u ON pa.user_id = u.id 
+            LEFT JOIN users u ON pa.user_id = u.id 
             WHERE pa.is_active = 1 
             AND (
                 -- Case 1: Ad is owned by user AND has no specific targeting assignments
                 (pa.user_id = ? AND NOT EXISTS (SELECT 1 FROM ad_display_assignments WHERE ad_id = pa.id))
                 -- Case 2: Ad is specifically assigned to this user
                 OR pa.id IN (SELECT ad_id FROM ad_display_assignments WHERE target_user_id = ?)
+                -- Case 3: Global Ads (owned by no one/admin)
+                OR (pa.user_id IS NULL AND NOT EXISTS (SELECT 1 FROM ad_display_assignments WHERE ad_id = pa.id))
             )
-            ORDER BY pa.grid_position ASC, RANDOM()
+            ORDER BY RANDOM()
             """,
             [link["user_id"], link["user_id"]]
         )
         
-        # Organize ads by grid position with random selection
+        # Organize ads with randomized selection
         ads_by_position = {1: None, 2: None, 3: None}
         
-        # Separate ads by position
-        position_ads = {1: [], 2: [], 3: []}
-        for ad in ads_data:
-            position = ad["grid_position"]
-            if position in position_ads:
-                position_ads[position].append(ad)
+        # Separate ads by type
+        large_ads = [ad for ad in ads_data if ad["grid_position"] == 1]
+        small_ads = [ad for ad in ads_data if ad["grid_position"] in [2, 3]]
         
-        # Randomly select one ad per position (1 large + 2 small)
         import random
-        for position in [1, 2, 3]:
-            if position_ads[position]:
-                selected_ad = random.choice(position_ads[position])
-                ads_by_position[position] = selected_ad
+        
+        # Select one Large ad for Position 1
+        if large_ads:
+            selected_large = random.choice(large_ads)
+            ads_by_position[1] = selected_large
+            # Track impression
+            try:
+                track_ad_impression(link["id"], link["user_id"], "large", 1, get_client_ip(), selected_large['id'])
+            except Exception as e:
+                print(f"Error tracking large ad impression: {e}")
                 
-                # Track ad impression and revenue
-                ad_type = "large" if position == 1 else "small"
-                ip_address = get_client_ip()
+        # Select two unique Small ads for Position 2 and 3
+        if small_ads:
+            # Pick up to 2 unique ads from the small ads pool
+            selected_small = random.sample(small_ads, min(2, len(small_ads)))
+            
+            # Assign to positions
+            for i, ad in enumerate(selected_small):
+                pos = i + 2  # 2 or 3
+                ads_by_position[pos] = ad
+                # Track impression
                 try:
-                    revenue = track_ad_impression(link["id"], link["user_id"], ad_type, position, ip_address, selected_ad['id'])
-                    print(f"Ad impression tracked: {ad_type} ad, revenue: ${revenue:.2f}")
+                    track_ad_impression(link["id"], link["user_id"], "small", pos, get_client_ip(), ad['id'])
                 except Exception as e:
-                    print(f"Error tracking ad impression: {e}")
+                    print(f"Error tracking small ad impression: {e}")
         
         # Count how many ads we have
         active_ads_count = sum(1 for ad in ads_by_position.values() if ad is not None)
@@ -1227,6 +1246,10 @@ def create_app() -> Flask:
             for day_info in daily_data:
                 writer.writerow(['Daily Pattern', day_info['day'], day_info['count']])
 
+        # Track CSV export activity
+        if g.user:
+            track_user_activity(g.user["id"], "export_analytics", f"Exported analytics (CSV) for link: {code_id}")
+
         from flask import Response
         return Response(
             output.getvalue(),
@@ -1313,6 +1336,9 @@ def create_app() -> Flask:
             </html>
             """
             
+            # Track Excel export activity
+            track_user_activity(g.user["id"], "export_analytics", f"Exported detailed visitor log (Excel) for link: {code_id}")
+
             from flask import Response
             return Response(
                 html_content,
@@ -1545,6 +1571,9 @@ def create_app() -> Flask:
                 [g.user["id"]]
             )
         
+        # Track behavior rules view
+        track_user_activity(g.user["id"], "view_rules", "Viewed behavior rules")
+        
         return render_template("behavior_rules.html", user_rules=user_rules)
 
     @app.route("/behavior-rules/create", methods=["POST"])
@@ -1586,6 +1615,7 @@ def create_app() -> Flask:
             [g.user["id"], rule_name, returning_window_hours, interested_threshold, engaged_threshold]
         )
         
+        track_user_activity(g.user["id"], "create_rule", f"Created new behavior rule: {rule_name}")
         flash(f"Behavior rule '{rule_name}' created successfully!", "success")
         return redirect(url_for("behavior_rules"))
 
@@ -1607,6 +1637,7 @@ def create_app() -> Flask:
             flash("Cannot delete the default rule", "danger")
             return redirect(url_for("behavior_rules"))
         
+        track_user_activity(g.user["id"], "delete_rule", f"Deleted behavior rule: {rule['rule_name']}")
         execute_db("DELETE FROM behavior_rules WHERE id = ?", [rule_id])
         flash("Behavior rule deleted successfully", "success")
         return redirect(url_for("behavior_rules"))
@@ -1631,6 +1662,7 @@ def create_app() -> Flask:
         # Set this rule as default
         execute_db("UPDATE behavior_rules SET is_default = 1 WHERE id = ?", [rule_id])
         
+        track_user_activity(g.user["id"], "set_default_rule", f"Set default behavior rule to: {rule['rule_name']}")
         flash(f"'{rule['rule_name']}' is now your default behavior rule", "success")
         return redirect(url_for("behavior_rules"))
 
@@ -1680,6 +1712,9 @@ def create_app() -> Flask:
             [g.user["id"]]
         )
         
+        # Track DDoS dashboard view
+        track_user_activity(g.user["id"], "view_ddos_dashboard", "Viewed DDoS protection dashboard")
+        
         return render_template("ddos_protection.html", 
                              links=links_with_protection, 
                              recent_events=recent_events)
@@ -1718,6 +1753,7 @@ def create_app() -> Flask:
             [link_id, 'manual_recovery', 1, datetime.utcnow().isoformat(), 0]
         )
         
+        track_user_activity(g.user["id"], "recover_link", f"Manually recovered link: {link['code']}")
         flash(f"Link '{link['code']}' has been recovered and is now active", "success")
         return redirect(url_for("ddos_protection_dashboard"))
 
@@ -1747,6 +1783,8 @@ def create_app() -> Flask:
             """,
             [link_id]
         )
+        
+        track_user_activity(g.user["id"], "view_ddos_stats", f"Viewed DDoS stats for link: {link['code']}")
         
         return render_template("ddos_link_stats.html", 
                              link=link, 
@@ -1840,6 +1878,9 @@ def create_app() -> Flask:
             ORDER BY n.created_at DESC
         """, [g.user["id"], g.user["id"], user_tier])
         
+        # Track notifications view
+        track_user_activity(g.user["id"], "view_notifications", "Viewed notification center")
+        
         return render_template("notifications.html", notifications=user_notifications)
 
     @app.route("/delete-notification/<int:notification_id>", methods=["POST"])
@@ -1867,6 +1908,7 @@ def create_app() -> Flask:
             if not exists:
                 execute_db("INSERT INTO notification_dismissals (user_id, notification_id) VALUES (?, ?)", 
                          [g.user["id"], notification_id])
+                track_user_activity(g.user["id"], "delete_notification", "Dismissed a notification")
                 flash("Notification removed", "success")
         else:
             flash("Notification not found", "danger")
@@ -1882,11 +1924,13 @@ def create_app() -> Flask:
     @app.route("/documentation")
     @login_required
     def documentation():
+        track_user_activity(g.user["id"], "view_docs", "Viewed documentation")
         return render_template("documentation.html")
 
     @app.route("/upgrade")
     @login_required
     def upgrade():
+        track_user_activity(g.user["id"], "view_upgrade", "Viewed upgrade plans")
         return render_template("upgrade.html")
 
     @app.route("/upgrade/process", methods=["POST"])
@@ -1910,6 +1954,7 @@ def create_app() -> Flask:
             [target_tier, expires_at, g.user["id"]]
         )
         
+        track_user_activity(g.user["id"], "upgrade", f"Upgraded account to {target_tier}")
         tier_name = MEMBERSHIP_TIERS[target_tier]["name"]
         flash(f"🎉 Upgraded to {tier_name}! Enjoy your new features.", "success")
         return redirect(url_for("index"))
@@ -1936,6 +1981,9 @@ def create_app() -> Flask:
         # Get ad statistics
         total_ads = len(user_ads)
         active_ads = len([ad for ad in user_ads if ad["is_active"]])
+        
+        # Track ad management view
+        track_user_activity(g.user["id"], "view_ads", "Viewed ad management")
         
         return render_template("create_ad.html", user_ads=user_ads, total_ads=total_ads, active_ads=active_ads)
 
@@ -2011,6 +2059,7 @@ def create_app() -> Flask:
             [g.user["id"], title, description, cta_text, cta_url, background_color, text_color, icon, grid_position, ad_type, image_filename]
         )
         
+        track_user_activity(g.user["id"], "create_ad", f"Created personal ad: {title}")
         flash("🎉 Your personalized ad has been created successfully!", "success")
         return redirect(url_for("create_ad"))
 
@@ -2038,6 +2087,7 @@ def create_app() -> Flask:
         )
         
         status_text = "activated" if new_status else "deactivated"
+        track_user_activity(g.user["id"], "toggle_ad", f"Toggled ad status: {ad['title']} ({status_text})")
         flash(f"Ad has been {status_text}", "success")
         return redirect(url_for("create_ad"))
 
@@ -2054,6 +2104,7 @@ def create_app() -> Flask:
             flash("Ad not found", "danger")
             return redirect(url_for("create_ad"))
         
+        track_user_activity(g.user["id"], "delete_ad", f"Deleted personal ad: {ad['title']}")
         execute_db("DELETE FROM personalized_ads WHERE id = ?", [ad_id])
         flash("Ad has been deleted", "success")
         return redirect(url_for("create_ad"))
@@ -2064,6 +2115,9 @@ def create_app() -> Flask:
         # Get user statistics
         total_links = query_db("SELECT COUNT(*) as count FROM links WHERE user_id = ?", [g.user["id"]], one=True)["count"]
         total_clicks = query_db("SELECT COUNT(*) as count FROM visits v JOIN links l ON v.link_id = l.id WHERE l.user_id = ?", [g.user["id"]], one=True)["count"]
+        
+        # Track settings view
+        track_user_activity(g.user["id"], "view_settings", "Viewed account settings")
         
         return render_template("settings.html", total_links=total_links, total_clicks=total_clicks)
 
@@ -2088,6 +2142,7 @@ def create_app() -> Flask:
                 flash("Current password is incorrect", "danger")
                 return redirect(url_for("settings"))
         
+        track_user_activity(g.user["id"], "update_settings", "Updated account security/email settings")
         flash("Settings updated successfully", "success")
         return redirect(url_for("settings"))
 
@@ -2096,6 +2151,9 @@ def create_app() -> Flask:
     def update_preferences():
         # For now, just show success message
         # In a real app, you'd store these preferences in the database
+        # Track preferences update
+        track_user_activity(g.user["id"], "update_preferences", "Updated user preferences")
+        
         flash("Preferences updated successfully", "success")
         return redirect(url_for("settings"))
 
@@ -2187,6 +2245,9 @@ def create_app() -> Flask:
             "linkStats": [{"state": row["state"], "count": row["count"]} for row in link_stats]
         }
         
+        # Track analytics overview view
+        track_user_activity(g.user["id"], "view_analytics_overview", "Viewed analytics overview")
+        
         return render_template(
             "analytics_overview.html",
             links=links,
@@ -2276,6 +2337,9 @@ def create_app() -> Flask:
             </html>
             """
             
+            # Track Excel overview export activity
+            track_user_activity(g.user["id"], "export_overview", "Exported analytics overview (Excel)")
+            
             # Create response with Excel MIME type
             from flask import Response
             return Response(
@@ -2351,6 +2415,9 @@ def create_app() -> Flask:
                     str(link["created_at"])[:10] if link["created_at"] else ""
                 ])
             
+            # Track CSV overview export activity
+            track_user_activity(g.user["id"], "export_overview", "Exported analytics overview (CSV)")
+            
             # Create response
             from flask import Response
             return Response(
@@ -2385,6 +2452,9 @@ def create_app() -> Flask:
             
             # Delete the link itself
             execute_db("DELETE FROM links WHERE id = ?", [link_id])
+            
+            # Track link deletion
+            track_user_activity(g.user["id"], "delete_link", f"Deleted link: {link['code']}")
             
             return jsonify({
                 "success": True, 
@@ -2482,7 +2552,7 @@ def ensure_db():
         """
         CREATE TABLE IF NOT EXISTS personalized_ads (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
+            user_id INTEGER,  -- Made nullable
             title TEXT NOT NULL,
             description TEXT NOT NULL,
             cta_text TEXT NOT NULL,

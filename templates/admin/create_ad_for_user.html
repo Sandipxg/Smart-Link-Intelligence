@@ -18,12 +18,8 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="title" class="form-label">Ad Title *</label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="title" 
-                                       name="title" 
-                                       placeholder="Enter ad title"
-                                       required>
+                                <input type="text" class="form-control" id="title" name="title"
+                                    placeholder="Enter ad title" required>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -40,35 +36,23 @@
 
                     <div class="mb-3">
                         <label for="description" class="form-label">Description *</label>
-                        <textarea class="form-control" 
-                                  id="description" 
-                                  name="description" 
-                                  rows="3" 
-                                  placeholder="Enter ad description"
-                                  required></textarea>
+                        <textarea class="form-control" id="description" name="description" rows="3"
+                            placeholder="Enter ad description" required></textarea>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="cta_text" class="form-label">Call-to-Action Text *</label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="cta_text" 
-                                       name="cta_text" 
-                                       placeholder="e.g., Learn More, Buy Now"
-                                       required>
+                                <input type="text" class="form-control" id="cta_text" name="cta_text"
+                                    placeholder="e.g., Learn More, Buy Now" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="cta_url" class="form-label">Target URL *</label>
-                                <input type="url" 
-                                       class="form-control" 
-                                       id="cta_url" 
-                                       name="cta_url" 
-                                       placeholder="https://example.com"
-                                       required>
+                                <input type="url" class="form-control" id="cta_url" name="cta_url"
+                                    placeholder="https://example.com" required>
                             </div>
                         </div>
                     </div>
@@ -77,32 +61,21 @@
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="background_color" class="form-label">Background Color</label>
-                                <input type="color" 
-                                       class="form-control form-control-color" 
-                                       id="background_color" 
-                                       name="background_color" 
-                                       value="#667eea">
+                                <input type="color" class="form-control form-control-color" id="background_color"
+                                    name="background_color" value="#667eea">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="text_color" class="form-label">Text Color</label>
-                                <input type="color" 
-                                       class="form-control form-control-color" 
-                                       id="text_color" 
-                                       name="text_color" 
-                                       value="#ffffff">
+                                <input type="color" class="form-control form-control-color" id="text_color"
+                                    name="text_color" value="#ffffff">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="icon" class="form-label">Icon/Emoji</label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="icon" 
-                                       name="icon" 
-                                       value="🚀" 
-                                       maxlength="2">
+                                <input type="text" class="form-control" id="icon" name="icon" value="🚀" maxlength="2">
                             </div>
                         </div>
                     </div>
@@ -128,15 +101,16 @@
             </div>
             <div class="card-body">
                 <div class="text-center">
-                    <div class="avatar-lg bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3">
+                    <div
+                        class="avatar-lg bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3">
                         {{ user.username[0].upper() }}
                     </div>
                     <h6>{{ user.username }}</h6>
                     <p class="text-muted small">{{ user.email or 'No email provided' }}</p>
                     {% if user.is_premium %}
-                        <span class="badge bg-warning text-dark">Premium User</span>
+                    <span class="badge bg-warning text-dark">Premium User</span>
                     {% else %}
-                        <span class="badge bg-secondary">Free User</span>
+                    <span class="badge bg-secondary">Free User</span>
                     {% endif %}
                 </div>
             </div>
@@ -164,7 +138,7 @@
             </div>
             <div class="card-body">
                 <small class="text-muted">
-                    <strong>Admin Privilege:</strong> You can create ads for any user, including free users. 
+                    <strong>Admin Privilege:</strong> You can create ads for any user, including free users.
                     This bypasses the normal Elite Pro restriction.
                 </small>
                 <hr>
@@ -184,46 +158,41 @@
 
 {% block scripts %}
 <script>
-// Live preview functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const titleInput = document.getElementById('title');
-    const descriptionInput = document.getElementById('description');
-    const ctaInput = document.getElementById('cta_text');
-    const backgroundInput = document.getElementById('background_color');
-    const textColorInput = document.getElementById('text_color');
-    const iconInput = document.getElementById('icon');
-    
-    const previewTitle = document.getElementById('preview-title');
-    const previewDescription = document.getElementById('preview-description');
-    const previewCta = document.getElementById('preview-cta');
-    const previewIcon = document.getElementById('preview-icon');
-    const previewContainer = document.getElementById('ad-preview');
-    
-    function updatePreview() {
-        previewTitle.textContent = titleInput.value || 'Your Ad Title';
-        previewDescription.textContent = descriptionInput.value || 'Your ad description will appear here';
-        previewCta.textContent = ctaInput.value || 'Call to Action';
-        previewIcon.textContent = iconInput.value || '🚀';
-        previewContainer.style.background = backgroundInput.value;
-        previewContainer.style.color = textColorInput.value;
-    }
-    
-    // Add event listeners
-    titleInput.addEventListener('input', updatePreview);
-    descriptionInput.addEventListener('input', updatePreview);
-    ctaInput.addEventListener('input', updatePreview);
-    backgroundInput.addEventListener('input', updatePreview);
-    textColorInput.addEventListener('input', updatePreview);
-    iconInput.addEventListener('input', updatePreview);
-});
+    // Live preview functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        const titleInput = document.getElementById('title');
+        const descriptionInput = document.getElementById('description');
+        const ctaInput = document.getElementById('cta_text');
+        const backgroundInput = document.getElementById('background_color');
+        const textColorInput = document.getElementById('text_color');
+        const iconInput = document.getElementById('icon');
+
+        const previewTitle = document.getElementById('preview-title');
+        const previewDescription = document.getElementById('preview-description');
+        const previewCta = document.getElementById('preview-cta');
+        const previewIcon = document.getElementById('preview-icon');
+        const previewContainer = document.getElementById('ad-preview');
+
+        function updatePreview() {
+            previewTitle.textContent = titleInput.value || 'Your Ad Title';
+            previewDescription.textContent = descriptionInput.value || 'Your ad description will appear here';
+            previewCta.textContent = ctaInput.value || 'Call to Action';
+            previewIcon.textContent = iconInput.value || '🚀';
+            previewContainer.style.background = backgroundInput.value;
+            previewContainer.style.color = textColorInput.value;
+        }
+
+        // Add event listeners
+        titleInput.addEventListener('input', updatePreview);
+        descriptionInput.addEventListener('input', updatePreview);
+        ctaInput.addEventListener('input', updatePreview);
+        backgroundInput.addEventListener('input', updatePreview);
+        textColorInput.addEventListener('input', updatePreview);
+        iconInput.addEventListener('input', updatePreview);
+    });
 </script>
 
-<style>
-.avatar-lg {
-    width: 80px;
-    height: 80px;
-    font-size: 32px;
-    font-weight: bold;
-}
-</style>
+{% block extra_head %}
+<link href="{{ url_for('static', filename='css/admin_create_ad_for_user.css') }}" rel="stylesheet">
+{% endblock %}
 {% endblock %}

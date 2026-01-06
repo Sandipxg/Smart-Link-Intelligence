@@ -295,32 +295,7 @@
     addCharacterCounter('cta_text', 50);
 </script>
 
-<style>
-    .form-control-color {
-        width: 100%;
-        height: 38px;
-    }
-
-    #adPreview {
-        border: 2px dashed #dee2e6;
-    }
-
-    .alert-info {
-        background-color: #e7f3ff;
-        border-color: #b8daff;
-        color: #004085;
-    }
-
-    .btn-admin {
-        background-color: #6f42c1;
-        border-color: #6f42c1;
-        color: white;
-    }
-
-    .btn-admin:hover {
-        background-color: #5a359a;
-        border-color: #5a359a;
-        color: white;
-    }
-</style>
+{% block extra_head %}
+<link href="{{ url_for('static', filename='css/admin_create_admin_ad.css') }}" rel="stylesheet">
+{% endblock %}
 {% endblock %}

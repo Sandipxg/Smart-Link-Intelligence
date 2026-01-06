@@ -1,0 +1,55 @@
+.ad-preview {
+    border-radius: 10px;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    min-height: 150px;
+}
+
+.ad-preview-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.preview-icon {
+    font-size: 1.5rem;
+}
+
+.preview-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.preview-description {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    line-height: 1.4;
+}
+
+.preview-cta {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-weight: bold;
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    align-self: flex-start;
+}
+
+.mini-ad-preview {
+    padding: 0.25rem 0.5rem;
+    border-radius: 5px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+}
+
+.form-control-color {
+    width: 50px;
+    height: 38px;
+    border-radius: 6px;
+}

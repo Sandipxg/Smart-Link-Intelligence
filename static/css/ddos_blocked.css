@@ -1,0 +1,20 @@
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn {
+    border-radius: 25px;
+    padding: 10px 20px;
+}
+
+.alert {
+    border-radius: 10px;
+}
+
+ul li {
+    margin-bottom: 8px;
+}
+
+.bi {
+    margin-right: 8px;
+}

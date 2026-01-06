@@ -313,55 +313,7 @@
     updateSelectedCount();
 </script>
 
-<style>
-    .avatar-sm {
-        width: 32px;
-        height: 32px;
-        font-size: 14px;
-        font-weight: bold;
-    }
-
-    .form-check-label {
-        cursor: pointer;
-        width: 100%;
-    }
-
-    .form-check {
-        padding: 0.5rem;
-        border: 1px solid #dee2e6;
-        border-radius: 0.375rem;
-        transition: all 0.2s;
-    }
-
-    .form-check:hover {
-        background-color: #f8f9fa;
-        border-color: #6f42c1;
-    }
-
-    .form-check-input:checked+.form-check-label {
-        background-color: #e7f3ff;
-    }
-
-    .btn-admin {
-        background-color: #6f42c1;
-        border-color: #6f42c1;
-        color: white;
-    }
-
-    .btn-admin:hover {
-        background-color: #5a359a;
-        border-color: #5a359a;
-        color: white;
-    }
-
-    .sticky-top {
-        z-index: 1020;
-    }
-
-    .btn-check:checked+.btn {
-        background-color: #6f42c1;
-        border-color: #6f42c1;
-        color: white;
-    }
-</style>
+{% block extra_head %}
+<link href="{{ url_for('static', filename='css/admin_display_ad_to_users.css') }}" rel="stylesheet">
+{% endblock %}
 {% endblock %}

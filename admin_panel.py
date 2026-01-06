@@ -145,6 +145,27 @@ def ensure_admin_tables():
         )
     """)
     
+    # Personalized Ads table
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS personalized_ads (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,  -- Made nullable
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            cta_text TEXT NOT NULL,
+            cta_url TEXT NOT NULL,
+            background_color TEXT DEFAULT '#667eea',
+            text_color TEXT DEFAULT '#ffffff',
+            icon TEXT DEFAULT '🚀',
+            is_active INTEGER DEFAULT 1,
+            grid_position INTEGER DEFAULT 1,
+            ad_type TEXT DEFAULT 'custom',
+            image_filename TEXT,
+            created_at TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )
+    """)
+    
     # Admin activity log
     conn.execute("""
         CREATE TABLE IF NOT EXISTS admin_activity_log (
@@ -590,19 +611,19 @@ def ads():
     
     if search:
         ads_query = """
-            SELECT pa.*, u.username
+            SELECT pa.*, COALESCE(u.username, 'System') as username
             FROM personalized_ads pa
-            JOIN users u ON pa.user_id = u.id
-            WHERE pa.title LIKE ? OR u.username LIKE ?
+            LEFT JOIN users u ON pa.user_id = u.id
+            WHERE pa.title LIKE ? OR u.username LIKE ? OR (u.username IS NULL AND 'System' LIKE ?)
             ORDER BY pa.created_at DESC
         """
         search_param = f"%{search}%"
-        ads_list = query_db(ads_query, [search_param, search_param])
+        ads_list = query_db(ads_query, [search_param, search_param, search_param])
     else:
         ads_list = query_db("""
-            SELECT pa.*, u.username
+            SELECT pa.*, COALESCE(u.username, 'System') as username
             FROM personalized_ads pa
-            JOIN users u ON pa.user_id = u.id
+            LEFT JOIN users u ON pa.user_id = u.id
             ORDER BY pa.created_at DESC
         """)
     
@@ -686,12 +707,12 @@ def create_admin_ad():
             if default_user:
                 user_id = default_user['id']
             else:
-                flash("No users found in database. Cannot create ad.", "danger")
-                return redirect(url_for('admin.ads'))
+                # If truly no users exist, allow user_id to be NULL (Global Ad)
+                user_id = None
 
-        # Validation (user_id is now handled)
-        if not all([user_id, title, description, cta_text, cta_url]):
-            flash("All fields are required", "danger")
+        # Validation (user_id is now optional for admin)
+        if not all([title, description, cta_text, cta_url]):
+            flash("All fields except user assignment are required", "danger")
             return render_template('admin/create_admin_ad.html')
         
         # Validate URL
@@ -699,11 +720,14 @@ def create_admin_ad():
             flash("Please enter a valid URL starting with http:// or https://", "danger")
             return render_template('admin/create_admin_ad.html')
         
-        # Validate user exists
-        user = query_db("SELECT * FROM users WHERE id = ?", [user_id], one=True)
-        if not user:
-            flash("Selected user not found", "danger")
-            return render_template('admin/create_admin_ad.html')
+        # Validate user exists if provided
+        user_name = "System"
+        if user_id:
+            user = query_db("SELECT * FROM users WHERE id = ?", [user_id], one=True)
+            if not user:
+                flash("Selected user not found", "danger")
+                return render_template('admin/create_admin_ad.html')
+            user_name = user['username']
         
         image_filename = None
         background_color = "#667eea"
@@ -739,9 +763,9 @@ def create_admin_ad():
         """, [user_id, title, description, cta_text, cta_url, background_color, text_color, icon, grid_position, ad_type, image_filename])
         
         log_admin_activity("create_ad", "ad", None, 
-                          f"Admin created ad '{title}' for user: {user['username']}")
+                          f"Admin created ad '{title}' for owner: {user_name}")
         
-        flash(f"Ad created successfully for {user['username']}", "success")
+        flash(f"Ad created successfully for {user_name}", "success")
         return redirect(url_for('admin.ads'))
     
     return render_template('admin/create_admin_ad.html')
@@ -782,6 +806,13 @@ def delete_ad(ad_id):
     
     return jsonify({"success": True, "message": "Ad deleted successfully"})
 
+@admin_bp.route('/ads/<int:ad_id>/assignment-count')
+@admin_required
+def get_ad_assignment_count(ad_id):
+    """Returns the number of users assigned to an ad"""
+    count = query_db("SELECT COUNT(*) as count FROM ad_display_assignments WHERE ad_id = ?", [ad_id], one=True)['count']
+    return jsonify({"success": True, "count": count})
+
 @admin_bp.route('/ads/<int:ad_id>/display-to-users', methods=['GET', 'POST'])
 @admin_required
 def display_ad_to_users(ad_id):
@@ -812,16 +843,31 @@ def display_ad_to_users(ad_id):
         return redirect(url_for('admin.ads'))
     
     # Get all users for the selection list
-    users_list = query_db("SELECT id, username, email, is_premium, membership_tier FROM users ORDER BY username ASC")
+    users_list = query_db("SELECT id, username, email, membership_tier FROM users ORDER BY username ASC")
     
     # Get currently assigned users
     assigned_users = query_db("SELECT target_user_id FROM ad_display_assignments WHERE ad_id = ?", [ad_id])
     assigned_user_ids = [row['target_user_id'] for row in assigned_users]
+
+    # Process users into tiers for the template
+    free_users = []
+    elite_users = []
     
-    return render_template('admin/ad_assignments.html', 
+    for u in users_list:
+        user_dict = dict(u)
+        user_dict['is_assigned'] = user_dict['id'] in assigned_user_ids
+        
+        tier = (user_dict.get('membership_tier') or 'free').lower()
+        if tier == 'elite':
+            elite_users.append(user_dict)
+        else:
+            free_users.append(user_dict)
+            
+    return render_template('admin/display_ad_to_users.html', 
                          ad=dict(ad), 
-                         users=[dict(row) for row in users_list],
-                         assigned_user_ids=assigned_user_ids)
+                         free_users=free_users,
+                         elite_users=elite_users,
+                         assigned_count=len(assigned_user_ids))
 
 @admin_bp.route('/broadcast', methods=['GET', 'POST'])
 @admin_required

@@ -105,61 +105,60 @@
                         </td>
                         <td>
                             {% if link.protection_level == 0 %}
-                                <span class="badge bg-success">Normal</span>
-                            {% elif link.protection_level <= 2 %}
-                                <span class="badge bg-info">Low</span>
-                            {% elif link.protection_level <= 3 %}
-                                <span class="badge bg-warning">Medium</span>
-                            {% elif link.protection_level <= 4 %}
-                                <span class="badge bg-danger">High</span>
-                            {% else %}
-                                <span class="badge bg-dark">Critical</span>
-                            {% endif %}
+                            <span class="badge bg-success">Normal</span>
+                            {% elif link.protection_level <= 2 %} <span class="badge bg-info">Low</span>
+                                {% elif link.protection_level <= 3 %} <span class="badge bg-warning">Medium</span>
+                                    {% elif link.protection_level <= 4 %} <span class="badge bg-danger">High</span>
+                                        {% else %}
+                                        <span class="badge bg-dark">Critical</span>
+                                        {% endif %}
                         </td>
                         <td>
                             {% if link.auto_disabled %}
-                                <span class="badge bg-danger">
-                                    <i class="bi bi-shield-x me-1"></i>Disabled
-                                </span>
+                            <span class="badge bg-danger">
+                                <i class="bi bi-shield-x me-1"></i>Disabled
+                            </span>
                             {% elif link.protection_level >= 4 %}
-                                <span class="badge bg-warning">
-                                    <i class="bi bi-shield-exclamation me-1"></i>Temp. Disabled
-                                </span>
+                            <span class="badge bg-warning">
+                                <i class="bi bi-shield-exclamation me-1"></i>Temp. Disabled
+                            </span>
                             {% elif link.protection_level >= 3 %}
-                                <span class="badge bg-info">
-                                    <i class="bi bi-shield-check me-1"></i>Captcha Required
-                                </span>
+                            <span class="badge bg-info">
+                                <i class="bi bi-shield-check me-1"></i>Captcha Required
+                            </span>
                             {% else %}
-                                <span class="badge bg-success">
-                                    <i class="bi bi-shield-check me-1"></i>Active
-                                </span>
+                            <span class="badge bg-success">
+                                <i class="bi bi-shield-check me-1"></i>Active
+                            </span>
                             {% endif %}
                         </td>
                         <td>
                             {% if link.ddos_events > 0 %}
-                                <span class="badge bg-warning">{{ link.ddos_events }}</span>
+                            <span class="badge bg-warning">{{ link.ddos_events }}</span>
                             {% else %}
-                                <span class="text-muted">0</span>
+                            <span class="text-muted">0</span>
                             {% endif %}
                         </td>
                         <td>
                             {% if link.last_ddos_event %}
-                                <small class="text-muted">{{ link.last_ddos_event[:16] }}</small>
+                            <small class="text-muted">{{ link.last_ddos_event[:16] }}</small>
                             {% else %}
-                                <small class="text-muted">Never</small>
+                            <small class="text-muted">Never</small>
                             {% endif %}
                         </td>
                         <td>
                             <div class="btn-group btn-group-sm">
                                 {% if link.auto_disabled or link.protection_level >= 3 %}
-                                <form method="POST" action="{{ url_for('recover_link', link_id=link.id) }}" class="d-inline">
-                                    <button type="submit" class="btn btn-success btn-sm" 
-                                            onclick="return confirm('Are you sure you want to recover this link?')">
+                                <form method="POST" action="{{ url_for('recover_link', link_id=link.id) }}"
+                                    class="d-inline">
+                                    <button type="submit" class="btn btn-success btn-sm"
+                                        onclick="return confirm('Are you sure you want to recover this link?')">
                                         <i class="bi bi-arrow-clockwise"></i> Recover
                                     </button>
                                 </form>
                                 {% endif %}
-                                <a href="{{ url_for('ddos_link_stats', link_id=link.id) }}" class="btn btn-outline-primary btn-sm">
+                                <a href="{{ url_for('ddos_link_stats', link_id=link.id) }}"
+                                    class="btn btn-outline-primary btn-sm">
                                     <i class="bi bi-bar-chart"></i> Stats
                                 </a>
                             </div>
@@ -216,15 +215,12 @@
                             <span class="badge bg-secondary">{{ event.event_type.replace('_', ' ').title() }}</span>
                         </td>
                         <td>
-                            {% if event.severity <= 2 %}
-                                <span class="badge bg-info">Low</span>
-                            {% elif event.severity <= 3 %}
-                                <span class="badge bg-warning">Medium</span>
-                            {% elif event.severity <= 4 %}
-                                <span class="badge bg-danger">High</span>
-                            {% else %}
-                                <span class="badge bg-dark">Critical</span>
-                            {% endif %}
+                            {% if event.severity <= 2 %} <span class="badge bg-info">Low</span>
+                                {% elif event.severity <= 3 %} <span class="badge bg-warning">Medium</span>
+                                    {% elif event.severity <= 4 %} <span class="badge bg-danger">High</span>
+                                        {% else %}
+                                        <span class="badge bg-dark">Critical</span>
+                                        {% endif %}
                         </td>
                         <td>
                             <span class="badge bg-light text-dark">Level {{ event.protection_level }}</span>
@@ -316,25 +312,7 @@
     </div>
 </div>
 
-<style>
-.card {
-    border: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.table th {
-    border-top: none;
-    font-weight: 600;
-    color: #495057;
-}
-
-.badge {
-    font-size: 0.75rem;
-}
-
-.btn-group-sm .btn {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-}
-</style>
+{% block extra_head %}
+<link href="{{ url_for('static', filename='css/ddos_protection.css') }}" rel="stylesheet">
+{% endblock %}
 {% endblock %}
