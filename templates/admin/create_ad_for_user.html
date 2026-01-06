@@ -157,40 +157,9 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-    // Live preview functionality
-    document.addEventListener('DOMContentLoaded', function () {
-        const titleInput = document.getElementById('title');
-        const descriptionInput = document.getElementById('description');
-        const ctaInput = document.getElementById('cta_text');
-        const backgroundInput = document.getElementById('background_color');
-        const textColorInput = document.getElementById('text_color');
-        const iconInput = document.getElementById('icon');
-
-        const previewTitle = document.getElementById('preview-title');
-        const previewDescription = document.getElementById('preview-description');
-        const previewCta = document.getElementById('preview-cta');
-        const previewIcon = document.getElementById('preview-icon');
-        const previewContainer = document.getElementById('ad-preview');
-
-        function updatePreview() {
-            previewTitle.textContent = titleInput.value || 'Your Ad Title';
-            previewDescription.textContent = descriptionInput.value || 'Your ad description will appear here';
-            previewCta.textContent = ctaInput.value || 'Call to Action';
-            previewIcon.textContent = iconInput.value || '🚀';
-            previewContainer.style.background = backgroundInput.value;
-            previewContainer.style.color = textColorInput.value;
-        }
-
-        // Add event listeners
-        titleInput.addEventListener('input', updatePreview);
-        descriptionInput.addEventListener('input', updatePreview);
-        ctaInput.addEventListener('input', updatePreview);
-        backgroundInput.addEventListener('input', updatePreview);
-        textColorInput.addEventListener('input', updatePreview);
-        iconInput.addEventListener('input', updatePreview);
-    });
-</script>
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin/admin_create_ad_for_user.js') }}"></script>
+{% endblock %}
 
 {% block extra_head %}
 <link href="{{ url_for('static', filename='css/admin/admin_create_ad_for_user.css') }}" rel="stylesheet">

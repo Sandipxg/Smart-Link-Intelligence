@@ -634,43 +634,9 @@
 
   <!-- Data for JavaScript -->
   <script>
-    // Use the pre-constructed payload from the backend
     window.analyticsData = {{ analytics_payload | tojson }};
-
-    // Function to show visitor details modal
-    function showVisitorModal(row) {
-      const visitor = JSON.parse(row.dataset.visitor);
-
-      document.getElementById('modal-ip').textContent = visitor.ip_address || 'N/A';
-      document.getElementById('modal-country').textContent = visitor.country || 'Unknown';
-      document.getElementById('modal-city').textContent = visitor.city || 'Unknown';
-      document.getElementById('modal-browser').textContent = visitor.browser || 'Unknown';
-      document.getElementById('modal-useragent').textContent = visitor.user_agent || 'Unknown';
-      document.getElementById('modal-referrer').textContent = visitor.referrer || 'no referrer';
-      document.getElementById('modal-hostname').textContent = visitor.hostname || 'Unknown';
-      document.getElementById('modal-isp').textContent = visitor.isp || 'Unknown';
-      document.getElementById('modal-org').textContent = visitor.org || 'Unknown';
-      document.getElementById('modal-timezone').textContent = visitor.timezone || 'Unknown';
-      document.getElementById('modal-device').textContent = visitor.device || 'Unknown';
-      document.getElementById('modal-behavior').textContent = visitor.behavior || 'Unknown';
-      document.getElementById('modal-timestamp').textContent = visitor.timestamp || 'Unknown';
-
-      // Coordinates
-      if (visitor.latitude && visitor.longitude) {
-        document.getElementById('modal-coords').innerHTML =
-          `${visitor.latitude}, ${visitor.longitude} 
-           <a href="https://www.google.com/maps?q=${visitor.latitude},${visitor.longitude}" target="_blank" class="ms-2 btn btn-sm btn-outline-primary">
-             View on Map
-           </a>`;
-      } else {
-        document.getElementById('modal-coords').textContent = 'Not available';
-      }
-
-      // Show the modal
-      const modal = new bootstrap.Modal(document.getElementById('visitorModal'));
-      modal.show();
-    }
   </script>
+  <script src="{{ url_for('static', filename='js/analytics_details.js') }}"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{{ url_for('static', filename='js/main.js') }}?v={{ range(1, 99999) | random }}"></script>
