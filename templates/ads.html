@@ -44,7 +44,7 @@
                     {% else %}
                     <!-- Custom Ad -->
                     <div class="ad-banner"
-                        style="background: linear-gradient(45deg, {{ ads_by_position[1].background_color }}, {{ ads_by_position[1].background_color }}dd); color: {{ ads_by_position[1].text_color }};">
+                        style="--ad-bg: {{ ads_by_position[1].background_color }}; --ad-bg-fade: {{ ads_by_position[1].background_color ~ 'dd' }}; --ad-text: {{ ads_by_position[1].text_color }}; background: linear-gradient(45deg, var(--ad-bg), var(--ad-bg-fade)); color: var(--ad-text);">
                         <div class="row align-items-center">
                             <div class="col-md-8">
                                 <h2 class="mb-2 fw-bold">{{ ads_by_position[1].icon }} {{ ads_by_position[1].title }}
@@ -148,7 +148,7 @@
                         {% else %}
                         <!-- Custom Ad -->
                         <div class="ad-content"
-                            style="background: linear-gradient(45deg, {{ ads_by_position[2].background_color }}, {{ ads_by_position[2].background_color }}dd); color: {{ ads_by_position[2].text_color }};">
+                            style="--ad-bg: {{ ads_by_position[2].background_color }}; --ad-bg-fade: {{ ads_by_position[2].background_color ~ 'dd' }}; --ad-text: {{ ads_by_position[2].text_color }}; background: linear-gradient(45deg, var(--ad-bg), var(--ad-bg-fade)); color: var(--ad-text);">
                             <span class="fs-1 mb-3 d-block">{{ ads_by_position[2].icon }}</span>
                             <h4 class="fw-bold mb-2">{{ ads_by_position[2].title }}</h4>
                             <p class="mb-3">{{ ads_by_position[2].description }}</p>
@@ -197,7 +197,7 @@
                         {% else %}
                         <!-- Custom Ad -->
                         <div class="ad-content"
-                            style="background: linear-gradient(45deg, {{ ads_by_position[3].background_color }}, {{ ads_by_position[3].background_color + 'dd' }}); color: {{ ads_by_position[3].text_color }};">
+                            style="--ad-bg: {{ ads_by_position[3].background_color }}; --ad-bg-fade: {{ ads_by_position[3].background_color ~ 'dd' }}; --ad-text: {{ ads_by_position[3].text_color }}; background: linear-gradient(45deg, var(--ad-bg), var(--ad-bg-fade)); color: var(--ad-text);">
                             <span class="fs-1 mb-3 d-block">{{ ads_by_position[3].icon }}</span>
                             <h4 class="fw-bold mb-2">{{ ads_by_position[3].title }}</h4>
                             <p class="mb-3">{{ ads_by_position[3].description }}</p>
