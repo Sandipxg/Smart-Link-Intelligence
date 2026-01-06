@@ -1,6 +1,9 @@
 import hashlib
 import os
 import re
+from dotenv import load_dotenv
+
+load_dotenv()
 import sqlite3
 import string
 import uuid
@@ -1396,10 +1399,63 @@ def create_app() -> Flask:
                 )
                 
                 # Send Welcome Email
+                # Professional HTML Email Template
+                html_content = f"""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }}
+                        .container {{ max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }}
+                        .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; text-align: center; }}
+                        .header h1 {{ margin: 0; font-size: 24px; font-weight: 700;letter-spacing: 1px; }}
+                        .content {{ padding: 30px; }}
+                        .welcome-text {{ font-size: 18px; color: #4a5568; margin-bottom: 20px; }}
+                        .feature-list {{ background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e2e8f0; }}
+                        .feature-item {{ margin-bottom: 10px; padding-left: 20px; position: relative; }}
+                        .feature-item:before {{ content: '✓'; position: absolute; left: 0; color: #667eea; font-weight: bold; }}
+                        .btn {{ display: inline-block; background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 25px; font-weight: 600; margin-top: 20px; transition: background 0.3s; }}
+                        .btn:hover {{ background: #5a67d8; }}
+                        .footer {{ background: #2d3748; color: #cbd5e0; padding: 20px; text-align: center; font-size: 12px; }}
+                        .social-links {{ margin-top: 10px; }}
+                        .social-links a {{ color: #a0aec0; text-decoration: none; margin: 0 10px; }}
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>Smart Link Intelligence</h1>
+                        </div>
+                        <div class="content">
+                            <p class="welcome-text">Hi <strong>{username}</strong>, Welcome aboard! 👋</p>
+                            <p>We're thrilled to have you join our community. Your account has been successfully created, and you're now ready to take your link management to the next level.</p>
+                            
+                            <div class="feature-list">
+                                <div class="feature-item">Create smart, trackable links instantly</div>
+                                <div class="feature-item">Access detailed analytics and insights</div>
+                                <div class="feature-item">Protect your links with advanced security</div>
+                            </div>
+                            
+                            <p>Ready to get started? detailed analytics are just a click away.</p>
+                            
+                            <div style="text-align: center;">
+                                <a href="{request.host_url}login" class="btn">Go to Dashboard</a>
+                            </div>
+                        </div>
+                        <div class="footer">
+                            <p>&copy; {datetime.now().year} Smart Link Intelligence. All rights reserved.</p>
+                            <p>You received this email because you signed up on our platform.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """
+
+                # Send Welcome Email
                 send_email(
                     to_email=email,
                     subject="Welcome to Smart Link Intelligence!",
-                    body=f"Hi {username},\n\nWelcome to Smart Link Intelligence! Your account has been created successfully.\n\nYou can now start creating smart links and tracking their analytics.\n\nBest regards,\nThe Smart Link Team"
+                    html_content=html_content
                 )
                 
                 # Log the user in automatically
@@ -2328,7 +2384,8 @@ def ensure_db():
             password_hash TEXT NOT NULL,
             created_at TEXT DEFAULT (datetime('now')),
             is_premium INTEGER DEFAULT 0,
-            premium_expires_at TEXT
+            premium_expires_at TEXT,
+            membership_tier TEXT DEFAULT 'free'
         )
         """
     )
@@ -2589,34 +2646,40 @@ def generate_code(length: int = 6) -> str:
     return "".join(alphabet[int.from_bytes(os.urandom(2), "big") % len(alphabet)] for _ in range(length))
 
 
-def send_email(to_email: str, subject: str, body: str):
-    smtp_host = os.environ.get("SMTP_HOST")
-    smtp_port = os.environ.get("SMTP_PORT", 587)
-    smtp_user = os.environ.get("SMTP_USER")
-    smtp_pass = os.environ.get("SMTP_PASSWORD")
+def send_email(to_email, subject, html_content):
+    EMAIL_USER = os.getenv("EMAIL_USER")
+    EMAIL_PASS = os.getenv("EMAIL_PASS")
 
-    if not smtp_host or not smtp_user or not smtp_pass:
-        print(f"--- MOCK EMAIL SEndING ---")
+    if not EMAIL_USER or not EMAIL_PASS:
+        print("--- MOCK EMAIL SENDING (Missing Credentials) ---")
         print(f"To: {to_email}")
         print(f"Subject: {subject}")
-        print(f"Body: {body}")
-        print(f"--------------------------")
+        print(f"Content: {html_content[:100]}...") # Truncate for log
+        print("------------------------------------------------")
         return
 
-    try:
-        msg = EmailMessage()
-        msg.set_content(body)
-        msg["Subject"] = subject
-        msg["From"] = smtp_user
-        msg["To"] = to_email
+    msg = EmailMessage()
+    msg["From"] = EMAIL_USER
+    msg["To"] = to_email
+    msg["Subject"] = subject
 
-        with smtplib.SMTP(smtp_host, int(smtp_port)) as server:
+    msg.set_content("This email requires HTML support.")
+    msg.add_alternative(html_content, subtype="html")
+
+    try:
+        # TLS is preferred (secure + widely allowed)
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
             server.starttls()
-            server.login(smtp_user, smtp_pass)
+            server.login(EMAIL_USER, EMAIL_PASS)
             server.send_message(msg)
         print(f"Email sent to {to_email}")
+        return True
+    except smtplib.SMTPAuthenticationError:
+        print("❌ Authentication failed – check App Password")
+        return False
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print("❌ Email error:", e)
+        return False
 
 
 def utcnow() -> datetime:
