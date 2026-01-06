@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0">
+                <i class="bi bi-bell-fill text-primary me-2"></i>Notifications
+            </h2>
+            <span class="badge bg-light text-dark border">{{ notifications|length }} total</span>
+        </div>
+
+        {% if notifications %}
+        <div class="list-group shadow-sm">
+            {% for n in notifications %}
+            <div
+                class="list-group-item list-group-item-action border-0 mb-2 rounded shadow-sm p-4 notification-item-{{ n.type }}">
+                <div class="d-flex w-100 justify-content-between align-items-start mb-2">
+                    <h5 class="mb-1 fw-bold text-{{ n.type }}">
+                        {% if n.type == 'info' %}
+                        <i class="bi bi-info-circle-fill me-2"></i>System Update
+                        {% elif n.type == 'success' %}
+                        <i class="bi bi-check-circle-fill me-2"></i>Success
+                        {% elif n.type == 'warning' %}
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Alert
+                        {% elif n.type == 'danger' %}
+                        <i class="bi bi-x-circle-fill me-2"></i>Important Notice
+                        {% endif %}
+                    </h5>
+                    <div class="d-flex align-items-center gap-3">
+                        <small class="text-muted">{{ n.created_at[:16] }}</small>
+                        <form action="{{ url_for('delete_notification', notification_id=n.id) }}" method="POST"
+                            class="d-inline">
+                            <button type="submit" class="btn btn-link p-0 text-muted delete-btn"
+                                title="Delete notification">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <p class="mb-0 text-dark" style="font-size: 1.1rem; line-height: 1.6;">
+                    {{ n.message }}
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="card border-0 shadow-sm text-center p-5">
+            <div class="card-body">
+                <i class="bi bi-bell-slash fa-4x text-light mb-3"></i>
+                <h4 class="text-muted">No notifications yet</h4>
+                <p class="text-secondary">When we have important updates for you, they will appear here.</p>
+                <a href="{{ url_for('index') }}" class="btn btn-primary mt-3">Back to Dashboard</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .list-group-item {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .list-group-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+        background-color: #fff;
+    }
+
+    .delete-btn {
+        transition: color 0.2s ease;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+    }
+
+    .delete-btn:hover {
+        color: var(--bs-danger) !important;
+    }
+
+    .bi-bell-slash {
+        font-size: 4rem;
+        color: #e9ecef;
+    }
+
+    .notification-item-info {
+        border-left: 5px solid var(--bs-info) !important;
+    }
+
+    .notification-item-success {
+        border-left: 5px solid var(--bs-success) !important;
+    }
+
+    .notification-item-warning {
+        border-left: 5px solid var(--bs-warning) !important;
+    }
+
+    .notification-item-danger {
+        border-left: 5px solid var(--bs-danger) !important;
+    }
+</style>
+{% endblock %}

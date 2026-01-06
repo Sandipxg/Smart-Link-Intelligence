@@ -186,11 +186,16 @@ def ensure_admin_tables():
         )
     """)
 
-    # System settings table (key-value storage for site-wide configs)
+    # Notifications table
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS system_settings (
-            setting_key TEXT PRIMARY KEY,
-            setting_value TEXT
+        CREATE TABLE IF NOT EXISTS notifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            message TEXT NOT NULL,
+            type TEXT DEFAULT 'info',
+            target_user_id INTEGER, -- NULL for group-based or site-wide
+            target_group TEXT DEFAULT 'all', -- 'all', 'free', 'elite', 'elite_pro'
+            created_at TEXT DEFAULT (datetime('now')),
+            is_read INTEGER DEFAULT 0
         )
     """)
     
@@ -799,68 +804,96 @@ def display_ad_to_users(ad_id):
                 execute_db("""
                     INSERT INTO ad_display_assignments (ad_id, target_user_id)
                     VALUES (?, ?)
-                """, [ad_id, int(user_id)])
-            except (ValueError, sqlite3.IntegrityError):
-                continue  # Skip invalid user IDs
+                """, [ad_id, user_id])
+            except:
+                pass
         
-        log_admin_activity("assign_ad_display", "ad", ad_id, 
-                          f"Assigned ad '{ad['title']}' to {len(selected_user_ids)} users")
-        
-        flash(f"Ad display settings updated for {len(selected_user_ids)} users", "success")
+        flash("Ad display assignments updated", "success")
         return redirect(url_for('admin.ads'))
     
-    # GET request - show user selection form
-    # Get all non-premium users (free and elite, but not premium users)
-    all_users = query_db("""
-        SELECT id, username, email, membership_tier, is_premium, created_at
-        FROM users 
-        WHERE (is_premium = 0 OR is_premium IS NULL) AND username != 'System'
-        ORDER BY membership_tier DESC, username ASC
+    # Get all users for the selection list
+    users_list = query_db("SELECT id, username, email, is_premium, membership_tier FROM users ORDER BY username ASC")
+    
+    # Get currently assigned users
+    assigned_users = query_db("SELECT target_user_id FROM ad_display_assignments WHERE ad_id = ?", [ad_id])
+    assigned_user_ids = [row['target_user_id'] for row in assigned_users]
+    
+    return render_template('admin/ad_assignments.html', 
+                         ad=dict(ad), 
+                         users=[dict(row) for row in users_list],
+                         assigned_user_ids=assigned_user_ids)
+
+@admin_bp.route('/broadcast', methods=['GET', 'POST'])
+@admin_required
+def broadcast():
+    if request.method == 'POST':
+        message = request.form.get('message', '').strip()
+        msg_type = request.form.get('type', 'info')
+        audience = request.form.get('audience', 'all')
+        selected_user_ids = request.form.getlist('user_ids')
+        
+        target_group = 'all'
+        target_user_ids = []
+        
+        if audience == 'selected':
+            target_user_ids = [int(uid) for uid in selected_user_ids if uid.isdigit()]
+            target_group = None
+        elif audience == 'all':
+            target_group = 'all'
+        else:
+            target_group = audience # 'free', 'elite', 'elite_pro'
+        
+        if not message:
+            flash("Message is required", "danger")
+            return redirect(url_for('admin.broadcast'))
+            
+        if audience == 'selected' and not target_user_ids:
+            flash("Please select at least one user", "danger")
+            return redirect(url_for('admin.broadcast'))
+
+        # Prepare for logging
+        target_name = "All Users"
+        
+        if target_user_ids:
+            # Send to multiple specific users
+            for uid in target_user_ids:
+                execute_db("""
+                    INSERT INTO notifications (message, type, target_user_id, target_group)
+                    VALUES (?, ?, ?, ?)
+                """, [message, msg_type, uid, None])
+            
+            if len(target_user_ids) == 1:
+                user = query_db("SELECT username FROM users WHERE id = ?", [target_user_ids[0]], one=True)
+                target_name = f"User: {user['username']}" if user else "Unknown User"
+            else:
+                target_name = f"{len(target_user_ids)} selected users"
+        else:
+            # Send to group or all
+            execute_db("""
+                INSERT INTO notifications (message, type, target_user_id, target_group)
+                VALUES (?, ?, ?, ?)
+            """, [message, msg_type, None, target_group])
+            
+            if target_group != 'all':
+                target_name = f"Group: {target_group.replace('_', ' ').title()}"
+            
+        log_admin_activity("broadcast", "notification", None, f"Sent '{msg_type}' notification to {target_name}: {message[:50]}...")
+        
+        flash(f"Broadcast sent successfully to {target_name}", "success")
+        return redirect(url_for('admin.broadcast'))
+        
+    users_list = query_db("SELECT id, username, membership_tier FROM users ORDER BY username ASC")
+    recent_notifications = query_db("""
+        SELECT n.*, u.username as target_name
+        FROM notifications n
+        LEFT JOIN users u ON n.target_user_id = u.id
+        ORDER BY n.created_at DESC
+        LIMIT 10
     """)
     
-    # Get currently assigned users for this ad
-    assigned_user_ids = [
-        row['target_user_id'] for row in query_db(
-            "SELECT target_user_id FROM ad_display_assignments WHERE ad_id = ?", 
-            [ad_id]
-        )
-    ]
-    
-    # Separate users by tier for better organization
-    free_users = []
-    elite_users = []
-    elite_pro_users = []
-    
-    for user in all_users:
-        user_dict = dict(user)
-        user_dict['is_assigned'] = user['id'] in assigned_user_ids
-        
-        tier = user['membership_tier'] if user['membership_tier'] else 'free'
-        if tier == 'elite_pro':
-            elite_pro_users.append(user_dict)
-        elif tier == 'elite':
-            elite_users.append(user_dict)
-        else:
-            free_users.append(user_dict)
-    
-    return render_template('admin/display_ad_to_users.html', 
-                         ad=ad,
-                         free_users=free_users,
-                         elite_users=elite_users,
-                         elite_pro_users=elite_pro_users,
-                         assigned_count=len(assigned_user_ids))
-
-@admin_bp.route('/ads/<int:ad_id>/assignment-count')
-@admin_required
-def get_ad_assignment_count(ad_id):
-    """Get the number of users assigned to this ad"""
-    count = query_db(
-        "SELECT COUNT(*) as count FROM ad_display_assignments WHERE ad_id = ?", 
-        [ad_id], one=True
-    )['count']
-    
-    return jsonify({"success": True, "count": count})
-
+    return render_template('admin/broadcast.html', 
+                         users=[dict(row) for row in users_list],
+                         notifications=[dict(row) for row in recent_notifications])
 @admin_bp.route('/analytics')
 @admin_required
 def analytics():

@@ -1822,6 +1822,57 @@ def create_app() -> Flask:
             
         return render_template("login.html")
 
+    @app.route("/notifications")
+    @login_required
+    def notifications():
+        """Site notifications for the logged-in user"""
+        user_dict = dict(g.user) if g.user else {}
+        user_tier = user_dict.get("membership_tier", "free")
+        if not user_tier: user_tier = "free"
+        
+        user_notifications = query_db("""
+            SELECT n.* FROM notifications n
+            LEFT JOIN notification_dismissals d ON n.id = d.notification_id AND d.user_id = ?
+            WHERE (n.target_user_id = ? 
+               OR n.target_group = 'all' 
+               OR (n.target_group = ? AND n.target_user_id IS NULL))
+               AND d.id IS NULL
+            ORDER BY n.created_at DESC
+        """, [g.user["id"], g.user["id"], user_tier])
+        
+        return render_template("notifications.html", notifications=user_notifications)
+
+    @app.route("/delete-notification/<int:notification_id>", methods=["POST"])
+    @login_required
+    def delete_notification(notification_id):
+        """Dismiss a notification for the current user"""
+        # Ensure the notification exists and is meant for this user (security check)
+        user_dict = dict(g.user) if g.user else {}
+        user_tier = user_dict.get("membership_tier", "free")
+        if not user_tier: user_tier = "free"
+
+        notification = query_db("""
+            SELECT * FROM notifications 
+            WHERE id = ? AND (
+                target_user_id = ? OR 
+                target_group = 'all' OR 
+                (target_group = ? AND target_user_id IS NULL)
+            )
+        """, [notification_id, g.user["id"], user_tier], one=True)
+
+        if notification:
+            # Check if already dismissed to avoid duplicates
+            exists = query_db("SELECT id FROM notification_dismissals WHERE user_id = ? AND notification_id = ?", 
+                            [g.user["id"], notification_id], one=True)
+            if not exists:
+                execute_db("INSERT INTO notification_dismissals (user_id, notification_id) VALUES (?, ?)", 
+                         [g.user["id"], notification_id])
+                flash("Notification removed", "success")
+        else:
+            flash("Notification not found", "danger")
+
+        return redirect(url_for("notifications"))
+
     @app.route("/logout")
     def logout():
         session.pop(USER_SESSION_KEY, None)
@@ -2564,6 +2615,17 @@ def ensure_db():
     # Membership Tier Columns
     ensure_column("users", "membership_tier", "membership_tier TEXT DEFAULT 'free'")
     ensure_column("links", "expires_at", "expires_at TEXT")
+    
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS notification_dismissals (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            notification_id INTEGER NOT NULL,
+            dismissed_at TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY(user_id) REFERENCES users(id),
+            FOREIGN KEY(notification_id) REFERENCES notifications(id)
+        )
+    """)
     
     conn.commit()
     conn.close()

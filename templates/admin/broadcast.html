@@ -1,0 +1,250 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Broadcast Notifications{% endblock %}
+{% block page_title %}Broadcast Notifications{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-5">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-0 pt-3">
+                <h5 class="mb-0"><i class="fas fa-paper-plane text-primary me-2"></i>New Broadcast</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Target Audience</label>
+                        <select name="audience" id="audienceSelect" class="form-select mb-3 shadow-sm">
+                            <option value="all">All Users</option>
+                            <optgroup label="Groups">
+                                <option value="free">All Free Users</option>
+                                <option value="elite">All Elite Users</option>
+                                <option value="elite_pro">All Elite Pro Users</option>
+                            </optgroup>
+                            <option value="selected">Specific Users (Select Multiple)</option>
+                        </select>
+
+                        <!-- Multi-User Selection Container -->
+                        <div id="multiUserContainer" class="border rounded p-3 bg-light shadow-sm"
+                            style="display: none; max-height: 400px; overflow-y: auto;">
+                            <div class="sticky-top bg-light pb-2 mb-2 border-bottom">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-white border-end-0"><i
+                                            class="fas fa-search text-muted"></i></span>
+                                    <input type="text" id="userSearch" class="form-control border-start-0"
+                                        placeholder="Search users by name...">
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2 px-1">
+                                    <small class="text-muted"><span id="selectedCount">0</span> users selected</small>
+                                    <button type="button" id="clearSelection"
+                                        class="btn btn-link btn-sm p-0 text-decoration-none">Clear all</button>
+                                </div>
+                            </div>
+
+                            <div id="userList" class="user-checkbox-list">
+                                {% for user in users %}
+                                <div class="form-check py-1 user-item" data-username="{{ user.username|lower }}">
+                                    <input class="form-check-input user-cb" type="checkbox" name="user_ids"
+                                        value="{{ user.id }}" id="user_{{ user.id }}">
+                                    <label class="form-check-label w-100 d-flex justify-content-between"
+                                        for="user_{{ user.id }}">
+                                        <span>{{ user.username }}</span>
+                                        <small class="badge bg-secondary-subtle text-secondary border">
+                                            {{ user.membership_tier|title if user.membership_tier else 'Free' }}
+                                        </small>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                                <div id="noResults" class="text-center py-3 text-muted" style="display: none;">
+                                    <i class="fas fa-search mb-2"></i>
+                                    <p class="small mb-0">No users match your search</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-text mt-2 text-muted">Select who will receive this notification. Choosing a
+                            group sends to all users in that tier.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Notification Type</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <input type="radio" class="btn-check" name="type" id="typeInfo" value="info" checked>
+                            <label class="btn btn-outline-info flex-fill" for="typeInfo">
+                                <i class="fas fa-info-circle me-1"></i>Info
+                            </label>
+
+                            <input type="radio" class="btn-check" name="type" id="typeSuccess" value="success">
+                            <label class="btn btn-outline-success flex-fill" for="typeSuccess">
+                                <i class="fas fa-check-circle me-1"></i>Success
+                            </label>
+
+                            <input type="radio" class="btn-check" name="type" id="typeWarning" value="warning">
+                            <label class="btn btn-outline-warning flex-fill" for="typeWarning">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Warning
+                            </label>
+
+                            <input type="radio" class="btn-check" name="type" id="typeDanger" value="danger">
+                            <label class="btn btn-outline-danger flex-fill" for="typeDanger">
+                                <i class="fas fa-times-circle me-1"></i>Danger
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Message</label>
+                        <textarea name="message" class="form-control" rows="5"
+                            placeholder="Type your broadcast message here..." required></textarea>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-admin py-2 fw-bold">
+                            <i class="fas fa-broadcast-tower me-2"></i>Send Broadcast
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pt-3">
+                <h5 class="mb-0"><i class="fas fa-history text-secondary me-2"></i>Recent Broadcasts</h5>
+            </div>
+            <div class="card-body">
+                {% if notifications %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Target</th>
+                                <th>Message</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for n in notifications %}
+                            <tr>
+                                <td class="text-nowrap small text-muted">{{ n.created_at[:16] }}</td>
+                                <td>
+                                    {% if n.target_user_id %}
+                                    <span class="badge bg-light text-dark border"><i class="fas fa-user me-1"></i>{{
+                                        n.target_name }}</span>
+                                    {% elif n.target_group == 'all' %}
+                                    <span class="badge bg-primary"><i class="fas fa-users me-1"></i>All Users</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary"><i class="fas fa-users me-1"></i>{{
+                                        n.target_group|title }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="text-truncate" style="max-width: 250px;" title="{{ n.message }}">
+                                        {{ n.message }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ n.type }}">{{ n.type|title }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-bullhorn fa-3x text-light mb-3"></i>
+                    <p class="text-muted">No broadcasts sent yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .user-checkbox-list .form-check:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+        border-radius: 4px;
+    }
+
+    .user-checkbox-list label {
+        cursor: pointer;
+    }
+
+    .form-check-input:checked+.form-check-label span {
+        font-weight: bold;
+        color: var(--bs-primary);
+    }
+
+    .sticky-top {
+        z-index: 10;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const audienceSelect = document.getElementById('audienceSelect');
+        const multiUserContainer = document.getElementById('multiUserContainer');
+        const userSearchInput = document.getElementById('userSearch');
+        const userItems = document.querySelectorAll('.user-item');
+        const userCheckboxes = document.querySelectorAll('.user-cb');
+        const selectedCountSpan = document.getElementById('selectedCount');
+        const clearSelectionBtn = document.getElementById('clearSelection');
+        const noResults = document.getElementById('noResults');
+
+        // Update selected count
+        function updateCount() {
+            const count = document.querySelectorAll('.user-cb:checked').length;
+            selectedCountSpan.textContent = count;
+        }
+
+        // Toggle container
+        audienceSelect.addEventListener('change', function () {
+            if (this.value === 'selected') {
+                multiUserContainer.style.display = 'block';
+            } else {
+                multiUserContainer.style.display = 'none';
+            }
+        });
+
+        // Handle search
+        userSearchInput.addEventListener('input', function () {
+            const query = this.value.toLowerCase();
+            let visibleCount = 0;
+
+            userItems.forEach(item => {
+                const username = item.getAttribute('data-username');
+                if (username.includes(query)) {
+                    item.style.setProperty('display', '', 'important');
+                    visibleCount++;
+                } else {
+                    item.style.setProperty('display', 'none', 'important');
+                }
+            });
+
+            noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+        });
+
+        // Handle selection changes
+        userCheckboxes.forEach(cb => {
+            cb.addEventListener('change', updateCount);
+        });
+
+        // Clear all selection
+        clearSelectionBtn.addEventListener('click', function () {
+            userCheckboxes.forEach(cb => {
+                cb.checked = false;
+            });
+            updateCount();
+        });
+
+        // Initial check
+        if (audienceSelect.value === 'selected') {
+            multiUserContainer.style.display = 'block';
+        }
+        updateCount();
+    });
+</script>
+{% endblock %}

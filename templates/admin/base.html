@@ -122,6 +122,12 @@
                                 <i class="fas fa-history"></i> User Activity
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'admin.broadcast' %}active{% endif %}"
+                                href="{{ url_for('admin.broadcast') }}">
+                                <i class="fas fa-broadcast-tower"></i> Broadcast
+                            </a>
+                        </li>
                         <li class="nav-item mt-3">
                             <hr class="text-white-50">
                         </li>
