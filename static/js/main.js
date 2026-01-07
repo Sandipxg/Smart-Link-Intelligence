@@ -10,6 +10,44 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     }
 
+    // Local Time Conversion Helper
+    const localizeTimestamps = () => {
+        const timeElements = document.querySelectorAll('.local-time');
+        const formatOptions = {
+            year: 'numeric', month: 'short', day: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            hour12: true
+        };
+        const formatter = new Intl.DateTimeFormat(undefined, formatOptions);
+
+        timeElements.forEach(el => {
+            const rawTime = el.textContent.trim();
+            if (!rawTime || rawTime === 'N/A') return;
+
+            try {
+                // Flask usually gives ISO format
+                let date;
+                if (rawTime.includes(' ')) {
+                    // Handle "YYYY-MM-DD HH:MM:SS" format often used in SQLite
+                    date = new Date(rawTime.replace(' ', 'T') + 'Z');
+                } else {
+                    date = new Date(rawTime.endsWith('Z') ? rawTime : rawTime + 'Z');
+                }
+
+                if (!isNaN(date.getTime())) {
+                    el.textContent = formatter.format(date);
+                    el.classList.remove('local-time'); // Prevent double processing
+                    el.title = `Original (UTC): ${rawTime}`;
+                }
+            } catch (e) {
+                console.error("Localization error:", e, rawTime);
+            }
+        });
+    };
+
+    // Initial localization
+    localizeTimestamps();
+
     // Global functions for navigation
     window.showCreateLinkModal = function () {
         if (window.APP_CONFIG && window.APP_CONFIG.isAuthenticated) {
@@ -248,12 +286,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const frequencyCtx = document.getElementById('clickFrequencyChart');
     if (frequencyCtx) {
         const hourlyData = Array(24).fill(0);
-        let totalClicks = 0;
+        const browserOffsetHours = -new Date().getTimezoneOffset() / 60;
+
         if (data.hourly) {
             data.hourly.forEach(item => {
-                hourlyData[item.hour] = item.count;
-                totalClicks += item.count;
+                // Shift UTC hour to local hour
+                let localHour = Math.round(item.hour + browserOffsetHours) % 24;
+                if (localHour < 0) localHour += 24;
+                hourlyData[localHour] += item.count;
             });
+        }
+
+        // Update the card title to indicate localization
+        const hourlyTitle = frequencyCtx.closest('.card-body')?.querySelector('h4');
+        if (hourlyTitle) {
+            hourlyTitle.innerHTML += ' <small class="text-muted fw-normal" style="font-size: 0.75rem;">(Local Time)</small>';
         }
 
         new Chart(frequencyCtx, {
@@ -291,57 +338,12 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 3. User Intent Classification Chart
-    const intentCtx = document.getElementById('intentClassificationChart');
-    if (intentCtx && data.intent) {
-        const totalIntent = (data.intent.curious || 0) + (data.intent.interested || 0) + (data.intent.engaged || 0);
-        const labels = ['Curious', 'Interested', 'Engaged'];
-        const chartData = totalIntent === 0
-            ? [1, 1, 1]
-            : [data.intent.curious || 0, data.intent.interested || 0, data.intent.engaged || 0];
+    // 3. User Intent - Handled via CSS Funnel in HTML now
+    // Chart.js initialization removed to prevent errors
 
-        new Chart(intentCtx, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: chartData,
-                    backgroundColor: [
-                        'rgba(107, 114, 128, 0.8)',
-                        'rgba(251, 191, 36, 0.8)',
-                        'rgba(34, 197, 94, 0.8)'
-                    ],
-                    borderColor: ['#6b7280', '#fbbf24', '#22c55e'],
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            usePointStyle: true,
-                            pointStyle: 'circle'
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                if (totalIntent === 0) return context.label + ': No data yet';
-                                const percentage = ((context.parsed * 100) / totalIntent).toFixed(1);
-                                return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
 
     // 4. Traffic Quality Chart
+    // 4. Traffic Quality Chart (Gauge Style)
     const qualityCtx = document.getElementById('trafficQualityChart');
     if (qualityCtx && data.quality) {
         const totalQuality = (data.quality.human || 0) + (data.quality.suspicious || 0);
@@ -357,24 +359,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 datasets: [{
                     data: chartData,
                     backgroundColor: [
-                        'rgba(34, 197, 94, 0.8)',
-                        'rgba(239, 68, 68, 0.8)'
+                        '#22c55e', // Vibrant Green
+                        '#ef4444'  // Red
                     ],
-                    borderColor: ['#22c55e', '#ef4444'],
-                    borderWidth: 2
+                    borderWidth: 0,
+                    borderRadius: 20,
+                    cutout: '75%',
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                rotation: -90,
+                circumference: 180,
+                layout: {
+                    padding: { bottom: 20 }
+                },
                 plugins: {
                     legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            usePointStyle: true,
-                            pointStyle: 'circle'
-                        }
+                        display: false
                     },
                     tooltip: {
                         callbacks: {
@@ -391,6 +394,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // 5. Daily Engagement Trends Chart
+    // 5. Daily Engagement Trends Chart (Bar Chart)
     const dailyCtx = document.getElementById('dailyEngagementChart');
     if (dailyCtx) {
         const dailyData = data.daily || [];
@@ -402,21 +406,17 @@ document.addEventListener('DOMContentLoaded', function () {
             : [0, 0, 0, 0, 0, 0, 0];
 
         new Chart(dailyCtx, {
-            type: 'line',
+            type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
                     label: 'Daily Clicks',
                     data: chartData,
                     borderColor: '#8b5cf6',
-                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                    tension: 0.4,
-                    fill: true,
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    pointBackgroundColor: '#8b5cf6',
-                    pointBorderColor: '#ffffff',
-                    pointBorderWidth: 2
+                    backgroundColor: 'rgba(139, 92, 246, 0.7)',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    borderSkipped: false
                 }]
             },
             options: {
@@ -460,113 +460,106 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 6. Users by Region Chart (Pie Chart)
-    const regionCtx = document.getElementById('regionChart');
-    if (regionCtx) {
+    // 6. Users by Region (World Map SVG)
+    const worldMap = document.getElementById('worldMap');
+    if (worldMap) {
         const regionData = data.region || [];
-        const labels = regionData.length > 0
-            ? regionData.map(r => r.location)
-            : ['No data yet'];
-        const chartData = regionData.length > 0
-            ? regionData.map(r => r.count)
-            : [1];
+        console.log('Updating World Map with data:', regionData);
 
-        new Chart(regionCtx, {
-            type: 'pie',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: chartData,
-                    backgroundColor: [
-                        'rgba(59, 130, 246, 0.8)',
-                        'rgba(168, 85, 247, 0.8)',
-                        'rgba(236, 72, 153, 0.8)',
-                        'rgba(34, 197, 94, 0.8)',
-                        'rgba(245, 158, 11, 0.8)',
-                        'rgba(239, 68, 68, 0.8)'
-                    ],
-                    borderColor: '#ffffff',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            usePointStyle: true,
-                            pointStyle: 'circle'
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                if (regionData.length === 0) return 'No visitors yet';
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((context.parsed * 100) / total).toFixed(1);
-                                return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
-                            }
-                        }
-                    }
+        // Map backend continent names to SVG IDs
+        const continentMap = {
+            'North America': 'na',
+            'South America': 'sa',
+            'Europe': 'eu',
+            'Africa': 'af',
+            'Asia': 'as',
+            'Oceania': 'oc',
+            'Australia': 'oc' // Handle alias
+        };
+
+        // Reset all labels to 0
+        Object.values(continentMap).forEach(code => {
+            const label = document.getElementById(`label-${code}`);
+            if (label) label.textContent = '0';
+        });
+
+        // Update counts based on data
+        regionData.forEach(item => {
+            const code = continentMap[item.location];
+            if (code) {
+                const label = document.getElementById(`label-${code}`);
+                const path = document.getElementById(`path-${code}`);
+
+                if (label) {
+                    label.textContent = item.count;
+                    label.classList.add('label-visible');
+                }
+                if (path) {
+                    // Make active continents simplified blue
+                    path.classList.add('continent-active');
+
+                    // Add simple tooltip on hover
+                    path.addEventListener('mouseenter', () => {
+                        label.style.opacity = '1';
+                    });
+                    path.addEventListener('mouseleave', () => {
+                        // Keep opacity if it has significant data, simplified logic
+                    });
                 }
             }
         });
     }
 
-    // 7. Users by Device Chart (Pie Chart)
-    const deviceCtx = document.getElementById('deviceChart');
-    if (deviceCtx) {
+    // 7. Device Breakdown (Icons Bar)
+    // Logic to update the progress bar widths and labels
+    const deviceBarContainer = document.getElementById('deviceBarContainer');
+    if (deviceBarContainer && data.device) {
         const deviceData = data.device || [];
-        const labels = deviceData.length > 0
-            ? deviceData.map(d => d.device)
-            : ['No data yet'];
-        const chartData = deviceData.length > 0
-            ? deviceData.map(d => d.count)
-            : [1];
+        let mobileCount = 0;
+        let desktopCount = 0;
 
-        new Chart(deviceCtx, {
-            type: 'pie',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: chartData,
-                    backgroundColor: [
-                        'rgba(59, 130, 246, 0.8)',
-                        'rgba(168, 85, 247, 0.8)',
-                        'rgba(236, 72, 153, 0.8)'
-                    ],
-                    borderColor: '#ffffff',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            usePointStyle: true,
-                            pointStyle: 'circle'
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                if (deviceData.length === 0) return 'No visitors yet';
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((context.parsed * 100) / total).toFixed(1);
-                                return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
-                            }
-                        }
-                    }
-                }
+        deviceData.forEach(d => {
+            const name = d.device.toLowerCase();
+            if (name.includes('mobile') || name.includes('android') || name.includes('iphone') || name.includes('ipad') || name.includes('tablet')) {
+                mobileCount += d.count;
+            } else {
+                desktopCount += d.count;
             }
         });
+
+        const totalDevices = mobileCount + desktopCount;
+        const mobilePct = totalDevices > 0 ? Math.round((mobileCount / totalDevices) * 100) : 0;
+        const desktopPct = totalDevices > 0 ? Math.round((desktopCount / totalDevices) * 100) : 0;
+
+        // Update Widths
+        const mobileBar = document.getElementById('deviceBarMobile');
+        const desktopBar = document.getElementById('deviceBarDesktop');
+        if (mobileBar) mobileBar.style.width = `${mobilePct}%`;
+        if (desktopBar) desktopBar.style.width = `${desktopPct}%`;
+
+        // Update Labels with LARGE icons
+        const mobileLabel = document.getElementById('deviceLabelMobile');
+        const desktopLabel = document.getElementById('deviceLabelDesktop');
+        // Mobile Icon
+        if (mobileLabel) {
+            mobileLabel.innerHTML = `
+                <i class="bi bi-phone-vibrate fs-3 d-block mb-1 text-primary"></i>
+                <span class="fs-5 fw-bold text-dark">${mobilePct}%</span>
+             `;
+        }
+        // Desktop Icon
+        if (desktopLabel) {
+            desktopLabel.innerHTML = `
+                <i class="bi bi-laptop fs-3 d-block mb-1 text-warning"></i>
+                <span class="fs-5 fw-bold text-dark">${desktopPct}%</span>
+             `;
+        }
+
+        // Update Counts
+        const mobileCountEl = document.getElementById('deviceCountMobile');
+        const desktopCountEl = document.getElementById('deviceCountDesktop');
+        if (mobileCountEl) mobileCountEl.textContent = `${mobileCount} Devices`;
+        if (desktopCountEl) desktopCountEl.textContent = `${desktopCount} Devices`;
     }
 
     // 8. Users by ISP Chart (Pie Chart)
@@ -678,9 +671,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         legend: {
                             position: 'bottom',
                             labels: {
-                                padding: 15,
+                                padding: 10,
                                 usePointStyle: true,
-                                pointStyle: 'circle'
+                                pointStyle: 'circle',
+                                font: { size: 11 }
                             }
                         },
                         tooltip: {
@@ -693,30 +687,34 @@ document.addEventListener('DOMContentLoaded', function () {
                                 }
                             }
                         }
+                    },
+                    layout: {
+                        padding: { bottom: 10 }
                     }
                 }
             });
 
             // Iterate and Populate Table
             if (countryTableBody) {
+                countryTableBody.innerHTML = ''; // Clear existing
                 if (countryData.length > 0) {
                     countryData.slice(0, 10).forEach(item => {
                         const tr = document.createElement('tr');
-                        const pct = Math.round((item.count * 100) / ((data.totals || {}).unique_visitors || 1));
-                        // Fallback for totals if not available (approximate)
-                        // Actually total is better from chart data sum
-                        const totalVisitors = chartData.reduce((a, b) => a + b, 0) || 1;
+                        // Calculate percentage based on total unique visitors or total chart data
+                        const totalVisitors = ((data.totals || {}).unique_visitors) || chartData.reduce((a, b) => a + b, 0) || 1;
                         const pct_calc = Math.round((item.count * 100) / totalVisitors);
 
                         tr.innerHTML = `
-                             <td class="border-0 small">${item.country || 'Unknown'}</td>
-                             <td class="border-0 small text-end">${item.count}</td>
-                             <td class="border-0 small text-end text-muted">${pct_calc}%</td>
+                             <td class="ps-2">${item.country || 'Unknown'}</td>
+                             <td class="text-end pe-2">
+                                <span class="fw-bold">${item.count}</span>
+                                <span class="text-muted small ms-1">(${pct_calc}%)</span>
+                             </td>
                          `;
                         countryTableBody.appendChild(tr);
                     });
                 } else {
-                    countryTableBody.innerHTML = '<tr><td colspan="3" class="text-center small text-muted">No data available</td></tr>';
+                    countryTableBody.innerHTML = '<tr><td colspan="2" class="text-center small text-muted py-3">No data available</td></tr>';
                 }
             }
 

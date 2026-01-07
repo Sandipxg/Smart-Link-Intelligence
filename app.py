@@ -923,17 +923,15 @@ def create_app() -> Flask:
             
             for row in visits_raw:
                 try:
+                    # Parse timestamp as UTC
                     dt_utc = datetime.fromisoformat(row["ts"]).replace(tzinfo=timezone.utc)
-                    tz_name = row["timezone"] or "UTC"
-                    try:
-                        visitor_tz = ZoneInfo(tz_name)
-                    except:
-                        visitor_tz = timezone.utc
                     
-                    dt_local = dt_utc.astimezone(visitor_tz)
-                    local_days.append(dt_local.weekday())
-                    local_hours.append(dt_local.hour)
-                except: pass
+                    # Bin as UTC for absolute baseline (frontend will localize for the viewer)
+                    local_days.append(dt_utc.weekday())
+                    local_hours.append(dt_utc.hour)
+                except Exception as e:
+                    print(f"Error processing timestamp: {e}")
+                    pass
             
             # Process daily distribution (Mon=0...Sun=6)
             day_names_sun = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']

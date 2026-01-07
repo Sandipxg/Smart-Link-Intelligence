@@ -60,142 +60,212 @@
       </ol>
     </nav>
 
-    <!-- Link Header Information -->
-    <section class="card shadow-sm mb-4">
-      <div class="card-body">
-        <div class="row g-4">
-          <!-- Link Details -->
-          <div class="col-lg-6">
-            <div class="d-flex gap-3">
-              <div class="bg-primary bg-opacity-10 rounded-3 p-3 d-flex align-items-center justify-content-center"
-                style="width: 60px; height: 60px;">
-                <svg width="28" height="28" fill="currentColor" class="text-primary" viewBox="0 0 16 16">
-                  <path d="M9.465 10H12a2 2 0 1 1 0 4H9.465c.34-.588.535-1.271.535-2 0-.729-.195-1.412-.535-2z" />
-                  <path d="M6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 1a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
-                </svg>
+    <!-- Link Header Information: Hero Stats Layout -->
+    <style>
+      .hero-section {
+        background: white;
+        border-radius: 1.5rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+      }
+
+      .info-card {
+        background: #f8fafc;
+        border-radius: 1rem;
+        padding: 1rem;
+        height: 100%;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid rgba(0, 0, 0, 0.03);
+      }
+
+      .info-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+
+      .trust-gauge-container {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        margin: 0 auto;
+      }
+
+      .gauge-svg {
+        transform: rotate(-90deg);
+        width: 100%;
+        height: 100%;
+      }
+
+      .gauge-bg {
+        fill: none;
+        stroke: #e2e8f0;
+        stroke-width: 3;
+      }
+
+      .gauge-fill {
+        fill: none;
+        stroke: #22c55e;
+        stroke-width: 3;
+        stroke-linecap: round;
+        transition: stroke-dasharray 1s ease-out;
+      }
+
+      .gauge-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+      }
+
+      .copy-pill {
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .copy-pill:hover {
+        background: #e2e8f0 !important;
+      }
+
+      .action-bar {
+        background: #f1f5f9;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 1rem 1.5rem;
+      }
+    </style>
+
+    <section class="hero-section shadow-sm mb-4">
+      <div class="px-4 pt-4 pb-3">
+        <div class="row align-items-center g-4">
+          <!-- Identity & Primary Info -->
+          <div class="col-xl-9 col-lg-8">
+            <div class="d-flex align-items-center mb-4">
+              <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary bg-opacity-10 p-2 rounded-3">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    class="text-primary">
+                    <path
+                      d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                    </path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                  </svg>
+                </div>
+                <div>
+                  <div class="d-flex align-items-baseline gap-2">
+                    <h2 class="h3 fw-bold mb-0">Link Analytics</h2>
+                    <span class="text-muted small font-monospace">({{ link.code }})</span>
+                  </div>
+                  <span class="badge bg-success rounded-pill px-3 mt-1">{{ link.state }}</span>
+                </div>
               </div>
-              <div class="flex-grow-1">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                  <h2 class="h4 mb-0">Link Analytics</h2>
-                  <span class="badge bg-success">{{ link.state }}</span>
+            </div>
+
+            <div class="row g-3">
+              <!-- Smart Link Copy Card -->
+              <div class="col-12">
+                <div class="info-card bg-primary bg-opacity-10 border-primary border-opacity-10">
+                  <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="bg-primary text-white p-2 rounded-circle"
+                        style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-link-45deg"></i>
+                      </div>
+                      <div>
+                        <span class="text-muted small d-block fw-bold text-uppercase">Smart Link</span>
+                        <code class="text-primary fw-bold"
+                          style="font-size: 1.1rem;">{{ url_for('redirect_link', code=link.code, _external=True) }}</code>
+                      </div>
+                    </div>
+                    <button class="btn btn-primary d-flex align-items-center gap-2 px-4 rounded-pill shadow-sm"
+                      onclick="navigator.clipboard.writeText('{{ url_for('redirect_link', code=link.code, _external=True) }}'); this.innerHTML='<i class=\'bi bi-check2-all\'></i> Copied'; setTimeout(()=>this.innerHTML='<i class=\'bi bi-clipboard\'></i> Copy Link', 2000)">
+                      <i class="bi bi-clipboard"></i> Copy Link
+                    </button>
+                  </div>
                 </div>
-                <div class="mb-2">
-                  <span class="text-muted small">Short Code:</span>
-                  <code class="bg-primary bg-opacity-10 text-primary px-2 py-1 rounded">{{ link.code }}</code>
-                </div>
-                <div class="mb-1">
-                  <span class="text-muted small">Original URL:</span>
+              </div>
+
+              <!-- Original URL Card -->
+              <div class="col-md-6">
+                <div class="info-card">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-globe2 text-muted"></i>
+                    <span class="text-muted small fw-bold text-uppercase">Original Target</span>
+                  </div>
                   <a href="{{ link.primary_url }}" target="_blank"
-                    class="text-decoration-none small d-inline-block text-truncate" style="max-width: 500px;">
+                    class="text-primary text-decoration-none fw-medium text-truncate d-block">
                     {{ link.primary_url }}
                   </a>
                 </div>
-                {% if behavior_rule %}
-                <div class="mb-1">
-                  <span class="text-muted small">Behavior Rule:</span>
-                  <span class="badge bg-info">{{ behavior_rule.rule_name }}</span>
-                  <small class="text-muted">
-                    ({{ behavior_rule.interested_threshold }}+ visits → Interested,
-                    {{ behavior_rule.engaged_threshold }}+ clicks → Engaged)
-                  </small>
+              </div>
+              <!-- Behavior Rule Card -->
+              <div class="col-md-6">
+                <div class="info-card">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-shield-check text-muted"></i>
+                    <span class="text-muted small fw-bold text-uppercase">Behavior Engine</span>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-info text-white rounded-pill">{{ behavior_rule.rule_name if behavior_rule else
+                      'Direct' }}</span>
+                    {% if behavior_rule %}
+                    <small class="text-muted text-truncate">{{ behavior_rule.interested_threshold }}+ visits for
+                      Interest</small>
+                    {% endif %}
+                  </div>
                 </div>
-                {% endif %}
-                <div class="mb-1">
-                  <span class="text-muted small">Created: {{ link.created_at }}</span>
+              </div>
+              <!-- Clicks Card -->
+              <div class="col-md-3 col-6">
+                <div class="info-card text-center">
+                  <span class="text-muted small d-block mb-1">Total Clicks</span>
+                  <span class="h3 fw-bold mb-0 text-dark">{{ "{:,}".format(totals.total or 0) }}</span>
                 </div>
-                <div class="d-flex align-items-center">
-                  <span class="text-muted small me-2">Smart Link:</span>
-                  <button class="btn btn-light btn-sm border py-0 px-2 d-flex align-items-center gap-1"
-                    onclick="navigator.clipboard.writeText('{{ url_for('redirect_link', code=link.code, _external=True) }}'); this.querySelector('span').textContent = 'Copied!'; setTimeout(() => { this.querySelector('span').textContent = 'Copy'; }, 1500);"
-                    title="Copy Smart Link">
-                    <svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-                      <path fill-rule="evenodd"
-                        d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V2Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H6ZM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1H2Z" />
-                    </svg>
-                    <span class="small">Copy</span>
-                  </button>
+              </div>
+              <!-- Visitors Card -->
+              <div class="col-md-3 col-6">
+                <div class="info-card text-center">
+                  <span class="text-muted small d-block mb-1 text-indigo">Unique Visitors</span>
+                  <span class="h3 fw-bold mb-0 text-indigo">{{ "{:,}".format(totals.unique_visitors or 0) }}</span>
+                </div>
+              </div>
+              <!-- Created Card -->
+              <div class="col-md-6">
+                <div class="info-card">
+                  <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                      <span class="text-muted small d-block mb-0 text-uppercase fw-bold">Timeline</span>
+                      <small class="text-dark">Created on <span class="local-time">{{ link.created_at }}</span></small>
+                    </div>
+                    <i class="bi bi-calendar3 text-muted"></i>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Share & Actions -->
-          <div class="col-lg-3">
-            <div class="card h-100 border-0 bg-light">
-              <div class="card-body d-flex align-items-center justify-content-between p-3">
-                <div class="d-flex flex-column align-items-start">
-                  <p class="small fw-bold text-muted mb-2">Scan to Download Report</p>
-                  <!-- Button now links directly to the server-side CSV route -->
-                  <a href="{{ url_for('export_csv', code_id=link.code) }}"
-                    class="btn btn-outline-dark btn-sm mb-2 w-100">
-                    <svg width="14" height="14" fill="currentColor" class="me-1" viewBox="0 0 16 16">
-                      <path
-                        d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
-                      <path
-                        d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
-                    </svg>
-                    Download CSV
-                  </a>
-                  <button class="btn btn-primary btn-sm w-100"
-                    data-csv-url="{{ url_for('export_csv', code_id=link.code, _external=True) }}"
-                    onclick="navigator.clipboard.writeText(this.dataset.csvUrl)">
-                    Copy CSV Link
-                  </button>
-                </div>
-                <!-- QR Code encodes the direct CSV download URL -->
-                <div class="bg-white p-1 rounded border">
+          <!-- Report & QR Section -->
+          <div class="col-xl-3 col-lg-4">
+            <div class="card bg-light border-0 h-100 rounded-4 py-4">
+              <div class="card-body d-flex flex-column align-items-center justify-content-center text-center">
+                <div class="bg-white p-3 rounded-4 shadow-sm border mb-4">
                   <img
-                    src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data={{ url_for('export_csv', code_id=link.code, _external=True) }}"
-                    alt="Scan to download CSV" width="80" height="80">
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ url_for('export_csv', code_id=link.code, _external=True) }}"
+                    alt="QR" width="120" height="120">
                 </div>
-              </div>
-            </div>
-          </div>
+                <h5 class="h6 fw-bold text-dark mb-1">Download Report</h5>
+                <p class="small text-muted mb-4 px-3">Scan QR or click below to export detailed link analytics</p>
 
-          <!-- Trust Score & Stats -->
-          <div class="col-lg-3">
-            <div class="row g-3">
-              <!-- Trust Score -->
-              <div class="col-12">
-                <div class="card bg-success bg-opacity-10 border-success border-opacity-25">
-                  <div class="card-body text-center">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                      <span class="small fw-medium text-success">Trust Score</span>
-                      <svg width="20" height="20" fill="currentColor" class="text-success" viewBox="0 0 16 16">
-                        <path
-                          d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                      </svg>
-                    </div>
-                    <div class="d-flex align-items-end justify-content-center gap-1 mb-2">
-                      <span class="display-5 fw-bold text-success">{{ trust }}</span>
-                      <span class="h5 text-success mb-2">/100</span>
-                    </div>
-                    <div class="progress mb-2" style="height: 8px;">
-                      <div class="progress-bar bg-success" style="width: {{ trust }}%"></div>
-                    </div>
-                    <p class="small mb-0 text-success">
-                      {% if trust >= 70 %}High quality engagement{% elif trust >= 50 %}Moderate quality{% else %}Needs
-                      improvement{% endif %}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Quick Stats -->
-              <div class="col-6">
-                <div class="card">
-                  <div class="card-body text-center p-3">
-                    <p class="small text-muted mb-1">Total Clicks</p>
-                    <p class="h4 fw-bold mb-0">{{ "{:,}".format(totals.total or 0) }}</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="card">
-                  <div class="card-body text-center p-3">
-                    <p class="small text-muted mb-1">Unique Visitors</p>
-                    <p class="h4 fw-bold mb-0">{{ "{:,}".format(totals.unique_visitors or 0) }}</p>
-                  </div>
+                <div class="w-100 px-3 d-grid gap-2">
+                  <a href="{{ url_for('export_csv', code_id=link.code) }}"
+                    class="btn btn-dark rounded-pill py-2 d-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-cloud-arrow-down-fill"></i> Download CSV
+                  </a>
+                  <button class="btn btn-outline-dark rounded-pill py-2"
+                    data-csv-url="{{ url_for('export_csv', code_id=link.code, _external=True) }}"
+                    onclick="navigator.clipboard.writeText(this.dataset.csvUrl); alert('CSV Link Copied!')">
+                    <i class="bi bi-link-45deg"></i> Copy CSV URL
+                  </button>
                 </div>
               </div>
             </div>
@@ -208,275 +278,401 @@
     <section class="mb-4">
       <h3 class="h5 fw-bold mb-3">Behavioral Analytics Visualizations</h3>
 
+      <!-- Bento Grid Layout -->
       <div class="row g-3">
-        <!-- Attention Decay Analysis -->
-        <div class="col-lg-6">
+
+        <!-- Row 1: Hero Metrics (Traffic & Quality) -->
+        <div class="col-lg-8">
           <div class="card shadow-sm h-100">
             <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                  <h4 class="h6 fw-bold mb-1">Attention Decay Analysis</h4>
-                  <p class="small text-muted mb-0">Engagement patterns over time</p>
-                </div>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="h6 fw-bold mb-0">Engagement Trends (Daily)</h4>
+                <span class="badge bg-info bg-opacity-10 text-info">Last 7 Days</span>
               </div>
-              <div style="height: 280px;">
-                <canvas id="attentionDecayChart"></canvas>
+              <div style="height: 300px;">
+                <canvas id="dailyEngagementChart"></canvas>
               </div>
-              <div class="mt-3 p-3 bg-light rounded">
-                <p class="small mb-0">
-                  <strong>Insight:</strong> {% if attention|length > 1 %}Engagement tracked across {{ attention|length
-                  }} time periods{% else %}Gathering initial engagement data{% endif %}.
-                </p>
+              <div class="mt-3 p-3 bg-light rounded border border-light">
+                <p class="small mb-0 text-muted"><strong>Insight:</strong> {{ weekend_insight }}</p>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Click Frequency Patterns -->
-        <div class="col-lg-6">
+        <div class="col-lg-4">
           <div class="card shadow-sm h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                  <h4 class="h6 fw-bold mb-1">Click Frequency Patterns</h4>
-                  <p class="small text-muted mb-0">Hourly distribution analysis</p>
-                </div>
+            <div class="card-body d-flex flex-column">
+              <div class="mb-3">
+                <h4 class="h6 fw-bold mb-0">Traffic Quality</h4>
+                <p class="small text-muted mb-0">Human vs Suspicious</p>
               </div>
-              <div style="height: 280px;">
-                <canvas id="clickFrequencyChart"></canvas>
-              </div>
-              <div class="mt-3 p-3 bg-light rounded">
-                <p class="small mb-0">
-                  <strong>Insight:</strong> Peak activity patterns suggest professional audience behavior.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- User Intent Classification -->
-        <div class="col-lg-6">
-          <div class="card shadow-sm h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                  <h4 class="h6 fw-bold mb-1">User Intent Classification</h4>
-                  <p class="small text-muted mb-0">Behavioral segmentation breakdown</p>
-                </div>
-              </div>
-              <div style="height: 280px;">
-                <canvas id="intentClassificationChart"></canvas>
-              </div>
-              <div class="mt-3 row g-2 text-center">
-                {% set total_visitors = totals.unique_visitors or 1 %}
-                <div class="col-4">
-                  <div class="p-2 bg-secondary bg-opacity-10 rounded">
-                    <p class="small text-muted mb-1">Curious</p>
-                    <p class="h5 fw-bold mb-0">{{ ((totals.curious or 0) * 100 / total_visitors)|round|int }}%</p>
-                    <p class="small text-muted mb-0">{{ "{:,}".format(totals.curious or 0) }}</p>
-                  </div>
-                </div>
-                <div class="col-4">
-                  <div class="p-2 bg-warning bg-opacity-10 rounded">
-                    <p class="small text-muted mb-1">Interested</p>
-                    <p class="h5 fw-bold mb-0">{{ ((totals.interested or 0) * 100 / total_visitors)|round|int }}%
-                    </p>
-                    <p class="small text-muted mb-0">{{ "{:,}".format(totals.interested or 0) }}</p>
-                  </div>
-                </div>
-                <div class="col-4">
-                  <div class="p-2 bg-success bg-opacity-10 rounded">
-                    <p class="small text-muted mb-1">Engaged</p>
-                    <p class="h5 fw-bold mb-0">{{ ((totals.engaged or 0) * 100 / total_visitors)|round|int }}%</p>
-                    <p class="small text-muted mb-0">{{ "{:,}".format(totals.engaged or 0) }}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Traffic Quality Assessment -->
-        <div class="col-lg-6">
-          <div class="card shadow-sm h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                  <h4 class="h6 fw-bold mb-1">Traffic Quality Assessment</h4>
-                  <p class="small text-muted mb-0">Human vs automated traffic</p>
-                </div>
-              </div>
-              <div style="height: 280px;">
+              <div class="position-relative d-flex justify-content-center" style="height: 200px;">
                 <canvas id="trafficQualityChart"></canvas>
-              </div>
-              <div class="mt-3 p-3 bg-success bg-opacity-10 rounded">
+                <!-- Centered Score for Gauge -->
                 {% set total_clicks = totals.total or 1 %}
                 {% set suspicious = totals.suspicious or 0 %}
                 {% set human_percentage = (((total_clicks - suspicious) * 100) / total_clicks)|round|int %}
-                <p class="small mb-0 text-success">
-                  <strong>Insight:</strong> {{ human_percentage }}% human traffic with {{ "{:,}".format(suspicious) }}
-                  suspicious clicks
-                  detected.
-                </p>
+                <div class="position-absolute text-center" style="bottom: 40px;">
+                  <h3 class="display-5 fw-bold text-success mb-0" style="line-height: 1;">{{ human_percentage }}%</h3>
+                  <p class="small text-muted mb-0 fw-bold">Human Score</p>
+                </div>
+              </div>
+              <div class="d-flex justify-content-center gap-3 mt-n3 pb-2">
+                <div class="d-flex align-items-center">
+                  <span class="d-inline-block rounded-circle me-1"
+                    style="width: 10px; height: 10px; background-color: #22c55e;"></span>
+                  <span class="small text-muted">Human</span>
+                </div>
+                <div class="d-flex align-items-center">
+                  <span class="d-inline-block rounded-circle me-1"
+                    style="width: 10px; height: 10px; background-color: #ef4444;"></span>
+                  <span class="small text-muted">Suspicious</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Engagement Trends -->
-        <div class="col-lg-6">
+        <!-- Row 2: Secondary Metrics (Square Cards) -->
+        <div class="col-lg-4">
           <div class="card shadow-sm h-100">
             <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                  <h4 class="h6 fw-bold mb-1">Engagement Trends</h4>
-                  <p class="small text-muted mb-0">Click patterns over 7-day period showing daily engagement
-                    distribution</p>
+              <h4 class="h6 fw-bold mb-3">User Intent</h4>
+              <style>
+                .funnel-container {
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  height: 100%;
+                  width: 100%;
+                }
+
+                .funnel-level {
+                  position: relative;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  color: white;
+                  font-weight: bold;
+                  font-size: 0.85rem;
+                  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                  transition: all 0.3s ease;
+                  cursor: default;
+                }
+
+                .funnel-level:hover {
+                  filter: brightness(1.1);
+                  transform: scale(1.02);
+                  z-index: 2;
+                }
+
+                /* Curious - Top */
+                .funnel-curious {
+                  width: 90%;
+                  height: 60px;
+                  background: linear-gradient(180deg, #9ca3af 0%, #6b7280 100%);
+                  clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
+                  margin-bottom: 4px;
+                }
+
+                /* Interested - Middle */
+                .funnel-interested {
+                  width: 70%;
+                  /* 70% is roughly 85% - 15% of the previous width? Visual approximation */
+                  height: 60px;
+                  background: linear-gradient(180deg, #fcd34d 0%, #f59e0b 100%);
+                  clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%);
+                  margin-bottom: 4px;
+                }
+
+                /* Engaged - Bottom */
+                .funnel-engaged {
+                  width: 42%;
+                  height: 60px;
+                  background: linear-gradient(180deg, #4ade80 0%, #22c55e 100%);
+                  clip-path: polygon(0 0, 100% 0, 50% 100%, 50% 100%);
+                  /* Triangle tip */
+                }
+
+                .funnel-label {
+                  position: absolute;
+                }
+              </style>
+              <div class="funnel-container py-2">
+                {% set f_curious = analytics_payload.intent.curious or 0 %}
+                {% set f_interested = analytics_payload.intent.interested or 0 %}
+                {% set f_engaged = analytics_payload.intent.engaged or 0 %}
+
+                <div class="funnel-level funnel-curious" title="Curious: {{ f_curious }}">
+                  <span class="funnel-label">Curious: {{ f_curious }}</span>
+                </div>
+                <div class="funnel-level funnel-interested" title="Interested: {{ f_interested }}">
+                  <span class="funnel-label">Interested: {{ f_interested }}</span>
+                </div>
+                <div class="funnel-level funnel-engaged" title="Engaged: {{ f_engaged }}">
+                  <span class="funnel-label" style="top: 10px;">Engaged: {{ f_engaged }}</span>
                 </div>
               </div>
-              <div style="height: 280px;">
-                <canvas id="dailyEngagementChart"></canvas>
-              </div>
-              <div class="mt-3 p-3 bg-info bg-opacity-10 rounded">
-                <p class="small mb-0 text-info">
-                  <strong>Insight:</strong> {{ weekend_insight }}
-                </p>
-
-              </div>
-            </div>
-          </div>
-        </div>
-
-
-
-        <!-- Users by Device -->
-        <div class="col-lg-6">
-          <div class="card shadow-sm h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                  <h4 class="h6 fw-bold mb-1">Users by Device</h4>
-                  <p class="small text-muted mb-0">Device type breakdown</p>
-                </div>
-              </div>
-              <div style="height: 280px;">
-                <canvas id="deviceChart"></canvas>
-              </div>
-              <div class="mt-3 row g-2 text-center">
-                {% for device in device_data %}
-                <div class="col-4">
-                  <div class="p-2 bg-light rounded">
-                    <p class="small text-muted mb-1">{{ device.device }}</p>
-                    {% set pct = ((device.count * 100) / (totals.unique_visitors or 1))|round|int %}
-                    <p class="h5 fw-bold mb-0">{{ pct }}%</p>
-                    <p class="small text-muted mb-0">{{ "{:,}".format(device.count) }}</p>
+              <div class="mt-3 text-center">
+                <div class="row g-1">
+                  <div class="col-4">
+                    <div class="p-1 rounded bg-secondary bg-opacity-10">
+                      <div class="small fw-bold">{{ totals.curious or 0 }}</div>
+                      <div class="small text-muted" style="font-size: 10px;">Curious</div>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="p-1 rounded bg-warning bg-opacity-10">
+                      <div class="small fw-bold">{{ totals.interested or 0 }}</div>
+                      <div class="small text-muted" style="font-size: 10px;">Interest</div>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="p-1 rounded bg-success bg-opacity-10">
+                      <div class="small fw-bold">{{ totals.engaged or 0 }}</div>
+                      <div class="small text-muted" style="font-size: 10px;">Engaged</div>
+                    </div>
                   </div>
                 </div>
-                {% endfor %}
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Users by Continent -->
-        <div class="col-lg-6">
+        <div class="col-lg-4">
           <div class="card shadow-sm h-100">
             <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                  <h4 class="h6 fw-bold mb-1">Users by Continent</h4>
-                  <p class="small text-muted mb-0">Geographic distribution by continent</p>
+              <h4 class="h6 fw-bold mb-3">Device Breakdown</h4>
+              <div class="d-flex flex-column justify-content-center h-100" id="deviceBarContainer">
+                <div class="d-flex justify-content-between px-2 mb-3 align-items-end">
+                  <div class="text-center" style="width: 48%;">
+                    <div id="deviceLabelMobile" style="min-height: 50px;">
+                      <i class="bi bi-phone-vibrate fs-3 d-block mb-1 text-muted"></i>
+                      <span class="fs-5 fw-bold text-muted">0%</span>
+                    </div>
+                  </div>
+                  <div class="text-center" style="width: 48%;">
+                    <div id="deviceLabelDesktop" style="min-height: 50px;">
+                      <i class="bi bi-laptop fs-3 d-block mb-1 text-muted"></i>
+                      <span class="fs-5 fw-bold text-muted">0%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- The Progress Bar -->
+                <div class="progress" style="height: 24px; border-radius: 12px; overflow: hidden; font-size: 0;">
+                  <div id="deviceBarMobile" class="progress-bar" role="progressbar"
+                    style="width: 50%; background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%); transition: width 0.6s ease;">
+                  </div>
+                  <div id="deviceBarDesktop" class="progress-bar" role="progressbar"
+                    style="width: 50%; background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%); transition: width 0.6s ease;">
+                  </div>
+                </div>
+
+                <!-- Stats Row -->
+                <div class="d-flex justify-content-between mt-3 px-1">
+                  <div class="text-start">
+                    <h5 class="mb-0 fw-bold text-dark" id="deviceCountMobile">0</h5>
+                    <small class="text-muted">Mobile / Tablet</small>
+                  </div>
+                  <div class="text-end">
+                    <h5 class="mb-0 fw-bold text-dark" id="deviceCountDesktop">0</h5>
+                    <small class="text-muted">Desktop</small>
+                  </div>
                 </div>
               </div>
-              <div style="height: 280px;">
-                <canvas id="regionChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h4 class="h6 fw-bold mb-3">Attention Decay</h4>
+              <div style="height: 200px;">
+                <canvas id="attentionDecayChart"></canvas>
               </div>
               <div class="mt-3">
-                {% if region_data %}
-                <div class="table-responsive">
-                  <table class="table table-sm mb-0">
-                    <tbody>
-                      {% for region in region_data[:5] %}
-                      <tr>
-                        <td class="border-0 small">{{ region.location }}</td>
-                        <td class="border-0 small text-end">{{ "{:,}".format(region.count) }}</td>
-                        {% set r_pct = ((region.count * 100) / (totals.unique_visitors or 1))|round|int %}
-                        <td class="border-0 small text-end text-muted">{{ r_pct }}%</td>
-                      </tr>
+                <p class="small text-muted mb-0 mx-auto text-center" style="max-width: 200px;">
+                  {% if attention|length > 1 %}Tracking {{ attention|length }} duration points{% else %}Not enough
+                  data{% endif %}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3: Geography & Systems (Asymmetrical) -->
+        <div class="col-lg-8">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h4 class="h6 fw-bold mb-3">Regional Distribution</h4>
+              <div class="row align-items-center">
+                <div class="col-md-7">
+                  <div class="position-relative d-flex align-items-center justify-content-center bg-light rounded"
+                    style="height: 250px; overflow: hidden;">
+                    <svg id="worldMap" viewBox="0 0 1000 500" style="width: 100%; height: 100%;">
+                      <!-- Simple World Map Paths (Abstract) -->
+                      <style>
+                        .continent-path {
+                          fill: #e2e8f0;
+                          stroke: #fff;
+                          stroke-width: 2;
+                          transition: all 0.3s ease;
+                        }
+
+                        .continent-path:hover {
+                          fill: #cbd5e1;
+                          cursor: pointer;
+                        }
+
+                        .continent-label {
+                          font-family: sans-serif;
+                          font-size: 24px;
+                          font-weight: bold;
+                          fill: #334155;
+                          opacity: 0;
+                          transition: opacity 0.3s;
+                          pointer-events: none;
+                          text-anchor: middle;
+                          alignment-baseline: middle;
+                          text-shadow: 0px 0px 4px rgba(255, 255, 255, 0.8);
+                        }
+
+                        .continent-active {
+                          fill: #93c5fd !important;
+                        }
+
+                        .label-visible {
+                          opacity: 1;
+                        }
+                      </style>
+
+                      <!-- North America -->
+                      <path id="path-na" class="continent-path"
+                        d="M 50 20 L 300 20 L 250 150 L 150 200 L 50 100 Z M 150 20 L 350 20 L 300 100 L 100 50 Z"
+                        d="m 75.9,29.9 83.0,-4.5 94.6,5.3 118.7,42.8 -6.2,25.9 -72.3,16.0 -33.9,74.1 -29.4,32.1 -25.9,-1.8 -21.4,-33.9 -44.6,-32.1 -55.3,-24.1 -8.0,-23.2 z" />
+                      <!-- Using a more accurate simplified path set for better visual -->
+                      <path id="path-na" class="continent-path"
+                        d="M54.9,28.8L158,23.5l113.3,47.3l-5.3,27.7l-71.3,15.2l-33.9,73.1l-30.3,31.2l-25-2.7l-20.5-33l-45.5-31.2l-51.7-25L54.9,28.8z" />
+                      <text id="label-na" class="continent-label" x="150" y="100">0</text>
+
+                      <!-- South America -->
+                      <path id="path-sa" class="continent-path"
+                        d="M228.4,220.8l77.6,35.7l33,87.4l-19.6,90.1l-39.2,27.7l-52.6-32.1l-39.2-105.3L228.4,220.8z" />
+                      <text id="label-sa" class="continent-label" x="260" y="320">0</text>
+
+                      <!-- Europe -->
+                      <path id="path-eu" class="continent-path" d="M430,30 L550,30 L 580,100 L 500,130 L 420,100 Z"
+                        d="m 432.8,28.8 111.5,4.5 41.9,64.2 -76.7,35.7 -70.5,-16.9 z" />
+                      <path id="path-eu" class="continent-path"
+                        d="M410.5,23.5l140.1,6.2l39.2,69.6l-76.7,35.7l-74.1-14.3L410.5,23.5z" />
+                      <text id="label-eu" class="continent-label" x="480" y="80">0</text>
+
+                      <!-- Africa -->
+                      <path id="path-af" class="continent-path"
+                        d="M417.6,138.7l116,9.8l56.2,56.2l-9.8,118.7l-60.7,51.7l-85.7-34.8l-41-94.6L417.6,138.7z" />
+                      <text id="label-af" class="continent-label" x="490" y="230">0</text>
+
+                      <!-- Asia -->
+                      <path id="path-as" class="continent-path"
+                        d="M592.5,28.8l175.8,10.7l102.6,34.8l-15.2,107.1l-76.7,66l-99.9-10.7l-67.8-67.8L592.5,28.8z" />
+                      <text id="label-as" class="continent-label" x="680" y="120">0</text>
+
+                      <!-- Oceania -->
+                      <path id="path-oc" class="continent-path"
+                        d="M729.9,282.4l112.4-7.1l52.6,58l-12.5,68.7l-70.5,39.2l-77.6-25.9L729.9,282.4z" />
+                      <text id="label-oc" class="continent-label" x="800" y="340">0</text>
+
+                    </svg>
+                  </div>
+                </div>
+                <div class="col-md-5">
+                  <div class="border rounded p-3" style="max-height: 250px; overflow-y: auto;">
+                    <ul class="list-group list-group-flush small">
+                      {% for region in region_data[:4] %}
+                      <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        {{ region.location }}
+                        <span class="badge bg-light text-dark rounded-pill">{{ region.count }}</span>
+                      </li>
                       {% endfor %}
-                    </tbody>
-                  </table>
-                </div>
-                {% else %}
-                <p class="small text-muted mb-0">No regional data available yet.</p>
-                {% endif %}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-6">
-          <div class="card shadow-sm h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                  <h4 class="h6 fw-bold mb-1">Users by Country</h4>
-                  <p class="small text-muted mb-0">Geographic breakdown by country</p>
-                </div>
-              </div>
-              <div style="height: 280px;">
-                <canvas id="countryChart"></canvas>
-              </div>
-              <div class="mt-3">
-                <!-- Country breakdown list (Javascript populates this or we can do server-side rendered table/list) -->
-                <!-- We'll let Chart.js handle the visual, but maybe a small table below like regions? -->
-                <div class="table-responsive" id="countryTableContainer" style="max-height: 150px; overflow-y: auto;">
-                  <!-- Content populated by JS or simple table here -->
-                  <table class="table table-sm mb-0">
-                    <tbody id="countryTableBody">
-                      <!-- JS will populate -->
-                    </tbody>
-                  </table>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="col-lg-6">
+        <div class="col-lg-4">
           <div class="card shadow-sm h-100">
             <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                  <h4 class="h6 fw-bold mb-1">Users by ISP</h4>
-                  <p class="small text-muted mb-0">Internet Service Provider breakdown</p>
-                </div>
-              </div>
-              <div style="height: 280px;">
+              <h4 class="h6 fw-bold mb-3">Top ISPs</h4>
+              <div style="height: 180px;">
                 <canvas id="ispChart"></canvas>
               </div>
-              <div class="mt-3">
-                {% if isp_data %}
-                <div class="table-responsive">
-                  <table class="table table-sm mb-0">
-                    <tbody>
-                      {% for row in isp_data[:5] %}
-                      <tr>
-                        <td class="border-0 small">{{ row.provider }}</td>
-                        <td class="border-0 small text-end">{{ "{:,}".format(row.count) }}</td>
-                        {% set i_pct = ((row.count * 100) / (totals.unique_visitors or 1))|round|int %}
-                        <td class="border-0 small text-end text-muted">{{ i_pct }}%</td>
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                </div>
-                {% else %}
-                <p class="small text-muted mb-0">No ISP data available yet.</p>
-                {% endif %}
+              <div class="mt-3 table-responsive" style="max-height: 100px; overflow-y: auto;">
+                <table class="table table-sm table-borderless small mb-0">
+                  <tbody>
+                    {% for row in isp_data[:5] %}
+                    <tr>
+                      <td class="text-truncate" style="max-width: 120px;" title="{{ row.provider }}">{{ row.provider }}
+                      </td>
+                      <td class="text-end fw-bold">{{ row.count }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Row 4: Detailed Analysis (Collapsible or just extra row) -->
+        <div class="col-md-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h4 class="h6 fw-bold mb-3">Hourly Click Patterns</h4>
+              <div style="height: 200px;">
+                <canvas id="clickFrequencyChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="h6 fw-bold mb-0">Global Reach (By Country)</h4>
+                <span class="badge bg-primary bg-opacity-10 text-primary">Top Locations</span>
+              </div>
+              <div class="row align-items-center">
+                <div class="col-12 col-xl-6 mb-3 mb-xl-0">
+                  <div style="height: 200px;">
+                    <canvas id="countryChart"></canvas>
+                  </div>
+                </div>
+                <div class="col-12 col-xl-6">
+                  <div class="table-responsive border rounded" style="max-height: 200px; overflow-y: auto;">
+                    <table class="table table-sm table-hover mb-0" style="font-size: 13px;">
+                      <thead class="table-light sticky-top">
+                        <tr>
+                          <th class="ps-2">Country</th>
+                          <th class="text-end pe-2">Users</th>
+                        </tr>
+                      </thead>
+                      <tbody id="countryTableBody">
+                        <!-- Populated by JS -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -528,7 +724,7 @@
                 <tr class="visitor-row" style="cursor: pointer;" data-visitor='{{ visitor | tojson }}'
                   onclick="showVisitorModal(this)">
                   <td class="small">{{ loop.index }}</td>
-                  <td class="small">{{ visitor.timestamp[:19] }}</td>
+                  <td class="small local-time">{{ visitor.timestamp }}</td>
                   <td class="small font-monospace">{{ visitor.ip_address }}</td>
                   <td class="small">
                     {% if visitor.latitude and visitor.longitude %}

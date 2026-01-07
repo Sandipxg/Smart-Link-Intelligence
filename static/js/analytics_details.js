@@ -21,7 +21,20 @@ function showVisitorModal(row) {
     setContent('modal-timezone', visitor.timezone || 'Unknown');
     setContent('modal-device', visitor.device || 'Unknown');
     setContent('modal-behavior', visitor.behavior || 'Unknown');
-    setContent('modal-timestamp', visitor.timestamp || 'Unknown');
+    let displayTime = visitor.timestamp || 'Unknown';
+    if (displayTime !== 'Unknown') {
+        try {
+            const date = new Date(displayTime.replace(' ', 'T') + 'Z');
+            if (!isNaN(date.getTime())) {
+                displayTime = new Intl.DateTimeFormat(undefined, {
+                    year: 'numeric', month: 'short', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit',
+                    hour12: true
+                }).format(date);
+            }
+        } catch (e) { }
+    }
+    setContent('modal-timestamp', displayTime);
 
     // Coordinates
     const coordsEl = document.getElementById('modal-coords');
