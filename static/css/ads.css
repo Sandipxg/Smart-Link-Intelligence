@@ -22,7 +22,7 @@ body {
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    min-height: 400px;
+    height: auto;
 }
 
 .small-ads-row {
@@ -165,7 +165,8 @@ body {
 }
 
 .large-ad .ad-image {
-    height: 300px;
+    height: auto;
+    width: 100%;
 }
 
 .small-ad .ad-image {
@@ -212,7 +213,7 @@ body {
 }
 
 .large-ad-image {
-    min-height: 400px;
+    height: auto;
 }
 
 .small-ad-image {

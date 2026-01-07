@@ -280,17 +280,14 @@ def create_app() -> Flask:
                 """
                 INSERT INTO links
                     (code, primary_url, returning_url, cta_url,
-                     variant_a_url, variant_b_url,
                      behavior_rule, created_at, state, user_id, behavior_rule_id, password_hash, expires_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 [
                     code,
                     primary_url,
                     data.get("returning_url") or primary_url,
                     data.get("cta_url") or primary_url,
-                    data.get("variant_a_url") or primary_url,
-                    data.get("variant_b_url") or primary_url,
                     data.get("behavior_rule") or "standard",
                     now.isoformat(),
                     "Active",
@@ -976,8 +973,22 @@ def create_app() -> Flask:
             def safe_get(row, key):
                 return row[key] if row and row[key] is not None else 0
 
+            # Get country data explicitly for the Country Chart
+            country_data_raw = query_db(
+                """
+                SELECT country, COUNT(DISTINCT ip_hash) as count
+                FROM visits
+                WHERE link_id = ? AND country IS NOT NULL AND country != 'Unknown'
+                GROUP BY country
+                ORDER BY count DESC
+                """,
+                [link["id"]],
+            )
+            # Create a simple list of dicts {country: "USA", count: 10}
+            country_data = [{'country': row['country'], 'count': row['count']} for row in country_data_raw]
+
             analytics_payload = {
-                "debug_version": "v1.0.1_isp_restored",
+                "debug_version": "v1.0.1_country_added",
                 "intent": {
                     "curious": curious_count,
                     "interested": interested_count,
@@ -988,11 +999,12 @@ def create_app() -> Flask:
                     "suspicious": suspicious_count
                 },
                 "attention": attention,
-                "hourly": hourly_data,  # Already list of dicts
+                "hourly": hourly_data,
                 "daily": daily_data,
-                "region": region_data,  # Already list of dicts
-                "cities": [dict(row) for row in city_data],  # SQLite Row objects
-                "device": [dict(row) for row in device_data],  # SQLite Row objects
+                "region": region_data,
+                "country": country_data,  # Included new country data
+                "cities": [dict(row) for row in city_data],
+                "device": [dict(row) for row in device_data],
                 "isp": [dict(row) for row in isp_data],
                 "weekend_insight": weekend_insight
             }

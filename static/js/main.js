@@ -635,6 +635,96 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // 9. Users by Country Chart (Doughnut Chart)
+    const countryCtx = document.getElementById('countryChart');
+    const countryTableBody = document.getElementById('countryTableBody');
+
+    if (countryCtx) {
+        try {
+            const countryData = data.country || [];
+            console.log('Rendering Country Chart with data:', countryData);
+
+            const labels = countryData.length > 0
+                ? countryData.map(c => c.country || 'Unknown')
+                : ['No data yet'];
+            const chartData = countryData.length > 0
+                ? countryData.map(c => c.count)
+                : [1];
+
+            // Render Chart
+            new Chart(countryCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.8)', // Emerald
+                            'rgba(59, 130, 246, 0.8)', // Blue
+                            'rgba(249, 115, 22, 0.8)', // Orange
+                            'rgba(236, 72, 153, 0.8)', // Pink
+                            'rgba(107, 114, 128, 0.8)', // Gray
+                            'rgba(139, 92, 246, 0.8)', // Violet
+                            'rgba(252, 165, 165, 0.8)'  // Light Red
+                        ],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    if (countryData.length === 0) return 'No country data yet';
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed * 100) / total).toFixed(1);
+                                    return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Iterate and Populate Table
+            if (countryTableBody) {
+                if (countryData.length > 0) {
+                    countryData.slice(0, 10).forEach(item => {
+                        const tr = document.createElement('tr');
+                        const pct = Math.round((item.count * 100) / ((data.totals || {}).unique_visitors || 1));
+                        // Fallback for totals if not available (approximate)
+                        // Actually total is better from chart data sum
+                        const totalVisitors = chartData.reduce((a, b) => a + b, 0) || 1;
+                        const pct_calc = Math.round((item.count * 100) / totalVisitors);
+
+                        tr.innerHTML = `
+                             <td class="border-0 small">${item.country || 'Unknown'}</td>
+                             <td class="border-0 small text-end">${item.count}</td>
+                             <td class="border-0 small text-end text-muted">${pct_calc}%</td>
+                         `;
+                        countryTableBody.appendChild(tr);
+                    });
+                } else {
+                    countryTableBody.innerHTML = '<tr><td colspan="3" class="text-center small text-muted">No data available</td></tr>';
+                }
+            }
+
+        } catch (e) {
+            console.error('Failed to initialize Country Chart:', e);
+        }
+    }
+
     // Export to CSV Function
     window.exportToCSV = function () {
         if (!data) return;
