@@ -49,12 +49,12 @@
         {% if user_tier != 'elite_pro' %}
         <div class="d-flex gap-2">
           {% if user_tier == 'free' %}
-          <a href="{{ url_for('upgrade') }}" class="btn btn-warning">
+          <a href="{{ url_for('user.upgrade') }}" class="btn btn-warning">
             <i class="bi bi-star-fill me-1"></i>Upgrade to Elite
           </a>
           {% endif %}
           {% if user_tier != 'elite_pro' %}
-          <a href="{{ url_for('upgrade') }}" class="btn btn-primary">
+          <a href="{{ url_for('user.upgrade') }}" class="btn btn-primary">
             <i class="bi bi-shield-fill-check me-1"></i>Get Elite Pro
           </a>
           {% endif %}
@@ -89,7 +89,7 @@
           </div>
         </div>
         <div class="card-body">
-          <form method="POST" action="{{ url_for('create') }}" id="linkCreateForm">
+          <form method="POST" action="{{ url_for('links.create') }}" id="linkCreateForm">
             <!-- Basic Information -->
             <div class="row g-3 mb-4">
               <div class="col-12">
@@ -125,7 +125,7 @@
                   {% endfor %}
                 </select>
                 <div class="form-text">
-                  <a href="{{ url_for('behavior_rules') }}" class="text-decoration-none">
+                  <a href="{{ url_for('user.behavior_rules') }}" class="text-decoration-none">
                     <i class="bi bi-gear"></i> Manage Rules
                   </a>
                 </div>
@@ -223,7 +223,7 @@
               </p>
             </div>
             <div class="col-md-4 text-end">
-              <a href="{{ url_for('analytics_overview') }}" class="btn btn-primary btn-lg">
+              <a href="{{ url_for('links.analytics_overview') }}" class="btn btn-primary btn-lg">
                 <i class="bi bi-arrow-right me-2"></i>View Analytics
               </a>
             </div>

@@ -28,7 +28,7 @@
                     <!-- Image Ad -->
                     <div class="image-ad-container" onclick="window.open('{{ ads_by_position[1].cta_url }}', '_blank')"
                         style="cursor: pointer;">
-                        <img src="{{ url_for('uploaded_file', filename=ads_by_position[1].image_filename) }}"
+                        <img src="{{ url_for('ads.uploaded_file', filename=ads_by_position[1].image_filename) }}"
                             alt="{{ ads_by_position[1].title }}" class="ad-image large-ad-image">
                         <div class="image-ad-overlay">
                             <div class="image-ad-content">
@@ -131,7 +131,7 @@
                         <div class="image-ad-container small-image-ad"
                             onclick="window.open('{{ ads_by_position[2].cta_url }}', '_blank')"
                             style="cursor: pointer;">
-                            <img src="{{ url_for('uploaded_file', filename=ads_by_position[2].image_filename) }}"
+                            <img src="{{ url_for('ads.uploaded_file', filename=ads_by_position[2].image_filename) }}"
                                 alt="{{ ads_by_position[2].title }}" class="ad-image small-ad-image">
                             <div class="image-ad-overlay">
                                 <div class="image-ad-content">
@@ -180,7 +180,7 @@
                         <div class="image-ad-container small-image-ad"
                             onclick="window.open('{{ ads_by_position[3].cta_url }}', '_blank')"
                             style="cursor: pointer;">
-                            <img src="{{ url_for('uploaded_file', filename=ads_by_position[3].image_filename) }}"
+                            <img src="{{ url_for('ads.uploaded_file', filename=ads_by_position[3].image_filename) }}"
                                 alt="{{ ads_by_position[3].title }}" class="ad-image small-ad-image">
                             <div class="image-ad-overlay">
                                 <div class="image-ad-content">

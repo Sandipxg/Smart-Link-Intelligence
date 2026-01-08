@@ -149,7 +149,7 @@
                         <td>
                             <div class="btn-group btn-group-sm">
                                 {% if link.auto_disabled or link.protection_level >= 3 %}
-                                <form method="POST" action="{{ url_for('recover_link', link_id=link.id) }}"
+                                <form method="POST" action="{{ url_for('ddos.recover_link', link_id=link.id) }}"
                                     class="d-inline">
                                     <button type="submit" class="btn btn-success btn-sm"
                                         onclick="return confirm('Are you sure you want to recover this link?')">
@@ -157,7 +157,7 @@
                                     </button>
                                 </form>
                                 {% endif %}
-                                <a href="{{ url_for('ddos_link_stats', link_id=link.id) }}"
+                                <a href="{{ url_for('ddos.ddos_link_stats', link_id=link.id) }}"
                                     class="btn btn-outline-primary btn-sm">
                                     <i class="bi bi-bar-chart"></i> Stats
                                 </a>
@@ -173,7 +173,7 @@
             <i class="bi bi-link-45deg text-muted" style="font-size: 3rem;"></i>
             <h5 class="text-muted mt-3">No Links Found</h5>
             <p class="text-muted">Create your first smart link to see protection status here.</p>
-            <a href="{{ url_for('index') }}" class="btn btn-primary">
+            <a href="{{ url_for('main.index') }}" class="btn btn-primary">
                 <i class="bi bi-plus-circle me-1"></i>Create Link
             </a>
         </div>

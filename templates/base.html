@@ -15,7 +15,7 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
     <div class="container">
-      <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') if g.user else url_for('landing') }}">
+      <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.index') if g.user else url_for('main.landing') }}">
         <div class="bg-primary rounded-2 p-1 me-2">
           <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
             <path d="M12 20L18 26L28 14" stroke="white" stroke-width="3" stroke-linecap="round" />
@@ -32,7 +32,7 @@
         {% if g.user %}
         <ul class="navbar-nav me-auto">
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('index') }}">
+            <a class="nav-link" href="{{ url_for('main.index') }}">
               <i class="bi bi-house-door me-1"></i>Dashboard
             </a>
           </li>
@@ -42,12 +42,12 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('behavior_rules') }}">
+            <a class="nav-link" href="{{ url_for('user.behavior_rules') }}">
               <i class="bi bi-sliders me-1"></i>Behavior Rules
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('ddos_protection_dashboard') }}">
+            <a class="nav-link" href="{{ url_for('ddos.ddos_protection_dashboard') }}">
               <i class="bi bi-shield-check me-1"></i>Security
               {% if g.user['membership_tier'] != 'elite_pro' %}
               <i class="bi bi-lock-fill text-secondary ms-1 fs-6" title="Locked for your tier"></i>
@@ -55,7 +55,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('create_ad') }}">
+            <a class="nav-link" href="{{ url_for('ads.create_ad') }}">
               <i class="bi bi-megaphone me-1"></i>Ads
               {% if g.user['membership_tier'] != 'elite_pro' %}
               <i class="bi bi-lock-fill text-secondary ms-1 fs-6" title="Locked for your tier"></i>
@@ -88,7 +88,7 @@
               </button>
               <ul class="dropdown-menu dropdown-menu-end">
                 {% if not g.user.is_premium %}
-                <li><a class="dropdown-item text-warning" href="{{ url_for('upgrade') }}">
+                <li><a class="dropdown-item text-warning" href="{{ url_for('user.upgrade') }}">
                     <i class="bi bi-star-fill me-2"></i>Upgrade to Elite
                   </a></li>
                 <li>
@@ -102,19 +102,19 @@
                   <hr class="dropdown-divider">
                 </li>
                 {% endif %}
-                <li><a class="dropdown-item" href="{{ url_for('notifications') }}">
+                <li><a class="dropdown-item" href="{{ url_for('user.notifications') }}">
                     <i class="bi bi-bell-fill me-2"></i>Notifications
                   </a></li>
-                <li><a class="dropdown-item" href="{{ url_for('documentation') }}">
+                <li><a class="dropdown-item" href="{{ url_for('main.documentation') }}">
                     <i class="bi bi-book me-2"></i>Documentation
                   </a></li>
-                <li><a class="dropdown-item" href="{{ url_for('settings') }}">
+                <li><a class="dropdown-item" href="{{ url_for('user.settings') }}">
                     <i class="bi bi-gear me-2"></i>Settings
                   </a></li>
                 <li><a class="dropdown-item text-info" href="{{ url_for('admin.admin_login') }}" target="_blank">
                     <i class="bi bi-shield-lock me-2"></i>Admin Panel
                   </a></li>
-                <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">
+                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
                     <i class="bi bi-box-arrow-right me-2"></i>Logout
                   </a></li>
               </ul>
@@ -122,10 +122,10 @@
           </div>
           {% else %}
           <div class="d-flex ms-auto">
-            <a class="btn btn-outline-light btn-sm me-2" href="{{ url_for('login') }}">
+            <a class="btn btn-outline-light btn-sm me-2" href="{{ url_for('auth.login') }}">
               <i class="bi bi-box-arrow-in-right me-1"></i>Login
             </a>
-            <a class="btn btn-primary btn-sm" href="{{ url_for('signup') }}">
+            <a class="btn btn-primary btn-sm" href="{{ url_for('auth.signup') }}">
               <i class="bi bi-person-plus me-1"></i>Sign up
             </a>
           </div>
@@ -159,7 +159,7 @@
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <form method="POST" action="{{ url_for('create') if g.user else '#' }}" id="quickCreateModalForm">
+        <form method="POST" action="{{ url_for('links.create') if g.user else '#' }}" id="quickCreateModalForm">
           <div class="modal-body">
             <div class="mb-3">
               <label class="form-label fw-semibold">Original URL <span class="text-danger">*</span></label>
@@ -213,7 +213,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
   <!-- Pass server-side data to client-side -->
-  <div id="app-data" data-login-url="{{ url_for('login') }}" data-analytics-url="{{ url_for('analytics_overview') }}"
+  <div id="app-data" data-login-url="{{ url_for('auth.login') }}" data-analytics-url="{{ url_for('links.analytics_overview') }}"
     data-authenticated="{{ 'true' if g.user else 'false' }}" style="display: none;"></div>
 
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>

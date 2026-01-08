@@ -14,7 +14,7 @@
             <code class="bg-light px-2 py-1 rounded">{{ link.code }}</code>
         </p>
     </div>
-    <a href="{{ url_for('ddos_protection_dashboard') }}" class="btn btn-outline-secondary">
+    <a href="{{ url_for('ddos.ddos_protection_dashboard') }}" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
     </a>
 </div>
@@ -132,7 +132,7 @@
             Security Event Timeline
         </h5>
         {% if link.auto_disabled or link.protection_level >= 3 %}
-        <form method="POST" action="{{ url_for('recover_link', link_id=link.id) }}" class="d-inline">
+        <form method="POST" action="{{ url_for('ddos.recover_link', link_id=link.id) }}" class="d-inline">
             <button type="submit" class="btn btn-success btn-sm"
                 onclick="return confirm('Are you sure you want to recover this link?')">
                 <i class="bi bi-arrow-clockwise me-1"></i>Recover Link

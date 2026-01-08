@@ -59,8 +59,8 @@
                 </ul>
 
                 <div class="d-flex gap-2">
-                    <a href="{{ url_for('login') }}" class="btn-outline-custom">Sign In</a>
-                    <a href="{{ url_for('signup') }}" class="btn-gradient">Sign Up</a>
+                    <a href="{{ url_for('auth.login') }}" class="btn-outline-custom">Sign In</a>
+                    <a href="{{ url_for('auth.signup') }}" class="btn-gradient">Sign Up</a>
                 </div>
             </div>
         </div>
@@ -82,7 +82,7 @@
                             experiences.
                         </p>
                         <div class="d-flex gap-3 align-items-center flex-wrap">
-                            <a href="{{ url_for('signup') }}" class="btn-gradient">
+                            <a href="{{ url_for('auth.signup') }}" class="btn-gradient">
                                 <i class="bi bi-rocket-takeoff me-2"></i>Sign Up
                             </a>
                             <button class="btn-outline-custom" onclick="openVideoModal()">

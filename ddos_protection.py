@@ -4,6 +4,33 @@ import time
 from datetime import datetime, timedelta
 from collections import defaultdict
 import hashlib
+from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, g
+from functools import wraps
+from database import query_db, execute_db
+from config import MEMBERSHIP_TIERS
+
+# Create Blueprint for DDoS protection routes
+ddos_bp = Blueprint('ddos', __name__, url_prefix='/ddos-protection')
+
+def ddos_required(f):
+    """Decorator to require DDoS protection feature (Elite Pro only)"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not g.get("user"):
+            flash("Please log in to continue", "warning")
+            return redirect(url_for("login"))
+            
+        # Check Membership
+        user_dict = dict(g.user) if g.user else {}
+        user_tier = user_dict.get("membership_tier", "free")
+        if not user_tier: 
+            user_tier = "free"
+        
+        if not MEMBERSHIP_TIERS.get(user_tier, MEMBERSHIP_TIERS["free"])["ddos_protection"]:
+            flash("DDoS Protection is exclusive to Elite Pro members. Please upgrade to access this feature.", "warning")
+            return redirect(url_for("index"))
+        return f(*args, **kwargs)
+    return decorated_function
 
 class DDoSProtection:
     def __init__(self, database_path):
@@ -218,3 +245,132 @@ class DDoSProtection:
         
         conn.close()
         return [dict(row) for row in stats]
+
+# DDoS Protection Routes
+@ddos_bp.route('/')
+@ddos_required
+def ddos_protection_dashboard():
+    """DDoS Protection Dashboard"""
+    # Import here to avoid circular imports
+    from admin_panel import track_user_activity
+    
+    # Get user's links with protection status
+    links_with_protection = query_db(
+        """
+        SELECT l.*, 
+               COALESCE(de.event_count, 0) as ddos_events,
+               COALESCE(de.last_event, '') as last_ddos_event
+        FROM links l
+        LEFT JOIN (
+            SELECT link_id, 
+                   COUNT(*) as event_count,
+                   MAX(detected_at) as last_event
+            FROM ddos_events 
+            GROUP BY link_id
+        ) de ON l.id = de.link_id
+        WHERE l.user_id = ?
+        ORDER BY l.created_at DESC
+        """,
+        [g.user["id"]]
+    )
+    
+    # Get recent DDoS events for user's links
+    recent_events = query_db(
+        """
+        SELECT de.*, l.code, l.primary_url
+        FROM ddos_events de
+        JOIN links l ON de.link_id = l.id
+        WHERE l.user_id = ?
+        ORDER BY de.detected_at DESC
+        LIMIT 20
+        """,
+        [g.user["id"]]
+    )
+    
+    # Track DDoS dashboard view
+    track_user_activity(g.user["id"], "view_ddos_dashboard", "Viewed DDoS protection dashboard")
+    
+    return render_template("ddos_protection.html", 
+                         links=links_with_protection, 
+                         recent_events=recent_events)
+
+
+@ddos_bp.route('/recover/<int:link_id>', methods=["POST"])
+@ddos_required
+def recover_link(link_id):
+    """Manually recover a DDoS-protected link"""
+    # Import here to avoid circular imports
+    from admin_panel import track_user_activity
+    
+    # Check if link belongs to current user
+    link = query_db(
+        "SELECT * FROM links WHERE id = ? AND user_id = ?",
+        [link_id, g.user["id"]], one=True
+    )
+    
+    if not link:
+        flash("Link not found", "danger")
+        return redirect(url_for("ddos.ddos_protection_dashboard"))
+    
+    # Reset protection level
+    execute_db(
+        """
+        UPDATE links 
+        SET protection_level = 0, auto_disabled = 0, ddos_detected_at = NULL
+        WHERE id = ?
+        """,
+        [link_id]
+    )
+    
+    # Log recovery event
+    execute_db(
+        """
+        INSERT INTO ddos_events 
+        (link_id, event_type, severity, detected_at, protection_level)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        [link_id, 'manual_recovery', 1, datetime.utcnow().isoformat(), 0]
+    )
+    
+    track_user_activity(g.user["id"], "recover_link", f"Manually recovered link: {link['code']}")
+    flash(f"Link '{link['code']}' has been recovered and is now active", "success")
+    return redirect(url_for("ddos.ddos_protection_dashboard"))
+
+
+@ddos_bp.route('/stats/<int:link_id>')
+@ddos_required
+def ddos_link_stats(link_id):
+    """Get detailed DDoS statistics for a specific link"""
+    # Import here to avoid circular imports
+    from admin_panel import track_user_activity
+    
+    # Check if link belongs to current user
+    link = query_db(
+        "SELECT * FROM links WHERE id = ? AND user_id = ?",
+        [link_id, g.user["id"]], one=True
+    )
+    
+    if not link:
+        abort(404)
+    
+    # Get protection statistics
+    ddos_protection = DDoSProtection("smart_links.db")  # Use relative path
+    stats = ddos_protection.get_protection_stats(link_id)
+    
+    # Get detailed events
+    events = query_db(
+        """
+        SELECT * FROM ddos_events 
+        WHERE link_id = ?
+        ORDER BY detected_at DESC
+        LIMIT 50
+        """,
+        [link_id]
+    )
+    
+    track_user_activity(g.user["id"], "view_ddos_stats", f"Viewed DDoS stats for link: {link['code']}")
+    
+    return render_template("ddos_link_stats.html", 
+                         link=link, 
+                         stats=stats, 
+                         events=events)

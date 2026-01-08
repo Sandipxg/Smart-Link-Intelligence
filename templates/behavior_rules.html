@@ -102,7 +102,7 @@
                                     <td>
                                         {% if not rule.is_default %}
                                         <form method="POST"
-                                            action="{{ url_for('set_default_behavior_rule', rule_id=rule.id) }}"
+                                            action="{{ url_for('user.set_default_behavior_rule', rule_id=rule.id) }}"
                                             class="d-inline">
                                             <button type="submit" class="btn btn-sm btn-outline-success"
                                                 title="Set as Default">
@@ -110,7 +110,7 @@
                                             </button>
                                         </form>
                                         <form method="POST"
-                                            action="{{ url_for('delete_behavior_rule', rule_id=rule.id) }}"
+                                            action="{{ url_for('user.delete_behavior_rule', rule_id=rule.id) }}"
                                             class="d-inline"
                                             onsubmit="return confirm('Are you sure you want to delete this rule?')">
                                             <button type="submit" class="btn btn-sm btn-outline-danger"
@@ -153,7 +153,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="POST" action="{{ url_for('create_behavior_rule') }}">
+            <form method="POST" action="{{ url_for('user.create_behavior_rule') }}">
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-12 mb-3">

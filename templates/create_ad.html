@@ -89,7 +89,7 @@
           </h5>
         </div>
         <div class="card-body p-4">
-          <form method="POST" action="{{ url_for('submit_ad') }}" id="adForm" enctype="multipart/form-data">
+          <form method="POST" action="{{ url_for('ads.submit_ad') }}" id="adForm" enctype="multipart/form-data">
             <!-- Ad Type Selection -->
             <div class="row g-3 mb-4">
               <div class="col-12">
@@ -317,7 +317,7 @@
             <tr>
               <td>
                 {% if ad.ad_type == 'image' and ad.image_filename %}
-                <img src="{{ url_for('uploaded_file', filename=ad.image_filename) }}" alt="{{ ad.title }}"
+                <img src="{{ url_for('ads.uploaded_file', filename=ad.image_filename) }}" alt="{{ ad.title }}"
                   class="img-thumbnail" style="width: 60px; height: 40px; object-fit: cover;">
                 {% else %}
                 <div class="mini-ad-preview" style="background: {{ ad.background_color }}; color: {{ ad.text_color }};">
@@ -373,7 +373,7 @@
               </td>
               <td>
                 <div class="btn-group btn-group-sm">
-                  <form method="POST" action="{{ url_for('toggle_ad', ad_id=ad.id) }}" class="d-inline">
+                  <form method="POST" action="{{ url_for('ads.toggle_ad', ad_id=ad.id) }}" class="d-inline">
                     <button type="submit" class="btn btn-outline-primary btn-sm">
                       {% if ad.is_active %}
                       <i class="bi bi-pause"></i>
@@ -382,7 +382,7 @@
                       {% endif %}
                     </button>
                   </form>
-                  <form method="POST" action="{{ url_for('delete_ad', ad_id=ad.id) }}" class="d-inline"
+                  <form method="POST" action="{{ url_for('ads.delete_ad', ad_id=ad.id) }}" class="d-inline"
                     onsubmit="return confirm('Are you sure you want to delete this ad?')">
                     <button type="submit" class="btn btn-outline-danger btn-sm">
                       <i class="bi bi-trash"></i>

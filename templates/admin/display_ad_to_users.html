@@ -15,7 +15,7 @@
             </div>
             <div class="card-body p-0">
                 {% if ad.ad_type == 'image' and ad.image_filename %}
-                <img src="{{ url_for('uploaded_file', filename=ad.image_filename) }}" class="card-img-top"
+                <img src="{{ url_for('ads.uploaded_file', filename=ad.image_filename) }}" class="card-img-top"
                     style="height: 200px; object-fit: cover;" alt="{{ ad.title }}">
                 {% else %}
                 <!-- Custom ad preview -->

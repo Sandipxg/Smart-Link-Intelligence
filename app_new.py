@@ -14,10 +14,6 @@ from admin_panel import admin_bp, ensure_admin_tables
 from ddos_protection import ddos_bp
 from routes.main import main_bp
 from routes.auth import auth_bp
-from routes.links import links_bp
-from routes.user import user_bp
-from routes.ads import ads_bp
-# Note: Analytics routes temporarily integrated into other modules due to file system issues
 
 
 def create_app() -> Flask:
@@ -47,10 +43,6 @@ def create_app() -> Flask:
     app.register_blueprint(ddos_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
-    app.register_blueprint(links_bp)
-    app.register_blueprint(user_bp)
-    app.register_blueprint(ads_bp)
-    # Note: Analytics routes temporarily integrated into other modules
     
     return app
 

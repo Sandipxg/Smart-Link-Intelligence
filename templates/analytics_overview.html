@@ -117,7 +117,7 @@
           <i class="bi bi-collection me-2"></i>All Smart Links
         </h5>
         <div>
-          <a href="{{ url_for('index') }}" class="btn btn-primary btn-sm">
+          <a href="{{ url_for('main.index') }}" class="btn btn-primary btn-sm">
             <i class="bi bi-plus-circle me-1"></i>Create New Link
           </a>
         </div>
@@ -200,11 +200,11 @@
               </td>
               <td>
                 <div class="btn-group btn-group-sm">
-                  <a class="btn btn-outline-primary" href="{{ url_for('analytics', code=link.code) }}"
+                  <a class="btn btn-outline-primary" href="{{ url_for('links.analytics', code=link.code) }}"
                     title="Detailed Analytics">
                     <i class="bi bi-bar-chart"></i>
                   </a>
-                  <a class="btn btn-outline-success" href="{{ url_for('redirect_link', code=link.code) }}"
+                  <a class="btn btn-outline-success" href="{{ url_for('links.redirect_link', code=link.code) }}"
                     target="_blank" title="Open Link">
                     <i class="bi bi-box-arrow-up-right"></i>
                   </a>
@@ -224,7 +224,7 @@
         <i class="bi bi-link-45deg fs-1 text-muted mb-3"></i>
         <h5 class="text-muted mb-3">No Smart Links Yet</h5>
         <p class="text-muted mb-4">Create your first smart link to start tracking analytics and user behavior.</p>
-        <a href="{{ url_for('index') }}" class="btn btn-primary">
+        <a href="{{ url_for('main.index') }}" class="btn btn-primary">
           <i class="bi bi-plus-circle me-2"></i>Create Your First Link
         </a>
       </div>

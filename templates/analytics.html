@@ -37,13 +37,13 @@
             ← Back to User
           </a>
           {% else %}
-          <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-sm">
+          <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary btn-sm">
             ← Dashboard
           </a>
           {% endif %}
           {% if g.user %}
           <span class="text-muted small">{{ g.user.username }}</span>
-          <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Logout</a>
+          <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm">Logout</a>
           {% endif %}
         </div>
       </div>
@@ -55,7 +55,7 @@
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Dashboard</a></li>
         <li class="breadcrumb-item active">Analytics</li>
       </ol>
     </nav>
@@ -174,11 +174,11 @@
                       <div>
                         <span class="text-muted small d-block fw-bold text-uppercase">Smart Link</span>
                         <code class="text-primary fw-bold"
-                          style="font-size: 1.1rem;">{{ url_for('redirect_link', code=link.code, _external=True) }}</code>
+                          style="font-size: 1.1rem;">{{ url_for('links.redirect_link', code=link.code, _external=True) }}</code>
                       </div>
                     </div>
                     <button class="btn btn-primary d-flex align-items-center gap-2 px-4 rounded-pill shadow-sm"
-                      onclick="navigator.clipboard.writeText('{{ url_for('redirect_link', code=link.code, _external=True) }}'); this.innerHTML='<i class=\'bi bi-check2-all\'></i> Copied'; setTimeout(()=>this.innerHTML='<i class=\'bi bi-clipboard\'></i> Copy Link', 2000)">
+                      onclick="navigator.clipboard.writeText('{{ url_for('links.redirect_link', code=link.code, _external=True) }}'); this.innerHTML='<i class=\'bi bi-check2-all\'></i> Copied'; setTimeout(()=>this.innerHTML='<i class=\'bi bi-clipboard\'></i> Copy Link', 2000)">
                       <i class="bi bi-clipboard"></i> Copy Link
                     </button>
                   </div>
@@ -250,19 +250,19 @@
               <div class="card-body d-flex flex-column align-items-center justify-content-center text-center">
                 <div class="bg-white p-3 rounded-4 shadow-sm border mb-4">
                   <img
-                    src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ url_for('export_csv', code_id=link.code, _external=True) }}"
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ url_for('links.export_csv', code_id=link.code, _external=True) }}"
                     alt="QR" width="120" height="120">
                 </div>
                 <h5 class="h6 fw-bold text-dark mb-1">Download Report</h5>
                 <p class="small text-muted mb-4 px-3">Scan QR or click below to export detailed link analytics</p>
 
                 <div class="w-100 px-3 d-grid gap-2">
-                  <a href="{{ url_for('export_csv', code_id=link.code) }}"
+                  <a href="{{ url_for('links.export_csv', code_id=link.code) }}"
                     class="btn btn-dark rounded-pill py-2 d-flex align-items-center justify-content-center gap-2">
                     <i class="bi bi-cloud-arrow-down-fill"></i> Download CSV
                   </a>
                   <button class="btn btn-outline-dark rounded-pill py-2"
-                    data-csv-url="{{ url_for('export_csv', code_id=link.code, _external=True) }}"
+                    data-csv-url="{{ url_for('links.export_csv', code_id=link.code, _external=True) }}"
                     onclick="navigator.clipboard.writeText(this.dataset.csvUrl); alert('CSV Link Copied!')">
                     <i class="bi bi-link-45deg"></i> Copy CSV URL
                   </button>
@@ -691,7 +691,7 @@
             <p class="small text-muted mb-0 mt-1">Click on any row to view full details</p>
           </div>
           <div class="d-flex align-items-center gap-2">
-            <a href="{{ url_for('export_link_analytics_excel', code_id=link.code) }}"
+            <a href="{{ url_for('links.export_link_analytics_excel', code_id=link.code) }}"
               class="btn btn-outline-light btn-sm">
               <svg width="14" height="14" fill="currentColor" class="me-1" viewBox="0 0 16 16">
                 <path

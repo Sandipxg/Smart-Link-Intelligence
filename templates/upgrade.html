@@ -60,7 +60,7 @@
           {% if g.user['membership_tier'] == 'elite' %}
           <button type="button" class="btn btn-lg btn-warning w-100" disabled>Current Plan</button>
           {% else %}
-          <form method="POST" action="{{ url_for('process_upgrade') }}">
+          <form method="POST" action="{{ url_for('user.process_upgrade') }}">
             <input type="hidden" name="plan" value="elite">
             <button type="submit" class="btn btn-lg btn-warning w-100">Upgrade to Elite</button>
           </form>
@@ -89,7 +89,7 @@
           {% if g.user['membership_tier'] == 'elite_pro' %}
           <button type="button" class="btn btn-lg btn-primary w-100" disabled>Current Plan</button>
           {% else %}
-          <form method="POST" action="{{ url_for('process_upgrade') }}">
+          <form method="POST" action="{{ url_for('user.process_upgrade') }}">
             <input type="hidden" name="plan" value="elite_pro">
             <button type="submit" class="btn btn-lg btn-primary w-100">Get Elite Pro</button>
           </form>
