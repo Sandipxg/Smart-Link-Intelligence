@@ -11,181 +11,244 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <!-- Chat Widget CSS -->
-    <link href="{{ url_for('static', filename='css/chat.css') }}" rel="stylesheet">
-
-    <!-- Landing Page CSS -->
+    
+    <!-- Modern Landing Page CSS -->
     <link href="{{ url_for('static', filename='css/landing.css') }}" rel="stylesheet">
 </head>
 
 <body>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="tech-grid">
+            <div class="grid-lines"></div>
+            <div class="grid-dots"></div>
+        </div>
+        <div class="circuit-patterns">
+            <div class="circuit circuit-1">
+                <svg viewBox="0 0 200 200" class="circuit-svg">
+                    <path d="M20,20 L180,20 L180,60 L140,60 L140,100 L180,100 L180,180 L20,180 L20,140 L60,140 L60,100 L20,100 Z" 
+                          stroke="rgba(37, 99, 235, 0.3)" stroke-width="2" fill="none"/>
+                    <circle cx="20" cy="20" r="3" fill="rgba(37, 99, 235, 0.6)"/>
+                    <circle cx="180" cy="60" r="3" fill="rgba(14, 165, 233, 0.6)"/>
+                    <circle cx="140" cy="100" r="3" fill="rgba(6, 182, 212, 0.6)"/>
+                    <circle cx="60" cy="140" r="3" fill="rgba(37, 99, 235, 0.6)"/>
+                </svg>
+            </div>
+            <div class="circuit circuit-2">
+                <svg viewBox="0 0 150 150" class="circuit-svg">
+                    <path d="M10,75 L50,75 L50,25 L100,25 L100,75 L140,75 M75,50 L75,100 L125,100" 
+                          stroke="rgba(14, 165, 233, 0.4)" stroke-width="2" fill="none"/>
+                    <rect x="45" y="70" width="10" height="10" fill="rgba(37, 99, 235, 0.5)"/>
+                    <rect x="95" y="20" width="10" height="10" fill="rgba(6, 182, 212, 0.5)"/>
+                </svg>
+            </div>
+            <div class="circuit circuit-3">
+                <svg viewBox="0 0 180 120" class="circuit-svg">
+                    <path d="M20,60 L60,60 L60,20 L120,20 L120,60 L160,60 L160,100 L80,100 L80,80" 
+                          stroke="rgba(6, 182, 212, 0.3)" stroke-width="2" fill="none"/>
+                    <circle cx="60" cy="60" r="4" fill="rgba(14, 165, 233, 0.7)"/>
+                    <circle cx="120" cy="20" r="4" fill="rgba(37, 99, 235, 0.7)"/>
+                </svg>
+            </div>
+        </div>
+        <div class="code-snippets">
+            <div class="code-block code-1">
+                <div class="code-line">if (user.engaged) {</div>
+                <div class="code-line">  route.to(premium_url);</div>
+                <div class="code-line">}</div>
+            </div>
+            <div class="code-block code-2">
+                <div class="code-line">analytics.track('click', {</div>
+                <div class="code-line">  source: 'smart_link',</div>
+                <div class="code-line">  behavior: 'curious'</div>
+                <div class="code-line">});</div>
+            </div>
+            <div class="code-block code-3">
+                <div class="code-line">const link = new SmartLink({</div>
+                <div class="code-line">  ai: true,</div>
+                <div class="code-line">  ddos_protection: 5</div>
+                <div class="code-line">});</div>
+            </div>
+        </div>
+        <div class="tech-particles">
+            <div class="particle particle-1">01</div>
+            <div class="particle particle-2">AI</div>
+            <div class="particle particle-3">{ }</div>
+            <div class="particle particle-4">⚡</div>
+            <div class="particle particle-5">🔗</div>
+            <div class="particle particle-6">∞</div>
+            <div class="particle particle-7">λ</div>
+            <div class="particle particle-8">⟨⟩</div>
+        </div>
+        <div class="data-streams">
+            <div class="stream stream-1"></div>
+            <div class="stream stream-2"></div>
+            <div class="stream stream-3"></div>
+        </div>
+    </div>
+
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-custom fixed-top" id="navbar">
-        <div class="container-fluid px-4">
-            <a href="#" class="navbar-brand-custom">
-                <div class="logo-icon">
-                    <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
-                        <path d="M12 20L18 26L28 14" stroke="white" stroke-width="3" stroke-linecap="round" />
-                    </svg>
+    <nav class="navbar navbar-expand-lg fixed-top glass-nav" id="navbar">
+        <div class="container">
+            <a href="#" class="navbar-brand modern-brand">
+                <div class="brand-icon">
+                    <div class="icon-inner">
+                        <i class="bi bi-link-45deg"></i>
+                    </div>
                 </div>
-                <span class="brand-full">Smart Link Intelligence</span>
-                <span class="brand-short">Smart Links</span>
+                <span class="brand-text">
+                    <span class="brand-main">Smart Links</span>
+                    <span class="brand-sub">Intelligence</span>
+                </span>
             </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler modern-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span></span>
+                <span></span>
+                <span></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item">
-                        <a class="nav-link nav-link-custom" href="#home-section">Home</a>
+                        <a class="nav-link modern-nav-link" href="#hero">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link nav-link-custom" href="#how-it-works">How It Works</a>
+                        <a class="nav-link modern-nav-link" href="#features">Features</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link nav-link-custom" href="#features-section">Features</a>
+                        <a class="nav-link modern-nav-link" href="#pricing">Pricing</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link nav-link-custom" href="#pricing-section">Pricing</a>
+                        <a class="nav-link modern-nav-link" href="{{ url_for('main.documentation') }}">Docs</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link nav-link-custom" href="{{ url_for('main.documentation') }}">Docs</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-custom" href="#contact">Contact</a>
+                        <a class="nav-link modern-nav-link" href="#contact">Contact</a>
                     </li>
                 </ul>
 
-                <div class="d-flex gap-2 navbar-buttons">
-                    <a href="{{ url_for('auth.login') }}" class="btn-outline-custom btn-sm-responsive">Sign In</a>
-                    <a href="{{ url_for('auth.signup') }}" class="btn-gradient btn-sm-responsive">Sign Up</a>
+                <div class="navbar-actions">
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-ghost">Sign In</a>
+                    <a href="{{ url_for('auth.signup') }}" class="btn btn-primary-modern">
+                        Get Started
+                        <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero-section" id="home-section">
-        <div class="tech-grid"></div>
-        <div class="hero-bg-blur"></div>
+    <section class="hero-modern" id="hero">
         <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-7 mb-5 mb-lg-0">
-                    <div data-aos="fade-up">
-                        <h1 class="hero-title">
-                            <span id="typewriter-text"></span><span id="typewriter-cursor">|</span>
-                        </h1>
-                        <p class="hero-subtitle">
-                            Transform ordinary URLs into intelligent, behavior-aware links with advanced analytics, 
-                            AI-powered routing, and enterprise-grade DDoS protection. Create smarter user journeys 
-                            that adapt to visitor engagement patterns in real-time.
-                        </p>
-                        <div class="d-flex gap-3 align-items-center flex-wrap">
-                            <a href="{{ url_for('auth.signup') }}" class="btn-gradient glow-effect">
-                                <i class="bi bi-rocket-takeoff me-2"></i>Sign Up
-                            </a>
-                            <button class="btn-outline-custom" onclick="openVideoModal()">
-                                <i class="bi bi-play-circle me-2"></i>How It Works
-                            </button>
+            <div class="row align-items-center min-vh-100">
+                <div class="col-lg-6 hero-content">
+                    <div class="hero-badge" data-aos="fade-up">
+                        <i class="bi bi-stars"></i>
+                        <span>AI-Powered Link Intelligence</span>
+                    </div>
+                    
+                    <h1 class="hero-title" data-aos="fade-up" data-aos-delay="100">
+                        Transform Your Links Into
+                        <span class="gradient-text">Smart Experiences</span>
+                    </h1>
+                    
+                    <p class="hero-description" data-aos="fade-up" data-aos-delay="200">
+                        Create intelligent, behavior-aware links that adapt to user engagement patterns. 
+                        Get real-time analytics, AI-powered routing, and enterprise-grade security.
+                    </p>
+                    
+                    <div class="hero-actions" data-aos="fade-up" data-aos-delay="300">
+                        <a href="{{ url_for('auth.signup') }}" class="btn btn-primary-hero">
+                            <span>Start Free Trial</span>
+                            <i class="bi bi-rocket-takeoff"></i>
+                        </a>
+                        <button class="btn btn-play" onclick="openDemoModal()">
+                            <div class="play-icon">
+                                <i class="bi bi-play-fill"></i>
+                            </div>
+                            <span>Watch Demo</span>
+                        </button>
+                    </div>
+                    
+                    <div class="hero-stats" data-aos="fade-up" data-aos-delay="400">
+                        <div class="stat-item">
+                            <div class="stat-number">99.9%</div>
+                            <div class="stat-label">Uptime</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">5-Layer</div>
+                            <div class="stat-label">DDoS Protection</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">24/7</div>
+                            <div class="stat-label">AI Support</div>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-5">
-                    <div data-aos="fade-left" data-aos-delay="200">
-                        <img src="https://via.placeholder.com/600x450/2563eb/ffffff?text=Smart+Link+Dashboard"
-                            alt="Smart Link Dashboard" class="hero-image glow-effect">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="stats-section">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
-                    <div class="stat-card">
-                        <div class="stat-number" data-count="99.9">0</div>
-                        <div class="stat-label">% Uptime Guarantee</div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
-                    <div class="stat-card">
-                        <div class="stat-number" data-count="5">0</div>
-                        <div class="stat-label">Layer DDoS Protection</div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="300">
-                    <div class="stat-card">
-                        <div class="stat-number" data-count="3">0</div>
-                        <div class="stat-label">Membership Tiers</div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="400">
-                    <div class="stat-card">
-                        <div class="stat-number" data-count="24">0</div>
-                        <div class="stat-label">Hour Real-Time Analytics</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- How It Works Section -->
-    <section id="how-it-works">
-        <div class="container">
-            <div data-aos="fade-up">
-                <p class="section-subtitle">HOW IT WORKS</p>
-                <h2 class="section-title">Create Intelligent Links in 3 Steps</h2>
-                <p class="section-description">
-                    Build behavior-aware links that automatically adapt to user engagement patterns. 
-                    Our AI analyzes visitor behavior and routes them to the most effective destination 
-                    based on their interaction level.
-                </p>
-            </div>
-
-            <div class="row g-4">
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                    <div class="work-card">
-                        <div class="work-icon">
-                            <i class="bi bi-person-plus"></i>
+                
+                <div class="col-lg-6 hero-visual">
+                    <div class="dashboard-preview" data-aos="fade-left" data-aos-delay="200">
+                        <div class="preview-container">
+                            <div class="preview-header">
+                                <div class="preview-dots">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                                <div class="preview-title">Smart Link Dashboard</div>
+                            </div>
+                            <div class="preview-content">
+                                <div class="preview-chart">
+                                    <canvas id="heroChart"></canvas>
+                                </div>
+                                <div class="preview-stats">
+                                    <div class="preview-stat">
+                                        <div class="stat-icon blue">
+                                            <i class="bi bi-graph-up"></i>
+                                        </div>
+                                        <div class="stat-info">
+                                            <div class="stat-value">2,847</div>
+                                            <div class="stat-name">Total Clicks</div>
+                                        </div>
+                                    </div>
+                                    <div class="preview-stat">
+                                        <div class="stat-icon green">
+                                            <i class="bi bi-people"></i>
+                                        </div>
+                                        <div class="stat-info">
+                                            <div class="stat-value">1,234</div>
+                                            <div class="stat-name">Unique Visitors</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <h3 class="work-title">Sign Up & Choose Plan</h3>
-                        <p class="work-description">
-                            Create your account and select from Free (10 links), Elite (35 links), or Elite Pro 
-                            (unlimited) plans. Each tier unlocks powerful features like custom ads and DDoS protection.
-                        </p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                    <div class="work-card">
-                        <div class="work-icon">
-                            <i class="bi bi-gear-wide-connected"></i>
+                        
+                        <!-- Floating Elements -->
+                        <div class="floating-card card-1" data-aos="fade-up" data-aos-delay="600">
+                            <div class="card-icon">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <div class="card-text">DDoS Protected</div>
                         </div>
-                        <h3 class="work-title">Configure Behavior Rules</h3>
-                        <p class="work-description">
-                            Set up intelligent routing with custom behavior rules. Define thresholds for curious, 
-                            interested, and engaged visitors. Add password protection and progressive URL routing.
-                        </p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                    <div class="work-card">
-                        <div class="work-icon">
-                            <i class="bi bi-graph-up-arrow"></i>
+                        
+                        <div class="floating-card card-2" data-aos="fade-up" data-aos-delay="800">
+                            <div class="card-icon">
+                                <i class="bi bi-cpu"></i>
+                            </div>
+                            <div class="card-text">AI Powered</div>
                         </div>
-                        <h3 class="work-title">Monitor & Optimize</h3>
-                        <p class="work-description">
-                            Track real-time analytics with geographic data, device insights, and behavioral patterns. 
-                            Export data as CSV, chat with AI assistant, and optimize your conversion funnels.
-                        </p>
+                        
+                        <div class="floating-card card-3" data-aos="fade-up" data-aos-delay="1000">
+                            <div class="card-icon">
+                                <i class="bi bi-globe"></i>
+                            </div>
+                            <div class="card-text">Global CDN</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -193,388 +256,375 @@
     </section>
 
     <!-- Features Section -->
-    <section class="features-section" id="features-section">
-        <div class="features-bg-blur"></div>
-        <div class="container position-relative">
-            <div data-aos="fade-up">
-                <p class="section-subtitle">FEATURES</p>
-                <h2 class="section-title">Intelligent Link Management Platform</h2>
-                <p class="section-description">
-                    Discover advanced features designed for marketers, developers, and businesses who need 
-                    intelligent URL management with behavioral analytics and enterprise-grade security.
-                </p>
-            </div>
-
-            <div class="row g-4">
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="bi bi-shield-check"></i>
-                        </div>
-                        <h3 class="feature-title">5-Layer DDoS Protection</h3>
-                        <p class="feature-description">
-                            Enterprise-grade security with rate limiting, burst detection, IP filtering, and automatic 
-                            link protection. Elite Pro members get advanced threat detection and mitigation.
-                        </p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="bi bi-cpu"></i>
-                        </div>
-                        <h3 class="feature-title">Behavioral AI Engine</h3>
-                        <p class="feature-description">
-                            Intelligent visitor classification into curious, interested, and engaged categories. 
-                            Progressive routing based on engagement patterns and attention decay algorithms.
-                        </p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="bi bi-graph-up"></i>
-                        </div>
-                        <h3 class="feature-title">Real-Time Analytics</h3>
-                        <p class="feature-description">
-                            Comprehensive analytics with geographic distribution, device breakdown, traffic quality 
-                            scores, and behavioral insights. Export data as CSV for deeper analysis.
-                        </p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="bi bi-sliders"></i>
-                        </div>
-                        <h3 class="feature-title">Custom Behavior Rules</h3>
-                        <p class="feature-description">
-                            Create personalized behavior rules with custom thresholds, time windows, and routing logic. 
-                            Set up password protection and progressive user journey optimization.
-                        </p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="bi bi-palette"></i>
-                        </div>
-                        <h3 class="feature-title">Smart Monetization</h3>
-                        <p class="feature-description">
-                            Grid-based ad system with custom branding and image uploads for Elite Pro members. 
-                            Create personalized ad experiences while maintaining professional appearance.
-                        </p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="bi bi-robot"></i>
-                        </div>
-                        <h3 class="feature-title">AI Chat Assistant</h3>
-                        <p class="feature-description">
-                            Built-in AI chatbot with 33+ intents for instant support and guidance. Get help with 
-                            link creation, analytics interpretation, and platform features.
-                        </p>
-                    </div>
-                </div>
-            </div>
+    <section class="features-modern" id="features">
+        <div class="binary-bg">
+            <div class="binary-line">01001000 01100101 01101100 01101100 01101111 00100000 01010111 01101111 01110010 01101100 01100100</div>
+            <div class="binary-line">01000001 01001001 00100000 01010000 01101111 01110111 01100101 01110010 01100101 01100100</div>
+            <div class="binary-line">01010011 01101101 01100001 01110010 01110100 00100000 01001100 01101001 01101110 01101011 01110011</div>
         </div>
-    </section>
-
-    <!-- Key Differentiators Section -->
-    <section class="differentiators-section">
         <div class="container">
-            <div data-aos="fade-up">
-                <p class="section-subtitle">WHY CHOOSE US</p>
-                <h2 class="section-title">Beyond Traditional Link Shorteners</h2>
+            <div class="section-header text-center" data-aos="fade-up">
+                <div class="section-badge">
+                    <i class="bi bi-lightning"></i>
+                    <span>Powerful Features</span>
+                </div>
+                <h2 class="section-title">
+                    Everything You Need for
+                    <span class="gradient-text">Smart Link Management</span>
+                </h2>
                 <p class="section-description">
-                    While others just shorten URLs, we create intelligent experiences that adapt to user behavior 
-                    and provide actionable insights for better conversion optimization.
+                    Advanced features designed for modern businesses who need intelligent 
+                    URL management with behavioral analytics and enterprise security.
                 </p>
             </div>
 
-            <div class="row g-4">
-                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
-                    <div class="differentiator-card">
-                        <div class="diff-icon">
-                            <i class="bi bi-lightning-charge"></i>
+            <div class="features-grid">
+                <div class="feature-card main-feature" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-icon">
+                        <i class="bi bi-cpu"></i>
+                    </div>
+                    <h3 class="feature-title">Behavioral AI Engine</h3>
+                    <p class="feature-description">
+                        Advanced AI analyzes user behavior patterns and automatically routes visitors 
+                        to the most effective destination based on their engagement level.
+                    </p>
+                    <div class="feature-highlights">
+                        <div class="highlight-item">
+                            <i class="bi bi-check-circle"></i>
+                            <span>Real-time behavior analysis</span>
                         </div>
-                        <div class="diff-content">
-                            <h3 class="diff-title">Behavioral Intelligence</h3>
-                            <p class="diff-description">
-                                Our AI doesn't just track clicks—it understands user intent. Classify visitors as 
-                                curious, interested, or engaged, then route them to the perfect destination based on 
-                                their behavior patterns.
-                            </p>
-                            <ul class="diff-features">
-                                <li>Attention decay algorithms</li>
-                                <li>Progressive URL routing</li>
-                                <li>Custom engagement thresholds</li>
-                            </ul>
+                        <div class="highlight-item">
+                            <i class="bi bi-check-circle"></i>
+                            <span>Progressive user routing</span>
+                        </div>
+                        <div class="highlight-item">
+                            <i class="bi bi-check-circle"></i>
+                            <span>Custom engagement thresholds</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
-                    <div class="differentiator-card">
-                        <div class="diff-icon">
-                            <i class="bi bi-shield-shaded"></i>
-                        </div>
-                        <div class="diff-content">
-                            <h3 class="diff-title">Enterprise Security</h3>
-                            <p class="diff-description">
-                                Elite Pro members get military-grade protection with our 5-layer DDoS defense system. 
-                                Automatic threat detection, rate limiting, and burst protection keep your links safe 
-                                from attacks.
-                            </p>
-                            <ul class="diff-features">
-                                <li>Real-time threat monitoring</li>
-                                <li>Automatic attack mitigation</li>
-                                <li>IP filtering & rate limiting</li>
-                            </ul>
-                        </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-icon">
+                        <i class="bi bi-shield-shaded"></i>
                     </div>
+                    <h3 class="feature-title">5-Layer DDoS Protection</h3>
+                    <p class="feature-description">
+                        Enterprise-grade security with automatic threat detection and mitigation.
+                    </p>
                 </div>
 
-                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="300">
-                    <div class="differentiator-card">
-                        <div class="diff-icon">
-                            <i class="bi bi-bar-chart-line"></i>
-                        </div>
-                        <div class="diff-content">
-                            <h3 class="diff-title">Advanced Analytics</h3>
-                            <p class="diff-description">
-                                Go beyond basic click counting. Get geographic insights by continent, device breakdown, 
-                                traffic quality scores, and behavioral analysis. Export everything as CSV for deeper 
-                                analysis.
-                            </p>
-                            <ul class="diff-features">
-                                <li>Continental geographic mapping</li>
-                                <li>Traffic quality scoring</li>
-                                <li>Behavioral pattern analysis</li>
-                            </ul>
-                        </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-icon">
+                        <i class="bi bi-graph-up"></i>
                     </div>
+                    <h3 class="feature-title">Real-Time Analytics</h3>
+                    <p class="feature-description">
+                        Comprehensive insights with geographic data and behavioral patterns.
+                    </p>
                 </div>
 
-                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="400">
-                    <div class="differentiator-card">
-                        <div class="diff-icon">
-                            <i class="bi bi-chat-dots"></i>
-                        </div>
-                        <div class="diff-content">
-                            <h3 class="diff-title">AI-Powered Support</h3>
-                            <p class="diff-description">
-                                Get instant help with our built-in AI chatbot that understands 33+ intents. From link 
-                                creation to analytics interpretation, get 24/7 assistance without waiting for human 
-                                support.
-                            </p>
-                            <ul class="diff-features">
-                                <li>33+ conversation intents</li>
-                                <li>Instant problem resolution</li>
-                                <li>Feature guidance & tips</li>
-                            </ul>
-                        </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="feature-icon">
+                        <i class="bi bi-sliders"></i>
                     </div>
+                    <h3 class="feature-title">Custom Rules</h3>
+                    <p class="feature-description">
+                        Create personalized behavior rules with custom thresholds and routing.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
+                    <div class="feature-icon">
+                        <i class="bi bi-robot"></i>
+                    </div>
+                    <h3 class="feature-title">AI Chat Assistant</h3>
+                    <p class="feature-description">
+                        24/7 AI support with 33+ intents for instant help and guidance.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="600">
+                    <div class="feature-icon">
+                        <i class="bi bi-palette"></i>
+                    </div>
+                    <h3 class="feature-title">Smart Monetization</h3>
+                    <p class="feature-description">
+                        Custom ad system with branding options for Elite Pro members.
+                    </p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Pricing Section -->
-    <section class="pricing-section tech-section" id="pricing-section">
+    <section class="pricing-modern" id="pricing">
         <div class="container">
-            <div data-aos="fade-up">
-                <p class="section-subtitle">PRICING</p>
-                <h2 class="section-title">Choose Your Intelligence Level</h2>
+            <div class="section-header text-center" data-aos="fade-up">
+                <div class="section-badge">
+                    <i class="bi bi-tag"></i>
+                    <span>Simple Pricing</span>
+                </div>
+                <h2 class="section-title">
+                    Choose Your
+                    <span class="gradient-text">Intelligence Level</span>
+                </h2>
                 <p class="section-description">
-                    Start free and scale up as your needs grow. Each tier unlocks powerful features 
-                    designed for different use cases and business requirements.
+                    Start free and scale up as your needs grow. Each tier unlocks 
+                    powerful features for different business requirements.
                 </p>
             </div>
 
-            <div class="row g-4 justify-content-center">
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                    <div class="pricing-card">
-                        <div class="pricing-header">
-                            <h3 class="pricing-title">Free</h3>
-                            <div class="pricing-price">
-                                <span class="price-currency">$</span>
-                                <span class="price-amount">0</span>
-                                <span class="price-period">/month</span>
-                            </div>
-                            <p class="pricing-description">Perfect for testing and small projects</p>
+            <div class="pricing-cards">
+                <div class="pricing-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="pricing-header">
+                        <h3 class="pricing-plan">Free</h3>
+                        <div class="pricing-price">
+                            <span class="currency">$</span>
+                            <span class="amount">0</span>
+                            <span class="period">/month</span>
                         </div>
-                        <div class="pricing-features">
-                            <ul class="feature-list">
-                                <li><i class="bi bi-check-circle-fill"></i> 10 Smart Links</li>
-                                <li><i class="bi bi-check-circle-fill"></i> 7-Day Link Validity</li>
-                                <li><i class="bi bi-check-circle-fill"></i> Basic Analytics</li>
-                                <li><i class="bi bi-check-circle-fill"></i> Standard Behavior Rules</li>
-                                <li><i class="bi bi-check-circle-fill"></i> AI Chat Assistant</li>
-                                <li class="feature-disabled"><i class="bi bi-x-circle"></i> Custom Ads</li>
-                                <li class="feature-disabled"><i class="bi bi-x-circle"></i> DDoS Protection</li>
-                            </ul>
+                        <p class="pricing-subtitle">Perfect for testing</p>
+                    </div>
+                    <div class="pricing-features">
+                        <div class="feature-item">
+                            <i class="bi bi-check"></i>
+                            <span>10 Smart Links</span>
                         </div>
-                        <div class="pricing-footer">
-                            <a href="{{ url_for('auth.signup') }}" class="btn-pricing">Get Started Free</a>
+                        <div class="feature-item">
+                            <i class="bi bi-check"></i>
+                            <span>7-Day Validity</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="bi bi-check"></i>
+                            <span>Basic Analytics</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="bi bi-check"></i>
+                            <span>AI Chat Support</span>
+                        </div>
+                        <div class="feature-item disabled">
+                            <i class="bi bi-x"></i>
+                            <span>Custom Ads</span>
                         </div>
                     </div>
+                    <a href="{{ url_for('auth.signup') }}" class="btn btn-outline-modern">
+                        Get Started Free
+                    </a>
                 </div>
 
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                    <div class="pricing-card pricing-popular">
-                        <div class="popular-badge">Most Popular</div>
-                        <div class="pricing-header">
-                            <h3 class="pricing-title">Elite</h3>
-                            <div class="pricing-price">
-                                <span class="price-currency">$</span>
-                                <span class="price-amount">19</span>
-                                <span class="price-period">/month</span>
-                            </div>
-                            <p class="pricing-description">Ideal for professionals and growing businesses</p>
+                <div class="pricing-card popular" data-aos="fade-up" data-aos-delay="200">
+                    <div class="popular-badge">Most Popular</div>
+                    <div class="pricing-header">
+                        <h3 class="pricing-plan">Elite</h3>
+                        <div class="pricing-price">
+                            <span class="currency">$</span>
+                            <span class="amount">19</span>
+                            <span class="period">/month</span>
                         </div>
-                        <div class="pricing-features">
-                            <ul class="feature-list">
-                                <li><i class="bi bi-check-circle-fill"></i> 35 Smart Links</li>
-                                <li><i class="bi bi-check-circle-fill"></i> Unlimited Validity</li>
-                                <li><i class="bi bi-check-circle-fill"></i> Advanced Analytics</li>
-                                <li><i class="bi bi-check-circle-fill"></i> Custom Behavior Rules</li>
-                                <li><i class="bi bi-check-circle-fill"></i> AI Chat Assistant</li>
-                                <li><i class="bi bi-check-circle-fill"></i> CSV Export</li>
-                                <li class="feature-disabled"><i class="bi bi-x-circle"></i> Custom Ads</li>
-                                <li class="feature-disabled"><i class="bi bi-x-circle"></i> DDoS Protection</li>
-                            </ul>
+                        <p class="pricing-subtitle">For professionals</p>
+                    </div>
+                    <div class="pricing-features">
+                        <div class="feature-item">
+                            <i class="bi bi-check"></i>
+                            <span>35 Smart Links</span>
                         </div>
-                        <div class="pricing-footer">
-                            <a href="{{ url_for('auth.signup') }}" class="btn-pricing btn-pricing-popular">Upgrade to Elite</a>
+                        <div class="feature-item">
+                            <i class="bi bi-check"></i>
+                            <span>Unlimited Validity</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="bi bi-check"></i>
+                            <span>Advanced Analytics</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="bi bi-check"></i>
+                            <span>Custom Rules</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="bi bi-check"></i>
+                            <span>CSV Export</span>
                         </div>
                     </div>
+                    <a href="{{ url_for('auth.signup') }}" class="btn btn-primary-modern">
+                        Upgrade to Elite
+                    </a>
                 </div>
 
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                    <div class="pricing-card">
-                        <div class="pricing-header">
-                            <h3 class="pricing-title">Elite Pro</h3>
-                            <div class="pricing-price">
-                                <span class="price-currency">$</span>
-                                <span class="price-amount">49</span>
-                                <span class="price-period">/month</span>
-                            </div>
-                            <p class="pricing-description">Enterprise-grade features for maximum control</p>
+                <div class="pricing-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="pricing-header">
+                        <h3 class="pricing-plan">Elite Pro</h3>
+                        <div class="pricing-price">
+                            <span class="currency">$</span>
+                            <span class="amount">49</span>
+                            <span class="period">/month</span>
                         </div>
-                        <div class="pricing-features">
-                            <ul class="feature-list">
-                                <li><i class="bi bi-check-circle-fill"></i> Unlimited Smart Links</li>
-                                <li><i class="bi bi-check-circle-fill"></i> Unlimited Validity</li>
-                                <li><i class="bi bi-check-circle-fill"></i> Premium Analytics</li>
-                                <li><i class="bi bi-check-circle-fill"></i> Advanced Behavior Rules</li>
-                                <li><i class="bi bi-check-circle-fill"></i> AI Chat Assistant</li>
-                                <li><i class="bi bi-check-circle-fill"></i> Custom Ad Creation</li>
-                                <li><i class="bi bi-check-circle-fill"></i> 5-Layer DDoS Protection</li>
-                                <li><i class="bi bi-check-circle-fill"></i> Ad-Free Experience</li>
-                            </ul>
+                        <p class="pricing-subtitle">Enterprise grade</p>
+                    </div>
+                    <div class="pricing-features">
+                        <div class="feature-item">
+                            <i class="bi bi-check"></i>
+                            <span>Unlimited Links</span>
                         </div>
-                        <div class="pricing-footer">
-                            <a href="{{ url_for('auth.signup') }}" class="btn-pricing">Go Elite Pro</a>
+                        <div class="feature-item">
+                            <i class="bi bi-check"></i>
+                            <span>DDoS Protection</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="bi bi-check"></i>
+                            <span>Custom Ads</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="bi bi-check"></i>
+                            <span>Ad-Free Experience</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="bi bi-check"></i>
+                            <span>Priority Support</span>
                         </div>
                     </div>
+                    <a href="{{ url_for('auth.signup') }}" class="btn btn-outline-modern">
+                        Go Elite Pro
+                    </a>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Contact Section -->
-    <section class="contact-section" id="contact">
+    <section class="contact-modern" id="contact">
         <div class="container">
-            <div data-aos="fade-up">
-                <p class="section-subtitle">CONTACT US</p>
-                <h2 class="section-title">Ready to Get Started?</h2>
-                <p class="section-description">
-                    Have questions about our behavioral AI features or need help choosing the right plan? 
-                    Our team is here to help you maximize your link intelligence.
-                </p>
-            </div>
-
-            <div data-aos="fade-up" data-aos-delay="200">
-                <form class="contact-form" id="contactForm" onsubmit="handleContactForm(event)">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <input type="text" name="name" class="form-control form-control-custom" placeholder="Your Name"
-                                required>
+            <div class="row align-items-center">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <div class="contact-content">
+                        <div class="section-badge">
+                            <i class="bi bi-chat-dots"></i>
+                            <span>Get In Touch</span>
                         </div>
-                        <div class="col-md-6">
-                            <input type="email" name="email" class="form-control form-control-custom" placeholder="Your Email"
-                                required>
+                        <h2 class="section-title">
+                            Ready to Transform Your
+                            <span class="gradient-text">Link Strategy?</span>
+                        </h2>
+                        <p class="section-description">
+                            Have questions about our behavioral AI features or need help choosing 
+                            the right plan? Our team is here to help you maximize your link intelligence.
+                        </p>
+                        
+                        <div class="contact-info">
+                            <div class="contact-item">
+                                <div class="contact-icon">
+                                    <i class="bi bi-lightning"></i>
+                                </div>
+                                <div class="contact-text">
+                                    <h4>Instant Setup</h4>
+                                    <p>Get started in under 2 minutes</p>
+                                </div>
+                            </div>
+                            <div class="contact-item">
+                                <div class="contact-icon">
+                                    <i class="bi bi-headset"></i>
+                                </div>
+                                <div class="contact-text">
+                                    <h4>24/7 AI Support</h4>
+                                    <p>Always available to help you</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <input type="text" name="subject" class="form-control form-control-custom" placeholder="Subject" required>
-                    <textarea name="message" class="form-control form-control-custom" rows="5" placeholder="Your Message"
-                        required></textarea>
-                    <div class="text-center">
-                        <button type="submit" class="btn-gradient" id="submitBtn">
-                            <i class="bi bi-send me-2"></i>Send Message
-                        </button>
+                </div>
+                
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div class="contact-form-container">
+                        <form class="modern-form" id="contactForm" onsubmit="handleContactForm(event)">
+                            <div class="form-group">
+                                <input type="text" name="name" class="form-control modern-input" placeholder="Your Name" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="email" name="email" class="form-control modern-input" placeholder="Your Email" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="subject" class="form-control modern-input" placeholder="Subject" required>
+                            </div>
+                            <div class="form-group">
+                                <textarea name="message" class="form-control modern-input" rows="4" placeholder="Your Message" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary-modern w-100" id="submitBtn">
+                                <span>Send Message</span>
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer-modern">
         <div class="container">
-            <div class="footer-links">
-                <a href="#home-section" class="footer-link">Home</a>
-                <a href="#how-it-works" class="footer-link">How It Works</a>
-                <a href="#features-section" class="footer-link">Features</a>
-                <a href="#pricing-section" class="footer-link">Pricing</a>
-                <a href="#contact" class="footer-link">Contact</a>
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="brand-icon">
+                        <div class="icon-inner">
+                            <i class="bi bi-link-45deg"></i>
+                        </div>
+                    </div>
+                    <div class="brand-info">
+                        <h4>Smart Link Intelligence</h4>
+                        <p>Transform your links into intelligent experiences</p>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <a href="#hero">Home</a>
+                    <a href="#features">Features</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="{{ url_for('main.documentation') }}">Documentation</a>
+                    <a href="#contact">Contact</a>
+                </div>
+                
+                <div class="footer-social">
+                    <a href="#" class="social-link">
+                        <i class="bi bi-twitter"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="bi bi-linkedin"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="bi bi-github"></i>
+                    </a>
+                </div>
             </div>
-
-            <div class="social-links">
-                <a href="#" class="social-link"><i class="bi bi-twitter"></i></a>
-                <a href="#" class="social-link"><i class="bi bi-linkedin"></i></a>
-                <a href="#" class="social-link"><i class="bi bi-github"></i></a>
-                <a href="#" class="social-link"><i class="bi bi-youtube"></i></a>
-            </div>
-
-            <div class="copyright">
-                <p>&copy; 2024 Smart Link Intelligence. All rights reserved. Made with 💙 for the future of link
-                    management.</p>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Smart Link Intelligence. Made with 💙 for the future of link management.</p>
             </div>
         </div>
     </footer>
 
-    <!-- Video Modal -->
-    <div class="video-modal" id="videoModal">
-        <div class="video-container">
-            <div class="video-header">
-                <h3 class="video-title">How Smart Link Intelligence Works</h3>
-                <button class="video-close" onclick="closeVideoModal()">
+    <!-- Demo Modal -->
+    <div class="demo-modal" id="demoModal">
+        <div class="modal-backdrop" onclick="closeDemoModal()"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Smart Link Intelligence Demo</h3>
+                <button class="modal-close" onclick="closeDemoModal()">
                     <i class="bi bi-x"></i>
                 </button>
             </div>
-            <iframe width="800" height="450" src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                title="How Smart Link Intelligence Works" frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen>
-            </iframe>
+            <div class="modal-content">
+                <iframe width="800" height="450" src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+                        title="Smart Link Intelligence Demo" frameborder="0" allowfullscreen>
+                </iframe>
+            </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- AOS Animation -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{ url_for('static', filename='js/landing.js') }}"></script>
-    <!-- Chat Widget -->
-    {% include 'partials/chat_widget.html' %}
-
-    <!-- Chat Widget JS -->
-    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
 </body>
 
 </html>
