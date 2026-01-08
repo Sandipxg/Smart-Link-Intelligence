@@ -80,7 +80,7 @@ class TypewriterEffect {
 document.addEventListener('DOMContentLoaded', function () {
     const typewriterElement = document.getElementById('typewriter-text');
     if (typewriterElement) {
-        const text = "Create, Manage & Optimize Smart Links with Ease";
+        const text = "Intelligent Links with Behavioral AI & Analytics";
         new TypewriterEffect(typewriterElement, text, {
             speed: 75,  // Base typing speed in milliseconds
             delay: 800  // Initial delay before starting
@@ -163,22 +163,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// FAQ Toggle
-function toggleFaq(element) {
-    const faqItem = element.parentElement;
-    const isActive = faqItem.classList.contains('active');
-
-    // Close all FAQ items
-    document.querySelectorAll('.faq-item').forEach(item => {
-        item.classList.remove('active');
-    });
-
-    // Open clicked item if it wasn't active
-    if (!isActive) {
-        faqItem.classList.add('active');
-    }
-}
-
 // Video Modal
 function openVideoModal() {
     const modal = document.getElementById('videoModal');
@@ -206,6 +190,41 @@ function closeVideoModal() {
 // Contact Form
 function handleContactForm(event) {
     event.preventDefault();
-    alert('Thank you for your message! We\'ll get back to you soon.');
-    event.target.reset();
+    
+    const form = event.target;
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.innerHTML;
+    
+    // Show loading state
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Sending...';
+    submitBtn.disabled = true;
+    
+    // Get form data
+    const formData = new FormData(form);
+    
+    // Submit to server
+    fetch('/contact', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            alert(data.message);
+            form.reset();
+        } else {
+            // Show error message
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while sending your message. Please try again later.');
+    })
+    .finally(() => {
+        // Reset button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
 }

@@ -248,13 +248,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 datasets: [{
                     label: 'Clicks per Day',
                     data: chartData,
-                    borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
                     tension: 0.4,
                     fill: true,
                     pointRadius: 4,
                     pointHoverRadius: 6,
-                    pointBackgroundColor: '#3b82f6'
+                    pointBackgroundColor: '#2563eb'
                 }]
             },
             options: {
@@ -310,13 +310,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 datasets: [{
                     label: 'Clicks',
                     data: hourlyData,
-                    backgroundColor: 'rgba(99, 102, 241, 0.2)',
-                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                    borderColor: '#2563eb',
                     borderWidth: 3,
                     tension: 0.4,
                     fill: true,
                     pointBackgroundColor: '#fff',
-                    pointBorderColor: '#6366f1',
+                    pointBorderColor: '#2563eb',
                     pointRadius: 4
                 }]
             },
@@ -412,8 +412,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 datasets: [{
                     label: 'Daily Clicks',
                     data: chartData,
-                    borderColor: '#8b5cf6',
-                    backgroundColor: 'rgba(139, 92, 246, 0.7)',
+                    borderColor: '#0ea5e9',
+                    backgroundColor: 'rgba(14, 165, 233, 0.7)',
                     borderWidth: 1,
                     borderRadius: 6,
                     borderSkipped: false
@@ -583,16 +583,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     datasets: [{
                         data: chartData,
                         backgroundColor: [
-                            'rgba(59, 130, 246, 0.8)',
-                            'rgba(168, 85, 247, 0.8)',
-                            'rgba(236, 72, 153, 0.8)',
-                            'rgba(34, 197, 94, 0.8)',
-                            'rgba(245, 158, 11, 0.8)',
-                            'rgba(239, 68, 68, 0.8)',
-                            'rgba(107, 114, 128, 0.8)',
-                            'rgba(99, 102, 241, 0.8)',
-                            'rgba(139, 92, 246, 0.8)',
-                            'rgba(232, 121, 249, 0.8)'
+                            'rgba(37, 99, 235, 0.8)',   // Primary blue
+                            'rgba(14, 165, 233, 0.8)',  // Sky blue
+                            'rgba(6, 182, 212, 0.8)',   // Cyan
+                            'rgba(59, 130, 246, 0.8)',  // Blue
+                            'rgba(99, 102, 241, 0.8)',  // Indigo
+                            'rgba(16, 185, 129, 0.8)',  // Emerald (accent)
+                            'rgba(245, 158, 11, 0.8)',  // Amber (accent)
+                            'rgba(139, 92, 246, 0.8)',  // Violet
+                            'rgba(168, 85, 247, 0.8)',  // Purple
+                            'rgba(148, 163, 184, 0.8)'  // Slate
                         ],
                         borderColor: '#ffffff',
                         borderWidth: 2
@@ -652,13 +652,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     datasets: [{
                         data: chartData,
                         backgroundColor: [
-                            'rgba(16, 185, 129, 0.8)', // Emerald
-                            'rgba(59, 130, 246, 0.8)', // Blue
-                            'rgba(249, 115, 22, 0.8)', // Orange
-                            'rgba(236, 72, 153, 0.8)', // Pink
-                            'rgba(107, 114, 128, 0.8)', // Gray
-                            'rgba(139, 92, 246, 0.8)', // Violet
-                            'rgba(252, 165, 165, 0.8)'  // Light Red
+                            'rgba(37, 99, 235, 0.8)',   // Primary blue
+                            'rgba(14, 165, 233, 0.8)',  // Sky blue
+                            'rgba(6, 182, 212, 0.8)',   // Cyan
+                            'rgba(16, 185, 129, 0.8)',  // Emerald
+                            'rgba(245, 158, 11, 0.8)',  // Amber
+                            'rgba(99, 102, 241, 0.8)',  // Indigo
+                            'rgba(148, 163, 184, 0.8)'  // Slate
                         ],
                         borderColor: '#ffffff',
                         borderWidth: 2

@@ -25,14 +25,15 @@
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-custom fixed-top" id="navbar">
-        <div class="container">
+        <div class="container-fluid px-4">
             <a href="#" class="navbar-brand-custom">
                 <div class="logo-icon">
                     <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
                         <path d="M12 20L18 26L28 14" stroke="white" stroke-width="3" stroke-linecap="round" />
                     </svg>
                 </div>
-                Smart Link Intelligence
+                <span class="brand-full">Smart Link Intelligence</span>
+                <span class="brand-short">Smart Links</span>
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -51,16 +52,19 @@
                         <a class="nav-link nav-link-custom" href="#features-section">Features</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link nav-link-custom" href="#faq-section">FAQ</a>
+                        <a class="nav-link nav-link-custom" href="#pricing-section">Pricing</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" href="{{ url_for('main.documentation') }}">Docs</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link nav-link-custom" href="#contact">Contact</a>
                     </li>
                 </ul>
 
-                <div class="d-flex gap-2">
-                    <a href="{{ url_for('auth.login') }}" class="btn-outline-custom">Sign In</a>
-                    <a href="{{ url_for('auth.signup') }}" class="btn-gradient">Sign Up</a>
+                <div class="d-flex gap-2 navbar-buttons">
+                    <a href="{{ url_for('auth.login') }}" class="btn-outline-custom btn-sm-responsive">Sign In</a>
+                    <a href="{{ url_for('auth.signup') }}" class="btn-gradient btn-sm-responsive">Sign Up</a>
                 </div>
             </div>
         </div>
@@ -68,6 +72,7 @@
 
     <!-- Hero Section -->
     <section class="hero-section" id="home-section">
+        <div class="tech-grid"></div>
         <div class="hero-bg-blur"></div>
         <div class="container">
             <div class="row align-items-center">
@@ -77,12 +82,12 @@
                             <span id="typewriter-text"></span><span id="typewriter-cursor">|</span>
                         </h1>
                         <p class="hero-subtitle">
-                            A powerful, secure, and intelligent platform to create behavior-aware links with advanced
-                            analytics, DDoS protection, and AI-powered routing. Transform your URLs into smart
-                            experiences.
+                            Transform ordinary URLs into intelligent, behavior-aware links with advanced analytics, 
+                            AI-powered routing, and enterprise-grade DDoS protection. Create smarter user journeys 
+                            that adapt to visitor engagement patterns in real-time.
                         </p>
                         <div class="d-flex gap-3 align-items-center flex-wrap">
-                            <a href="{{ url_for('auth.signup') }}" class="btn-gradient">
+                            <a href="{{ url_for('auth.signup') }}" class="btn-gradient glow-effect">
                                 <i class="bi bi-rocket-takeoff me-2"></i>Sign Up
                             </a>
                             <button class="btn-outline-custom" onclick="openVideoModal()">
@@ -93,8 +98,8 @@
                 </div>
                 <div class="col-lg-5">
                     <div data-aos="fade-left" data-aos-delay="200">
-                        <img src="https://via.placeholder.com/600x450/bd24df/ffffff?text=Smart+Link+Dashboard"
-                            alt="Smart Link Dashboard" class="hero-image">
+                        <img src="https://via.placeholder.com/600x450/2563eb/ffffff?text=Smart+Link+Dashboard"
+                            alt="Smart Link Dashboard" class="hero-image glow-effect">
                     </div>
                 </div>
             </div>
@@ -108,25 +113,25 @@
                 <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
                     <div class="stat-card">
                         <div class="stat-number" data-count="99.9">0</div>
-                        <div class="stat-label">% Uptime</div>
+                        <div class="stat-label">% Uptime Guarantee</div>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
                     <div class="stat-card">
-                        <div class="stat-number" data-count="10">0</div>
-                        <div class="stat-label">Million+ Links</div>
+                        <div class="stat-number" data-count="5">0</div>
+                        <div class="stat-label">Layer DDoS Protection</div>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="300">
                     <div class="stat-card">
-                        <div class="stat-number" data-count="50">0</div>
-                        <div class="stat-label">Thousand+ Users</div>
+                        <div class="stat-number" data-count="3">0</div>
+                        <div class="stat-label">Membership Tiers</div>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="400">
                     <div class="stat-card">
-                        <div class="stat-number" data-count="5">0</div>
-                        <div class="stat-label">Layer DDoS Protection</div>
+                        <div class="stat-number" data-count="24">0</div>
+                        <div class="stat-label">Hour Real-Time Analytics</div>
                     </div>
                 </div>
             </div>
@@ -138,10 +143,11 @@
         <div class="container">
             <div data-aos="fade-up">
                 <p class="section-subtitle">HOW IT WORKS</p>
-                <h2 class="section-title">Get Started in 3 Simple Steps</h2>
+                <h2 class="section-title">Create Intelligent Links in 3 Steps</h2>
                 <p class="section-description">
-                    Create your smart links in minutes and start leveraging AI-powered routing, advanced analytics, and
-                    enterprise-grade security features.
+                    Build behavior-aware links that automatically adapt to user engagement patterns. 
+                    Our AI analyzes visitor behavior and routes them to the most effective destination 
+                    based on their interaction level.
                 </p>
             </div>
 
@@ -151,22 +157,22 @@
                         <div class="work-icon">
                             <i class="bi bi-person-plus"></i>
                         </div>
-                        <h3 class="work-title">Create Account</h3>
+                        <h3 class="work-title">Sign Up & Choose Plan</h3>
                         <p class="work-description">
-                            Sign up with your email, set up a secure password, and verify your identity to unlock full
-                            access to the platform. Getting started takes just a few minutes.
+                            Create your account and select from Free (10 links), Elite (35 links), or Elite Pro 
+                            (unlimited) plans. Each tier unlocks powerful features like custom ads and DDoS protection.
                         </p>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
                     <div class="work-card">
                         <div class="work-icon">
-                            <i class="bi bi-link-45deg"></i>
+                            <i class="bi bi-gear-wide-connected"></i>
                         </div>
-                        <h3 class="work-title">Create Smart Links</h3>
+                        <h3 class="work-title">Configure Behavior Rules</h3>
                         <p class="work-description">
-                            Paste your URL, customize behavior rules, set up progressive routing, and configure advanced
-                            settings. Our AI will handle the rest automatically.
+                            Set up intelligent routing with custom behavior rules. Define thresholds for curious, 
+                            interested, and engaged visitors. Add password protection and progressive URL routing.
                         </p>
                     </div>
                 </div>
@@ -175,10 +181,10 @@
                         <div class="work-icon">
                             <i class="bi bi-graph-up-arrow"></i>
                         </div>
-                        <h3 class="work-title">Track & Optimize</h3>
+                        <h3 class="work-title">Monitor & Optimize</h3>
                         <p class="work-description">
-                            Monitor real-time analytics, track user behavior, analyze conversion funnels, and optimize
-                            your links for maximum engagement and results.
+                            Track real-time analytics with geographic data, device insights, and behavioral patterns. 
+                            Export data as CSV, chat with AI assistant, and optimize your conversion funnels.
                         </p>
                     </div>
                 </div>
@@ -192,10 +198,10 @@
         <div class="container position-relative">
             <div data-aos="fade-up">
                 <p class="section-subtitle">FEATURES</p>
-                <h2 class="section-title">The Most Trusted Platform for Smart Link Management</h2>
+                <h2 class="section-title">Intelligent Link Management Platform</h2>
                 <p class="section-description">
-                    Discover powerful tools designed to help you create, secure, and optimize your links — trusted by
-                    marketers, developers, and businesses worldwide.
+                    Discover advanced features designed for marketers, developers, and businesses who need 
+                    intelligent URL management with behavioral analytics and enterprise-grade security.
                 </p>
             </div>
 
@@ -205,22 +211,22 @@
                         <div class="feature-icon">
                             <i class="bi bi-shield-check"></i>
                         </div>
-                        <h3 class="feature-title">Enterprise Security</h3>
+                        <h3 class="feature-title">5-Layer DDoS Protection</h3>
                         <p class="feature-description">
-                            Your links are protected with 5-layer DDoS protection, advanced encryption, and real-time
-                            threat detection for maximum security.
+                            Enterprise-grade security with rate limiting, burst detection, IP filtering, and automatic 
+                            link protection. Elite Pro members get advanced threat detection and mitigation.
                         </p>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
                     <div class="feature-card">
                         <div class="feature-icon">
-                            <i class="bi bi-brain"></i>
+                            <i class="bi bi-cpu"></i>
                         </div>
-                        <h3 class="feature-title">AI-Powered Routing</h3>
+                        <h3 class="feature-title">Behavioral AI Engine</h3>
                         <p class="feature-description">
-                            Intelligent behavior analysis routes users to the perfect destination based on their
-                            engagement level and interaction patterns.
+                            Intelligent visitor classification into curious, interested, and engaged categories. 
+                            Progressive routing based on engagement patterns and attention decay algorithms.
                         </p>
                     </div>
                 </div>
@@ -231,8 +237,8 @@
                         </div>
                         <h3 class="feature-title">Real-Time Analytics</h3>
                         <p class="feature-description">
-                            Get live insights, geographic data, device analytics, and behavior tracking with beautiful
-                            visualizations and detailed reports.
+                            Comprehensive analytics with geographic distribution, device breakdown, traffic quality 
+                            scores, and behavioral insights. Export data as CSV for deeper analysis.
                         </p>
                     </div>
                 </div>
@@ -243,8 +249,8 @@
                         </div>
                         <h3 class="feature-title">Custom Behavior Rules</h3>
                         <p class="feature-description">
-                            Create flexible behavior rules with custom thresholds for visitor classification and
-                            progressive user journey optimization.
+                            Create personalized behavior rules with custom thresholds, time windows, and routing logic. 
+                            Set up password protection and progressive user journey optimization.
                         </p>
                     </div>
                 </div>
@@ -255,20 +261,20 @@
                         </div>
                         <h3 class="feature-title">Smart Monetization</h3>
                         <p class="feature-description">
-                            Grid-based ad system with custom branding, image support, and premium ad-free experiences
-                            for enhanced user engagement.
+                            Grid-based ad system with custom branding and image uploads for Elite Pro members. 
+                            Create personalized ad experiences while maintaining professional appearance.
                         </p>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
                     <div class="feature-card">
                         <div class="feature-icon">
-                            <i class="bi bi-code-slash"></i>
+                            <i class="bi bi-robot"></i>
                         </div>
-                        <h3 class="feature-title">Developer API</h3>
+                        <h3 class="feature-title">AI Chat Assistant</h3>
                         <p class="feature-description">
-                            RESTful API with comprehensive documentation, webhooks, and easy integration for developers
-                            and enterprise applications.
+                            Built-in AI chatbot with 33+ intents for instant support and guidance. Get help with 
+                            link creation, analytics interpretation, and platform features.
                         </p>
                     </div>
                 </div>
@@ -276,65 +282,202 @@
         </div>
     </section>
 
-    <!-- FAQ Section -->
-    <section id="faq-section">
+    <!-- Key Differentiators Section -->
+    <section class="differentiators-section">
         <div class="container">
             <div data-aos="fade-up">
-                <p class="section-subtitle">FAQ</p>
-                <h2 class="section-title">Frequently Asked Questions</h2>
+                <p class="section-subtitle">WHY CHOOSE US</p>
+                <h2 class="section-title">Beyond Traditional Link Shorteners</h2>
                 <p class="section-description">
-                    Get answers to common questions about Smart Link Intelligence and how it can transform your link
-                    management strategy.
+                    While others just shorten URLs, we create intelligent experiences that adapt to user behavior 
+                    and provide actionable insights for better conversion optimization.
                 </p>
             </div>
 
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="faq-item" data-aos="fade-up" data-aos-delay="100">
-                        <div class="faq-header" onclick="toggleFaq(this)">
-                            <h3 class="faq-title">What is Smart Link Intelligence?</h3>
-                            <i class="bi bi-plus faq-icon"></i>
+            <div class="row g-4">
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="differentiator-card">
+                        <div class="diff-icon">
+                            <i class="bi bi-lightning-charge"></i>
                         </div>
-                        <div class="faq-content">
-                            Smart Link Intelligence is a next-generation link management platform that uses AI to
-                            analyze user behavior and route visitors to the most appropriate destination based on their
-                            engagement level, creating personalized user experiences.
-                        </div>
-                    </div>
-
-                    <div class="faq-item" data-aos="fade-up" data-aos-delay="200">
-                        <div class="faq-header" onclick="toggleFaq(this)">
-                            <h3 class="faq-title">How does the DDoS protection work?</h3>
-                            <i class="bi bi-plus faq-icon"></i>
-                        </div>
-                        <div class="faq-content">
-                            Our 5-layer DDoS protection system automatically detects and mitigates attacks in real-time.
-                            It includes rate limiting, burst detection, IP filtering, and automatic link protection that
-                            can temporarily disable links under attack and restore them when safe.
+                        <div class="diff-content">
+                            <h3 class="diff-title">Behavioral Intelligence</h3>
+                            <p class="diff-description">
+                                Our AI doesn't just track clicks—it understands user intent. Classify visitors as 
+                                curious, interested, or engaged, then route them to the perfect destination based on 
+                                their behavior patterns.
+                            </p>
+                            <ul class="diff-features">
+                                <li>Attention decay algorithms</li>
+                                <li>Progressive URL routing</li>
+                                <li>Custom engagement thresholds</li>
+                            </ul>
                         </div>
                     </div>
+                </div>
 
-                    <div class="faq-item" data-aos="fade-up" data-aos-delay="300">
-                        <div class="faq-header" onclick="toggleFaq(this)">
-                            <h3 class="faq-title">Can I customize behavior rules for my links?</h3>
-                            <i class="bi bi-plus faq-icon"></i>
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="differentiator-card">
+                        <div class="diff-icon">
+                            <i class="bi bi-shield-shaded"></i>
                         </div>
-                        <div class="faq-content">
-                            Yes! You can create custom behavior rules with your own thresholds for visitor
-                            classification. Set custom time windows, visit counts, and engagement levels to define when
-                            users are considered curious, interested, or highly engaged.
+                        <div class="diff-content">
+                            <h3 class="diff-title">Enterprise Security</h3>
+                            <p class="diff-description">
+                                Elite Pro members get military-grade protection with our 5-layer DDoS defense system. 
+                                Automatic threat detection, rate limiting, and burst protection keep your links safe 
+                                from attacks.
+                            </p>
+                            <ul class="diff-features">
+                                <li>Real-time threat monitoring</li>
+                                <li>Automatic attack mitigation</li>
+                                <li>IP filtering & rate limiting</li>
+                            </ul>
                         </div>
                     </div>
+                </div>
 
-                    <div class="faq-item" data-aos="fade-up" data-aos-delay="400">
-                        <div class="faq-header" onclick="toggleFaq(this)">
-                            <h3 class="faq-title">Is there an API for developers?</h3>
-                            <i class="bi bi-plus faq-icon"></i>
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="differentiator-card">
+                        <div class="diff-icon">
+                            <i class="bi bi-bar-chart-line"></i>
                         </div>
-                        <div class="faq-content">
-                            Absolutely! We provide a comprehensive RESTful API with full documentation, webhooks for
-                            real-time events, and easy integration options for developers and businesses looking to
-                            integrate smart link functionality into their applications.
+                        <div class="diff-content">
+                            <h3 class="diff-title">Advanced Analytics</h3>
+                            <p class="diff-description">
+                                Go beyond basic click counting. Get geographic insights by continent, device breakdown, 
+                                traffic quality scores, and behavioral analysis. Export everything as CSV for deeper 
+                                analysis.
+                            </p>
+                            <ul class="diff-features">
+                                <li>Continental geographic mapping</li>
+                                <li>Traffic quality scoring</li>
+                                <li>Behavioral pattern analysis</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="differentiator-card">
+                        <div class="diff-icon">
+                            <i class="bi bi-chat-dots"></i>
+                        </div>
+                        <div class="diff-content">
+                            <h3 class="diff-title">AI-Powered Support</h3>
+                            <p class="diff-description">
+                                Get instant help with our built-in AI chatbot that understands 33+ intents. From link 
+                                creation to analytics interpretation, get 24/7 assistance without waiting for human 
+                                support.
+                            </p>
+                            <ul class="diff-features">
+                                <li>33+ conversation intents</li>
+                                <li>Instant problem resolution</li>
+                                <li>Feature guidance & tips</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing-section tech-section" id="pricing-section">
+        <div class="container">
+            <div data-aos="fade-up">
+                <p class="section-subtitle">PRICING</p>
+                <h2 class="section-title">Choose Your Intelligence Level</h2>
+                <p class="section-description">
+                    Start free and scale up as your needs grow. Each tier unlocks powerful features 
+                    designed for different use cases and business requirements.
+                </p>
+            </div>
+
+            <div class="row g-4 justify-content-center">
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="pricing-card">
+                        <div class="pricing-header">
+                            <h3 class="pricing-title">Free</h3>
+                            <div class="pricing-price">
+                                <span class="price-currency">$</span>
+                                <span class="price-amount">0</span>
+                                <span class="price-period">/month</span>
+                            </div>
+                            <p class="pricing-description">Perfect for testing and small projects</p>
+                        </div>
+                        <div class="pricing-features">
+                            <ul class="feature-list">
+                                <li><i class="bi bi-check-circle-fill"></i> 10 Smart Links</li>
+                                <li><i class="bi bi-check-circle-fill"></i> 7-Day Link Validity</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Basic Analytics</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Standard Behavior Rules</li>
+                                <li><i class="bi bi-check-circle-fill"></i> AI Chat Assistant</li>
+                                <li class="feature-disabled"><i class="bi bi-x-circle"></i> Custom Ads</li>
+                                <li class="feature-disabled"><i class="bi bi-x-circle"></i> DDoS Protection</li>
+                            </ul>
+                        </div>
+                        <div class="pricing-footer">
+                            <a href="{{ url_for('auth.signup') }}" class="btn-pricing">Get Started Free</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="pricing-card pricing-popular">
+                        <div class="popular-badge">Most Popular</div>
+                        <div class="pricing-header">
+                            <h3 class="pricing-title">Elite</h3>
+                            <div class="pricing-price">
+                                <span class="price-currency">$</span>
+                                <span class="price-amount">19</span>
+                                <span class="price-period">/month</span>
+                            </div>
+                            <p class="pricing-description">Ideal for professionals and growing businesses</p>
+                        </div>
+                        <div class="pricing-features">
+                            <ul class="feature-list">
+                                <li><i class="bi bi-check-circle-fill"></i> 35 Smart Links</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Unlimited Validity</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Advanced Analytics</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Custom Behavior Rules</li>
+                                <li><i class="bi bi-check-circle-fill"></i> AI Chat Assistant</li>
+                                <li><i class="bi bi-check-circle-fill"></i> CSV Export</li>
+                                <li class="feature-disabled"><i class="bi bi-x-circle"></i> Custom Ads</li>
+                                <li class="feature-disabled"><i class="bi bi-x-circle"></i> DDoS Protection</li>
+                            </ul>
+                        </div>
+                        <div class="pricing-footer">
+                            <a href="{{ url_for('auth.signup') }}" class="btn-pricing btn-pricing-popular">Upgrade to Elite</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="pricing-card">
+                        <div class="pricing-header">
+                            <h3 class="pricing-title">Elite Pro</h3>
+                            <div class="pricing-price">
+                                <span class="price-currency">$</span>
+                                <span class="price-amount">49</span>
+                                <span class="price-period">/month</span>
+                            </div>
+                            <p class="pricing-description">Enterprise-grade features for maximum control</p>
+                        </div>
+                        <div class="pricing-features">
+                            <ul class="feature-list">
+                                <li><i class="bi bi-check-circle-fill"></i> Unlimited Smart Links</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Unlimited Validity</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Premium Analytics</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Advanced Behavior Rules</li>
+                                <li><i class="bi bi-check-circle-fill"></i> AI Chat Assistant</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Custom Ad Creation</li>
+                                <li><i class="bi bi-check-circle-fill"></i> 5-Layer DDoS Protection</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Ad-Free Experience</li>
+                            </ul>
+                        </div>
+                        <div class="pricing-footer">
+                            <a href="{{ url_for('auth.signup') }}" class="btn-pricing">Go Elite Pro</a>
                         </div>
                     </div>
                 </div>
@@ -347,30 +490,30 @@
         <div class="container">
             <div data-aos="fade-up">
                 <p class="section-subtitle">CONTACT US</p>
-                <h2 class="section-title">Get in Touch</h2>
+                <h2 class="section-title">Ready to Get Started?</h2>
                 <p class="section-description">
-                    Have questions or need help getting started? We're here to help you make the most of Smart Link
-                    Intelligence.
+                    Have questions about our behavioral AI features or need help choosing the right plan? 
+                    Our team is here to help you maximize your link intelligence.
                 </p>
             </div>
 
             <div data-aos="fade-up" data-aos-delay="200">
-                <form class="contact-form" onsubmit="handleContactForm(event)">
+                <form class="contact-form" id="contactForm" onsubmit="handleContactForm(event)">
                     <div class="row">
                         <div class="col-md-6">
-                            <input type="text" class="form-control form-control-custom" placeholder="Your Name"
+                            <input type="text" name="name" class="form-control form-control-custom" placeholder="Your Name"
                                 required>
                         </div>
                         <div class="col-md-6">
-                            <input type="email" class="form-control form-control-custom" placeholder="Your Email"
+                            <input type="email" name="email" class="form-control form-control-custom" placeholder="Your Email"
                                 required>
                         </div>
                     </div>
-                    <input type="text" class="form-control form-control-custom" placeholder="Subject" required>
-                    <textarea class="form-control form-control-custom" rows="5" placeholder="Your Message"
+                    <input type="text" name="subject" class="form-control form-control-custom" placeholder="Subject" required>
+                    <textarea name="message" class="form-control form-control-custom" rows="5" placeholder="Your Message"
                         required></textarea>
                     <div class="text-center">
-                        <button type="submit" class="btn-gradient">
+                        <button type="submit" class="btn-gradient" id="submitBtn">
                             <i class="bi bi-send me-2"></i>Send Message
                         </button>
                     </div>
@@ -386,7 +529,7 @@
                 <a href="#home-section" class="footer-link">Home</a>
                 <a href="#how-it-works" class="footer-link">How It Works</a>
                 <a href="#features-section" class="footer-link">Features</a>
-                <a href="#faq-section" class="footer-link">FAQ</a>
+                <a href="#pricing-section" class="footer-link">Pricing</a>
                 <a href="#contact" class="footer-link">Contact</a>
             </div>
 
@@ -398,7 +541,7 @@
             </div>
 
             <div class="copyright">
-                <p>&copy; 2024 Smart Link Intelligence. All rights reserved. Made with ❤️ for the future of link
+                <p>&copy; 2024 Smart Link Intelligence. All rights reserved. Made with 💙 for the future of link
                     management.</p>
             </div>
         </div>

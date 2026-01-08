@@ -102,14 +102,43 @@ def index():
 
 
 @main_bp.route("/documentation")
-@login_required
 def documentation():
-    """Documentation page"""
-    # Import here to avoid circular imports
-    from admin_panel import track_user_activity
-    
-    track_user_activity(g.user["id"], "view_docs", "Viewed documentation")
+    """Public documentation page"""
     return render_template("documentation.html")
+
+
+@main_bp.route("/contact", methods=["POST"])
+def contact():
+    """Handle contact form submissions"""
+    try:
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip()
+        subject = request.form.get("subject", "").strip()
+        message = request.form.get("message", "").strip()
+        
+        # Validate required fields
+        if not all([name, email, subject, message]):
+            return jsonify({"success": False, "message": "All fields are required"}), 400
+        
+        # Basic email validation
+        if "@" not in email or "." not in email:
+            return jsonify({"success": False, "message": "Please enter a valid email address"}), 400
+        
+        # Insert feedback into database
+        from database import execute_db
+        execute_db(
+            """
+            INSERT INTO feedbacks (name, email, subject, message, submitted_at, status)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            [name, email, subject, message, datetime.now().isoformat(), "new"]
+        )
+        
+        return jsonify({"success": True, "message": "Thank you for your feedback! We'll get back to you soon."})
+        
+    except Exception as e:
+        print(f"Error submitting feedback: {e}")
+        return jsonify({"success": False, "message": "An error occurred. Please try again later."}), 500
 
 
 @main_bp.route("/chat", methods=["POST"])

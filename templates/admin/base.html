@@ -61,6 +61,12 @@
                                 <i class="fas fa-broadcast-tower"></i> Broadcast
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'admin.feedbacks' %}active{% endif %}"
+                                href="{{ url_for('admin.feedbacks') }}">
+                                <i class="fas fa-comments"></i> Feedbacks
+                            </a>
+                        </li>
                         <li class="nav-item mt-3">
                             <hr class="text-white-50">
                         </li>

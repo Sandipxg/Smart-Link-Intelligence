@@ -1,0 +1,206 @@
+/* Analytics Blue Theme Overrides */
+:root {
+    --analytics-primary: #2563eb;
+    --analytics-secondary: #0ea5e9;
+    --analytics-accent: #06b6d4;
+    --analytics-success: #10b981;
+    --analytics-warning: #f59e0b;
+    --analytics-danger: #ef4444;
+    --analytics-light: #f1f5f9;
+    --analytics-dark: #1e293b;
+}
+
+/* Chart container enhancements */
+.chart-container {
+    position: relative;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.02), rgba(14, 165, 233, 0.02));
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+/* Card enhancements for analytics */
+.analytics-card {
+    background: white;
+    border: 1px solid rgba(37, 99, 235, 0.1);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.analytics-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--analytics-primary), var(--analytics-secondary));
+}
+
+.analytics-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15);
+    border-color: rgba(37, 99, 235, 0.2);
+}
+
+/* Metric cards */
+.metric-card {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(14, 165, 233, 0.05));
+    border: 1px solid rgba(37, 99, 235, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(14, 165, 233, 0.08));
+    transform: translateY(-1px);
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--analytics-primary);
+    margin-bottom: 0.5rem;
+}
+
+.metric-label {
+    color: #64748b;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Button theme overrides */
+.btn-analytics-primary {
+    background: linear-gradient(135deg, var(--analytics-primary), var(--analytics-secondary));
+    border: none;
+    color: white;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-analytics-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+    color: white;
+}
+
+/* Badge theme overrides */
+.badge-analytics {
+    background: linear-gradient(135deg, var(--analytics-primary), var(--analytics-secondary));
+    color: white;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+}
+
+/* Loading states */
+.loading-analytics {
+    background: linear-gradient(90deg, #f0f9ff 25%, #e0f2fe 50%, #f0f9ff 75%);
+    background-size: 200% 100%;
+    animation: shimmer-analytics 1.5s infinite;
+    border-radius: 8px;
+    height: 20px;
+}
+
+@keyframes shimmer-analytics {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Regional map enhancements */
+.continent-path {
+    fill: rgba(37, 99, 235, 0.1);
+    stroke: rgba(37, 99, 235, 0.3);
+    stroke-width: 1;
+    transition: all 0.3s ease;
+}
+
+.continent-path:hover {
+    fill: rgba(37, 99, 235, 0.2);
+    stroke: var(--analytics-primary);
+    stroke-width: 2;
+    cursor: pointer;
+}
+
+.continent-active {
+    fill: rgba(37, 99, 235, 0.3) !important;
+    stroke: var(--analytics-primary) !important;
+    stroke-width: 2 !important;
+}
+
+.continent-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    fill: var(--analytics-primary);
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+/* Data table enhancements */
+.analytics-table {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(37, 99, 235, 0.1);
+}
+
+.analytics-table th {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(14, 165, 233, 0.05));
+    color: var(--analytics-primary);
+    font-weight: 600;
+    border: none;
+    padding: 1rem;
+}
+
+.analytics-table td {
+    border-color: rgba(37, 99, 235, 0.05);
+    padding: 0.75rem 1rem;
+}
+
+.analytics-table tbody tr:hover {
+    background: rgba(37, 99, 235, 0.02);
+}
+
+/* Progress bars */
+.progress-analytics {
+    height: 8px;
+    background: rgba(37, 99, 235, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-analytics .progress-bar {
+    background: linear-gradient(90deg, var(--analytics-primary), var(--analytics-secondary));
+    border-radius: 4px;
+}
+
+/* Status indicators */
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+.status-active {
+    background: var(--analytics-success);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.status-inactive {
+    background: #94a3b8;
+    box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.2);
+}
+
+.status-warning {
+    background: var(--analytics-warning);
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}

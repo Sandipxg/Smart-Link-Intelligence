@@ -1183,6 +1183,105 @@ def export_revenue():
         headers={"Content-disposition": "attachment; filename=ad_revenue_report.csv"}
     )
 
+@admin_bp.route('/feedbacks')
+@admin_required
+def feedbacks():
+    """Manage user feedbacks"""
+    try:
+        # Get filter parameters
+        status_filter = request.args.get('status', 'all')
+        
+        # Build query based on filter
+        if status_filter == 'all':
+            feedbacks_list = query_db("""
+                SELECT * FROM feedbacks 
+                ORDER BY submitted_at DESC
+            """)
+        else:
+            feedbacks_list = query_db("""
+                SELECT * FROM feedbacks 
+                WHERE status = ?
+                ORDER BY submitted_at DESC
+            """, [status_filter])
+        
+        # Get feedback statistics
+        stats = {
+            'total': query_db("SELECT COUNT(*) as count FROM feedbacks", one=True)['count'],
+            'new': query_db("SELECT COUNT(*) as count FROM feedbacks WHERE status = 'new'", one=True)['count'],
+            'responded': query_db("SELECT COUNT(*) as count FROM feedbacks WHERE status = 'responded'", one=True)['count'],
+            'closed': query_db("SELECT COUNT(*) as count FROM feedbacks WHERE status = 'closed'", one=True)['count']
+        }
+        
+        log_admin_activity("view_feedbacks", "system", None, f"Viewed feedbacks with filter: {status_filter}")
+        
+        return render_template('admin/feedbacks.html',
+                             feedbacks=feedbacks_list,
+                             stats=stats,
+                             status_filter=status_filter)
+                             
+    except Exception as e:
+        flash(f"Error loading feedbacks: {str(e)}", "danger")
+        return redirect(url_for('admin.dashboard'))
+
+
+@admin_bp.route('/feedbacks/<int:feedback_id>/respond', methods=['POST'])
+@admin_required
+def respond_to_feedback(feedback_id):
+    """Respond to a feedback"""
+    try:
+        response = request.form.get('response', '').strip()
+        if not response:
+            return jsonify({"success": False, "message": "Response cannot be empty"}), 400
+        
+        # Update feedback with response
+        execute_db("""
+            UPDATE feedbacks 
+            SET admin_response = ?, responded_at = ?, responded_by = ?, status = 'responded'
+            WHERE id = ?
+        """, [response, datetime.now().isoformat(), "Admin", feedback_id])
+        
+        log_admin_activity("respond_feedback", "feedback", feedback_id, f"Responded to feedback ID: {feedback_id}")
+        
+        return jsonify({"success": True, "message": "Response sent successfully"})
+        
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error sending response: {str(e)}"}), 500
+
+
+@admin_bp.route('/feedbacks/<int:feedback_id>/status', methods=['POST'])
+@admin_required
+def update_feedback_status(feedback_id):
+    """Update feedback status"""
+    try:
+        new_status = request.form.get('status')
+        if new_status not in ['new', 'responded', 'closed']:
+            return jsonify({"success": False, "message": "Invalid status"}), 400
+        
+        execute_db("UPDATE feedbacks SET status = ? WHERE id = ?", [new_status, feedback_id])
+        
+        log_admin_activity("update_feedback_status", "feedback", feedback_id, f"Changed status to: {new_status}")
+        
+        return jsonify({"success": True, "message": f"Status updated to {new_status}"})
+        
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error updating status: {str(e)}"}), 500
+
+
+@admin_bp.route('/feedbacks/<int:feedback_id>/delete', methods=['POST'])
+@admin_required
+def delete_feedback(feedback_id):
+    """Delete a feedback"""
+    try:
+        execute_db("DELETE FROM feedbacks WHERE id = ?", [feedback_id])
+        
+        log_admin_activity("delete_feedback", "feedback", feedback_id, f"Deleted feedback ID: {feedback_id}")
+        
+        return jsonify({"success": True, "message": "Feedback deleted successfully"})
+        
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error deleting feedback: {str(e)}"}), 500
+
+
 @admin_bp.route('/maintenance', methods=['GET', 'POST'])
 @admin_required
 def maintenance():

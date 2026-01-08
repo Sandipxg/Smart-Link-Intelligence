@@ -185,5 +185,21 @@ def ensure_db():
         )
     """)
     
+    # Feedbacks table
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS feedbacks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            subject TEXT NOT NULL,
+            message TEXT NOT NULL,
+            submitted_at TEXT NOT NULL,
+            status TEXT DEFAULT 'new',
+            admin_response TEXT,
+            responded_at TEXT,
+            responded_by TEXT
+        )
+    """)
+    
     conn.commit()
     conn.close()
