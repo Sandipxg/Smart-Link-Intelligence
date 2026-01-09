@@ -126,12 +126,28 @@ def classify_behavior(link_id: int, session_id: str, visits, now: datetime, beha
     return "Curious", per_session
 
 
-def detect_suspicious(visits, now: datetime) -> bool:
-    """Detect suspicious activity based on timing"""
-    if len(visits) < 2:
+def detect_suspicious(visits, now: datetime, current_ip_hash: str = None) -> bool:
+    """Detect suspicious activity based on timing (per IP)"""
+    if not visits:
         return False
-    latest = datetime.fromisoformat(visits[0]["ts"])
+        
+    # If no IP hash provided, fall back to old behavior (or skip?)
+    # Better to filter if we have it.
+    if current_ip_hash:
+        # Filter visits to only this user's history
+        # Note: visits must contain 'ip_hash' field
+        relevant_visits = [v for v in visits if dict(v).get("ip_hash") == current_ip_hash]
+    else:
+        # Fallback if ip_hash not available in visits data
+        relevant_visits = visits
+
+    if len(relevant_visits) < 1:
+        # First visit for this user is not suspicious by time delta
+        return False
+        
+    latest = datetime.fromisoformat(relevant_visits[0]["ts"])
     delta = (now - latest).total_seconds()
+    
     return delta < SUSPICIOUS_INTERVAL_SECONDS
 
 
