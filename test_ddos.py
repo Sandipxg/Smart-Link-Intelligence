@@ -67,17 +67,30 @@ def test_distributed_attack():
     print("Test 2 Complete. Check server logs. These should mostly be ALLOWED now.")
 
 if __name__ == "__main__":
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='DDoS Protection Test Tool')
+    parser.add_argument('--code', type=str, help='Link Code to test', required=False)
+    parser.add_argument('--mode', type=str, choices=['1', '2'], help='Test Mode: 1=Burst (Same IP), 2=Distributed (Diff IP)', required=False)
+    
+    args = parser.parse_args()
+    
     print("DDoS Protection Test Tool")
     print("=========================")
-    print("Make sure your app is running on port 5000")
     
-    # Needs a real link code to test effectively
-    code = input("Enter a valid Link Code to test (e.g. AbC12s): ")
-    TARGET_LINK = f"r/{code}"
+    if args.code:
+        TARGET_LINK = f"r/{args.code}"
+    else:
+        # Needs a real link code to test effectively
+        code = input("Enter a valid Link Code to test (e.g. AbC12s): ")
+        TARGET_LINK = f"r/{code}"
     
-    print("\n1. Test Single User Burst (Should Block)")
-    print("2. Test Multi-User Traffic (Should Allow)")
-    choice = input("Select test (1/2): ")
+    if args.mode:
+        choice = args.mode
+    else:
+        print("\n1. Test Single User Burst (Should Block)")
+        print("2. Test Multi-User Traffic (Should Allow)")
+        choice = input("Select test (1/2): ")
     
     if choice == "1":
         test_single_user_burst()
