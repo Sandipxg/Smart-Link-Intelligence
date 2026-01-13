@@ -1,67 +1,386 @@
+/* Admin Panel - Multi-Color Theme (blue base with complementary colors) */
+:root {
+    /* Primary blue theme */
+    --primary: #2563eb;
+    --primary-light: #3b82f6;
+    --primary-dark: #1d4ed8;
+    --secondary: #0ea5e9;
+    --accent: #06b6d4;
+    
+    /* Complementary colors */
+    --success: #10b981;
+    --success-light: #34d399;
+    --success-dark: #059669;
+    --warning: #f59e0b;
+    --warning-light: #fbbf24;
+    --warning-dark: #d97706;
+    --danger: #ef4444;
+    --danger-light: #f87171;
+    --danger-dark: #dc2626;
+    --purple: #8b5cf6;
+    --purple-light: #a78bfa;
+    --purple-dark: #7c3aed;
+    --indigo: #6366f1;
+    --indigo-light: #818cf8;
+    --indigo-dark: #4f46e5;
+    --pink: #ec4899;
+    --pink-light: #f472b6;
+    --pink-dark: #db2777;
+    --teal: #14b8a6;
+    --teal-light: #2dd4bf;
+    --teal-dark: #0d9488;
+    
+    /* Neutral colors */
+    --white: #ffffff;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    --gradient-secondary: linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%);
+    --gradient-success: linear-gradient(135deg, var(--success) 0%, var(--teal) 100%);
+    --gradient-warning: linear-gradient(135deg, var(--warning) 0%, var(--warning-light) 100%);
+    --gradient-danger: linear-gradient(135deg, var(--danger) 0%, var(--pink) 100%);
+    --gradient-purple: linear-gradient(135deg, var(--purple) 0%, var(--indigo) 100%);
+    
+    /* Shadows */
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.3);
+    --shadow-success: 0 0 20px rgba(16, 185, 129, 0.3);
+    --shadow-warning: 0 0 20px rgba(245, 158, 11, 0.3);
+    --shadow-danger: 0 0 20px rgba(239, 68, 68, 0.3);
+    --shadow-purple: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
 .sidebar {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(145deg, #1e3a8a 0%, #1e40af 25%, #2563eb 50%, #1d4ed8 75%, #1e3a8a 100%);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, 
+        rgba(59, 130, 246, 0.1) 0%, 
+        transparent 25%, 
+        rgba(37, 99, 235, 0.1) 50%, 
+        transparent 75%, 
+        rgba(29, 78, 216, 0.1) 100%);
+    background-size: 60px 60px;
+    animation: sidebarPattern 20s linear infinite;
+    z-index: 0;
+}
+
+@keyframes sidebarPattern {
+    0% { transform: translateX(0) translateY(0); }
+    100% { transform: translateX(60px) translateY(60px); }
+}
+
+.sidebar > * {
+    position: relative;
+    z-index: 1;
 }
 
 .sidebar .nav-link {
-    color: rgba(255, 255, 255, 0.8);
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    margin: 0.25rem 0;
+    color: rgba(255, 255, 255, 0.95);
+    padding: 0.875rem 1.25rem;
+    border-radius: 0.875rem;
+    margin: 0.375rem 0.75rem;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    position: relative;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sidebar .nav-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    border-radius: 0.875rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.sidebar .nav-link:hover::before,
+.sidebar .nav-link.active::before {
+    opacity: 1;
 }
 
 .sidebar .nav-link:hover,
 .sidebar .nav-link.active {
     color: white;
-    background-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(6px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar .nav-link i {
+    margin-right: 0.5rem;
+    width: 20px;
+    text-align: center;
 }
 
 .main-content {
-    background-color: #f8f9fa;
+    background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
     min-height: 100vh;
 }
 
 .card {
     border: none;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    box-shadow: var(--shadow-md);
+    border-radius: 1rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(37, 99, 235, 0.1);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }
 
 .stats-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--gradient-primary);
     color: white;
+    border: none;
 }
 
 .revenue-card {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: var(--gradient-success);
     color: white;
+    border: none;
 }
 
 .users-card {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: var(--gradient-purple);
     color: white;
+    border: none;
 }
 
 .activity-card {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    background: var(--gradient-warning);
     color: white;
+    border: none;
 }
 
 .admin-header {
-    background: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-md);
+    border-bottom: 1px solid rgba(37, 99, 235, 0.1);
 }
 
 .btn-admin {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--gradient-primary);
     border: none;
     color: white;
+    border-radius: 0.75rem;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-glow);
 }
 
 .btn-admin:hover {
-    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    background: var(--gradient-secondary);
     color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(37, 99, 235, 0.5);
 }
 
 .table-hover tbody tr:hover {
-    background-color: rgba(102, 126, 234, 0.1);
+    background-color: rgba(37, 99, 235, 0.08);
+}
+
+/* Additional colorful components */
+.btn-success {
+    background: var(--gradient-success);
+    border: none;
+    color: white;
+    border-radius: 0.75rem;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-success);
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, var(--success-dark) 0%, var(--teal-dark) 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+}
+
+.btn-warning {
+    background: var(--gradient-warning);
+    border: none;
+    color: white;
+    border-radius: 0.75rem;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-warning);
+}
+
+.btn-warning:hover {
+    background: linear-gradient(135deg, var(--warning-dark) 0%, var(--warning) 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.5);
+}
+
+.btn-danger {
+    background: var(--gradient-danger);
+    border: none;
+    color: white;
+    border-radius: 0.75rem;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-danger);
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, var(--danger-dark) 0%, var(--pink-dark) 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
+}
+
+.btn-purple {
+    background: var(--gradient-purple);
+    border: none;
+    color: white;
+    border-radius: 0.75rem;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-purple);
+}
+
+.btn-purple:hover {
+    background: linear-gradient(135deg, var(--purple-dark) 0%, var(--indigo-dark) 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+}
+
+/* Colorful badges */
+.badge-success {
+    background: var(--success);
+    color: white;
+}
+
+.badge-warning {
+    background: var(--warning);
+    color: white;
+}
+
+.badge-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.badge-purple {
+    background: var(--purple);
+    color: white;
+}
+
+.badge-teal {
+    background: var(--teal);
+    color: white;
+}
+
+/* Sidebar navigation with different colors for different sections */
+.sidebar .nav-link[href*="users"] i {
+    color: var(--purple-light);
+}
+
+.sidebar .nav-link[href*="analytics"] i {
+    color: var(--success-light);
+}
+
+.sidebar .nav-link[href*="ads"] i {
+    color: var(--warning-light);
+}
+
+.sidebar .nav-link[href*="broadcast"] i {
+    color: var(--pink-light);
+}
+
+.sidebar .nav-link[href*="activity"] i {
+    color: var(--teal-light);
+}
+
+.sidebar .nav-link[href*="feedbacks"] i {
+    color: var(--indigo-light);
+}
+
+/* Additional modern styling */
+.admin-brand {
+    color: white !important;
+    font-weight: 700;
+    font-size: 1.25rem;
+    text-decoration: none;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.admin-brand:hover {
+    color: rgba(255, 255, 255, 0.9) !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.sidebar-header {
+    padding: 1.5rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    margin-bottom: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+}
+
+.nav-section-title {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 1.5rem 1rem 0.5rem 1rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.badge-admin {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }

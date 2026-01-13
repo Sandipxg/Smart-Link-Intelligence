@@ -1,6 +1,138 @@
+/* Admin Users - Multi-Color Theme */
 .avatar-sm {
     width: 32px;
     height: 32px;
     font-size: 14px;
     font-weight: bold;
+    background: var(--gradient-purple);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(139, 92, 246, 0.2);
+}
+
+.users-table-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(139, 92, 246, 0.1);
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.users-header {
+    background: var(--gradient-purple);
+    color: white;
+    padding: 1.5rem;
+}
+
+.user-row {
+    transition: all 0.3s ease;
+}
+
+.user-row:hover {
+    background: rgba(139, 92, 246, 0.05);
+    transform: translateX(4px);
+}
+
+.user-status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-active {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.status-inactive {
+    background: rgba(107, 114, 128, 0.1);
+    color: var(--gray-600);
+}
+
+.status-premium {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.status-banned {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+}
+
+.user-actions .btn {
+    margin: 0 0.25rem;
+    border-radius: 0.5rem;
+    padding: 0.375rem 0.75rem;
+}
+
+.btn-view {
+    background: var(--gradient-primary);
+    border: none;
+    color: white;
+    font-size: 0.75rem;
+}
+
+.btn-view:hover {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary) 100%);
+    color: white;
+}
+
+.btn-edit {
+    background: var(--gradient-warning);
+    border: none;
+    color: white;
+    font-size: 0.75rem;
+}
+
+.btn-edit:hover {
+    background: linear-gradient(135deg, var(--warning-dark) 0%, var(--warning) 100%);
+    color: white;
+}
+
+.btn-delete {
+    background: var(--gradient-danger);
+    border: none;
+    color: white;
+    font-size: 0.75rem;
+}
+
+.btn-delete:hover {
+    background: linear-gradient(135deg, var(--danger-dark) 0%, var(--pink-dark) 100%);
+    color: white;
+}
+
+.user-stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.user-stat-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.user-stat-card.total-users {
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.user-stat-card.active-users {
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.user-stat-card.premium-users {
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.user-stat-card.banned-users {
+    border: 1px solid rgba(239, 68, 68, 0.2);
 }

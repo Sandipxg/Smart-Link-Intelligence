@@ -1,6 +1,50 @@
+/* Admin User Detail - Blue & White Theme */
 .avatar-lg {
     width: 80px;
     height: 80px;
     font-size: 32px;
     font-weight: bold;
+    background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid rgba(37, 99, 235, 0.2);
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+}
+
+.user-detail-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(37, 99, 235, 0.1);
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+}
+
+.user-detail-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.15);
+}
+
+.user-info-header {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%);
+    border-radius: 1rem 1rem 0 0;
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(37, 99, 235, 0.1);
+}
+
+.user-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(37, 99, 235, 0.05);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(37, 99, 235, 0.1);
 }

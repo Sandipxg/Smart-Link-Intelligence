@@ -1,17 +1,36 @@
+/* Admin Broadcast - Blue & White Theme */
 .user-checkbox-list .form-check:hover {
-    background-color: rgba(0, 0, 0, 0.03);
-    border-radius: 4px;
+    background-color: rgba(37, 99, 235, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(37, 99, 235, 0.2);
 }
 
 .user-checkbox-list label {
     cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .form-check-input:checked+.form-check-label span {
     font-weight: bold;
-    color: var(--bs-primary);
+    color: var(--primary, #2563eb);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary, #2563eb);
+    border-color: var(--primary, #2563eb);
 }
 
 .sticky-top {
     z-index: 10;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(37, 99, 235, 0.1);
+}
+
+.broadcast-header {
+    background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+    color: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
 }

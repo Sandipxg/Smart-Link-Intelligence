@@ -1,6 +1,27 @@
+/* Admin Create Ad for User - Blue & White Theme */
 .avatar-lg {
     width: 80px;
     height: 80px;
     font-size: 32px;
     font-weight: bold;
+    background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid rgba(37, 99, 235, 0.2);
+}
+
+.user-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(37, 99, 235, 0.1);
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+}
+
+.user-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.15);
 }

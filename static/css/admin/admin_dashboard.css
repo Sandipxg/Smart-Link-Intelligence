@@ -1,25 +1,225 @@
+/* Admin Dashboard - Multi-Color Theme Animations */
 .stat-updated {
     animation: pulse 0.5s ease-in-out;
 }
 
 @keyframes pulse {
-
-    0%,
-    100% {
+    0%, 100% {
         transform: scale(1);
     }
-
     50% {
-        transform: scale(1.1);
-        color: #28a745;
+        transform: scale(1.05);
+        color: var(--accent);
+        text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
     }
 }
 
 #last-refresh {
     opacity: 0.7;
     transition: opacity 0.3s;
+    color: var(--gray-600);
 }
 
 #last-refresh:hover {
     opacity: 1;
+    color: var(--primary);
+}
+
+/* Modern dashboard enhancements with multiple colors */
+.dashboard-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(37, 99, 235, 0.1);
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: rgba(37, 99, 235, 0.2);
+}
+
+/* Colorful stat icons */
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    margin-bottom: 1rem;
+}
+
+.stat-icon.primary {
+    background: var(--gradient-primary);
+}
+
+.stat-icon.success {
+    background: var(--gradient-success);
+}
+
+.stat-icon.warning {
+    background: var(--gradient-warning);
+}
+
+.stat-icon.danger {
+    background: var(--gradient-danger);
+}
+
+.stat-icon.purple {
+    background: var(--gradient-purple);
+}
+
+.stat-icon.teal {
+    background: linear-gradient(135deg, var(--teal) 0%, var(--accent) 100%);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--gray-600);
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.chart-container {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid rgba(37, 99, 235, 0.1);
+}
+
+.table-modern {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 1px solid rgba(37, 99, 235, 0.1);
+}
+
+.table-modern thead {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.table-modern th {
+    border: none;
+    font-weight: 600;
+    padding: 1rem;
+}
+
+.table-modern td {
+    border: none;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(37, 99, 235, 0.05);
+}
+
+/* Colorful status badges */
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-active {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.status-inactive {
+    background: rgba(107, 114, 128, 0.1);
+    color: var(--gray-600);
+}
+
+.status-pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.status-error {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+}
+
+.status-premium {
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--purple);
+}
+
+/* Activity feed with different colors */
+.activity-item {
+    border-left: 3px solid var(--gray-200);
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.activity-item.user-activity {
+    border-left-color: var(--purple);
+}
+
+.activity-item.system-activity {
+    border-left-color: var(--primary);
+}
+
+.activity-item.warning-activity {
+    border-left-color: var(--warning);
+}
+
+.activity-item.error-activity {
+    border-left-color: var(--danger);
+}
+
+.activity-item.success-activity {
+    border-left-color: var(--success);
+}
+
+/* Progress bars with different colors */
+.progress-bar.bg-success {
+    background: var(--gradient-success) !important;
+}
+
+.progress-bar.bg-warning {
+    background: var(--gradient-warning) !important;
+}
+
+.progress-bar.bg-danger {
+    background: var(--gradient-danger) !important;
+}
+
+.progress-bar.bg-purple {
+    background: var(--gradient-purple) !important;
+}
+
+/* Notification alerts */
+.alert-success {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(20, 184, 166, 0.1) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: var(--success-dark);
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    color: var(--warning-dark);
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: var(--danger-dark);
+}
+
+.alert-info {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%);
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    color: var(--primary-dark);
 }
