@@ -215,8 +215,7 @@ def ensure_admin_tables():
             type TEXT DEFAULT 'info',
             target_user_id INTEGER, -- NULL for group-based or site-wide
             target_group TEXT DEFAULT 'all', -- 'all', 'free', 'elite', 'elite_pro'
-            created_at TEXT DEFAULT (datetime('now')),
-            is_read INTEGER DEFAULT 0
+            created_at TEXT DEFAULT (datetime('now'))
         )
     """)
     

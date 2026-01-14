@@ -251,11 +251,14 @@ CREATE TABLE behavior_rules (
 ```
 
 #### `personalized_ads`
-User-created custom advertisements (Elite Pro feature).
+**Unified advertisement table** for both user-created ads (Elite Pro feature) and admin-created system-wide ads.
+
+**Design Note**: This single table handles all ad types. Admin/system ads have `user_id = NULL`, while user-created ads have `user_id` set to the owner's ID. This unified approach simplifies queries, improves performance, and provides better flexibility than maintaining separate tables.
+
 ```sql
 CREATE TABLE personalized_ads (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
+    user_id INTEGER,                     -- NULL for admin/system ads, user ID for user-created ads
     title TEXT NOT NULL,
     description TEXT NOT NULL,
     cta_text TEXT NOT NULL,
@@ -272,40 +275,72 @@ CREATE TABLE personalized_ads (
 )
 ```
 
-#### `admin_ads`
-System-wide ads created by administrators.
-```sql
-CREATE TABLE admin_ads (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    description TEXT NOT NULL,
-    cta_text TEXT NOT NULL,
-    cta_url TEXT NOT NULL,
-    background_color TEXT DEFAULT '#667eea',
-    text_color TEXT DEFAULT '#ffffff',
-    icon TEXT DEFAULT '🚀',
-    grid_position INTEGER DEFAULT 1,
-    ad_type TEXT DEFAULT 'custom',
-    image_filename TEXT,
-    is_active INTEGER DEFAULT 1,
-    created_by TEXT,                     -- Admin username
-    created_at TEXT DEFAULT (datetime('now'))
-)
+**Ad Types**:
+- **Admin/System Ads**: `user_id IS NULL` - Created by administrators, can be assigned to specific users via `ad_display_assignments`
+- **User Ads**: `user_id = <user_id>` - Created by Elite Pro users, displayed on their links
+
+**Usage Examples**:
+```python
+# Query admin ads
+admin_ads = query_db("SELECT * FROM personalized_ads WHERE user_id IS NULL")
+
+# Query user's ads
+user_ads = query_db("SELECT * FROM personalized_ads WHERE user_id = ?", [user_id])
+
+# Query all ads with owner info
+all_ads = query_db("""
+    SELECT pa.*, COALESCE(u.username, 'System') as owner_name
+    FROM personalized_ads pa
+    LEFT JOIN users u ON pa.user_id = u.id
+""")
 ```
 
 #### `ad_impressions`
-Tracks ad views for revenue calculation.
+Tracks ad views for revenue calculation and analytics.
 ```sql
 CREATE TABLE ad_impressions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    ad_id INTEGER NOT NULL,
-    ad_type TEXT NOT NULL,               -- 'admin' or 'user'
-    user_id INTEGER,                     -- User who saw the ad
-    viewed_at TEXT NOT NULL,
-    grid_position INTEGER,
-    FOREIGN KEY(ad_id) REFERENCES admin_ads(id) OR personalized_ads(id)
+    link_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,            -- User who owns the link where ad was shown
+    ad_type TEXT NOT NULL,               -- 'large' or 'small'
+    ad_position INTEGER NOT NULL,        -- 1, 2, or 3
+    revenue REAL NOT NULL,               -- Revenue generated from this impression
+    ip_address TEXT,
+    ad_id INTEGER,                       -- References personalized_ads(id)
+    timestamp TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY(link_id) REFERENCES links(id),
+    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(ad_id) REFERENCES personalized_ads(id)
 )
 ```
+
+**Revenue Rates**:
+- Large ad (position 1): $0.05 per impression
+- Small ads (positions 2, 3): $0.02 per impression
+
+#### `ad_display_assignments`
+Manages targeted ad distribution - assigns specific ads to specific users.
+
+**Purpose**: Allows admins to control which users see which ads. When an admin creates a system-wide ad (with `user_id = NULL` in `personalized_ads`), they can assign it to specific users through this table.
+
+```sql
+CREATE TABLE ad_display_assignments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ad_id INTEGER NOT NULL,              -- References personalized_ads(id)
+    target_user_id INTEGER NOT NULL,     -- User who should see this ad
+    assigned_by_admin INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY(ad_id) REFERENCES personalized_ads(id) ON DELETE CASCADE,
+    FOREIGN KEY(target_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE(ad_id, target_user_id)        -- Prevent duplicate assignments
+)
+```
+
+**Usage**:
+- Admin creates an ad with `user_id = NULL` in `personalized_ads`
+- Admin assigns the ad to specific users via this table
+- When those users' links are visited, the assigned ad is displayed
+- Elite Pro users don't see assigned ads (they have ad-free experience)
 
 #### `ddos_events`
 Logs DDoS attack events and protection actions.
@@ -323,21 +358,31 @@ CREATE TABLE ddos_events (
 ```
 
 #### `notifications`
-System notifications for users.
+System notifications for users - supports both individual and broadcast notifications.
+
+**Design Note**: Notifications can be targeted to individual users (`target_user_id`), groups (`target_group`), or all users. Since broadcast notifications are shared across multiple users, individual dismissal is tracked in the `notification_dismissals` table rather than using an `is_read` flag.
+
 ```sql
 CREATE TABLE notifications (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,                     -- NULL for broadcast
-    title TEXT NOT NULL,
     message TEXT NOT NULL,
     type TEXT DEFAULT 'info',            -- 'info', 'warning', 'success', 'danger'
-    created_at TEXT DEFAULT (datetime('now')),
-    is_read INTEGER DEFAULT 0
+    target_user_id INTEGER,              -- NULL for broadcast/group notifications
+    target_group TEXT DEFAULT 'all',     -- 'all', 'free', 'elite', 'elite_pro'
+    created_at TEXT DEFAULT (datetime('now'))
 )
 ```
 
+**Targeting Options**:
+- **Individual**: `target_user_id = <user_id>` - Sent to specific user
+- **Group**: `target_group = 'free'` (or 'elite', 'elite_pro') - Sent to all users in that tier
+- **Broadcast**: `target_group = 'all'` - Sent to all users
+
 #### `notification_dismissals`
-Tracks which users dismissed which notifications.
+Tracks which users have dismissed which notifications (many-to-many relationship).
+
+**Purpose**: Since broadcast notifications are shared across users, this table tracks individual user dismissals. When a user dismisses a notification, a record is created here, and that notification won't appear for them anymore.
+
 ```sql
 CREATE TABLE notification_dismissals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -347,6 +392,15 @@ CREATE TABLE notification_dismissals (
     FOREIGN KEY(user_id) REFERENCES users(id),
     FOREIGN KEY(notification_id) REFERENCES notifications(id)
 )
+```
+
+**Example Query** (fetch undismissed notifications for a user):
+```sql
+SELECT n.* FROM notifications n
+LEFT JOIN notification_dismissals d ON n.id = d.notification_id AND d.user_id = ?
+WHERE (n.target_user_id = ? OR n.target_group = 'all' OR n.target_group = ?)
+  AND d.id IS NULL  -- Only show if not dismissed
+ORDER BY n.created_at DESC
 ```
 
 #### `feedbacks`
@@ -572,7 +626,7 @@ execute_db("INSERT INTO visits (...) VALUES (...)", [values])
 - `user_detail(user_id)`: Detailed user view
 - `toggle_user_premium(user_id)`: Grant/revoke premium access
 - `ads()`: Ad management interface
-- `create_admin_ad()`: Create system-wide ads
+- `create_admin_ad()`: Create system-wide ads (stored in `personalized_ads` with `user_id = NULL`)
 - `display_ad_to_users(ad_id)`: Assign ads to specific users
 - `analytics()`: Platform-wide analytics
 - `activity()`: User activity log
