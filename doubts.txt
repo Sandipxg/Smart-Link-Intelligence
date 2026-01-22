@@ -1,0 +1,2 @@
+storing fucntion in variables 
+difference between rest and spready ( ...a ) 

@@ -74,33 +74,31 @@ graph TD
 - **Real-Time Classification**: Dynamic visitor behavior analysis
 - **Rule Management**: Easy-to-use interface for creating and managing behavior rules
 
-### 🛡️ **Advanced Security & DDoS Protection**
+### 🛡️ **Advanced Security & Protection**
 - **Multi-Layer DDoS Protection**: Automatic detection and mitigation of distributed attacks
 - **Rate Limiting**: Intelligent request throttling per IP and link
 - **Burst Attack Prevention**: Real-time detection of rapid-fire requests
 - **Automatic Link Protection**: Self-healing links that disable under attack
 - **Security Dashboard**: Monitor threats and manage protection levels
-- **Fraud Detection**: AI-powered suspicious activity detection
-- **Privacy-First**: Session-based tracking, no personal data stored
-- **Real-Time Analytics**: Live visitor behavior insights
-- **Trust Scoring**: Automated link quality assessment
+
+### 🤖 **AI-Powered Support**
+- **Smart Chatbot**: Integrated AI assistant to help users navigate the platform
+- **Automated Assistance**: Quick answers for common queries and troubleshooting
+
+### ⚡ **System Control**
+- **Comprehensive Admin Panel**: Full administrative control system to manage users, ads, and platform health.
+- **Centralized Management**: Unified interface for system-wide configuration and monitoring.
 
 ### 🎨 **Professional User Experience**
 - **Stunning Landing Page**: Modern, responsive design with gradient aesthetics and glass morphism
 - **Intuitive Navigation**: Clear user journey from landing to dashboard
 - **Interactive Elements**: Smooth animations, hover effects, and engaging UI components
 - **Mobile-First Design**: Optimized for all devices and screen sizes
-- **Smart Ad System**: Grid-based ad placement with premium bypass
+- **Smart Ad System**: Unified ad platform supporting both user-created and system-wide advertisements.
 - **Custom Branding**: Personalized ad creation with image support
-- **Premium Features**: Ad-free experience and advanced analytics
+- **Premium Features**: Ad-free experience and advanced analytics for Elite Pro users
 - **Link Management**: Delete, track, and manage all links from one dashboard
 - **Export Capabilities**: Excel/CSV export with shareable analytics
-
-### 🔧 **Developer-Friendly**
-- **RESTful API**: Complete programmatic access
-- **Webhook Support**: Real-time event notifications
-- **Easy Integration**: Simple embed codes and widgets
-- **Comprehensive Documentation**: Full API reference
 
 ---
 
@@ -135,31 +133,6 @@ python app.py
 ```
 
 🎉 **That's it!** Visit `http://localhost:5000` to see the beautiful landing page and start using Smart Link Intelligence.
-
-### 🌐 **First Visit Experience**
-
-When you first visit the application:
-
-1. **Landing Page**: You'll see a professional landing page with:
-   - Modern gradient design and glass morphism effects
-   - Clear explanation of platform features and benefits
-   - Interactive elements and smooth animations
-   - Statistics showcasing platform reliability
-
-2. **Getting Started**: Two clear options:
-   - **Sign Up**: Create a new account to start using the platform
-   - **Sign In**: Access your existing account and dashboard
-
-3. **Dashboard Access**: After authentication, you'll be redirected to your personalized dashboard
-
-### 🎨 **Landing Page Features**
-
-- **Hero Section**: Compelling headline with clear value proposition
-- **Statistics**: Live counters showing platform metrics (99.9% uptime, 10M+ links, etc.)
-- **How It Works**: 3-step process explanation with interactive cards
-- **Features Showcase**: 6 key features with detailed descriptions
-- **FAQ Section**: Common questions with expandable answers
-- **Contact Form**: Professional contact form for inquiries
 
 ### 🔧 Configuration
 
@@ -242,18 +215,6 @@ sequenceDiagram
     S->>S: Update Analytics
 ```
 
-### 📈 User Journey Stages
-
-| Stage | 🎯 Behavior | 🔄 Action | 📊 Analytics |
-|-------|-------------|-----------|--------------|
-| **🌐 Landing** | First-time visitor | → View landing page | Track page engagement |
-| **📝 Registration** | Interested user | → Sign up process | Monitor conversion rate |
-| **🛡️ Protected** | DDoS/Rate limited | → Block/Captcha | Security monitoring |
-| **😊 Curious** | First-time visitor | → Primary URL | Track initial interest |
-| **🤔 Interested** | Return within custom window | → Returning URL | Measure engagement |
-| **🔥 Highly Engaged** | Custom click threshold | → CTA URL | Conversion opportunity |
-| **🚫 Suspicious** | Rapid/bot clicks | → Block/Flag | Fraud prevention |
-
 ### 🎛️ Custom Behavior Rules
 
 Configure your own thresholds for visitor classification:
@@ -268,47 +229,7 @@ Configure your own thresholds for visitor classification:
 - Returning Window: 24 hours  
 - Interested: 2+ visits
 - Engaged: 3+ clicks
-
-💼 SaaS Rule:
-- Returning Window: 168 hours (1 week)
-- Interested: 2+ visits
-- Engaged: 4+ clicks
 ```
-
-### 🛡️ **DDoS Protection System**
-
-Smart Link Intelligence includes a comprehensive 5-level DDoS protection system:
-
-```
-🛡️ Protection Levels:
-
-Level 0: 🟢 Normal Operation
-- Standard monitoring
-- Full functionality
-
-Level 1-2: 🔵 Enhanced Monitoring  
-- Increased logging
-- Suspicious activity tracking
-
-Level 3: 🟡 Captcha Protection
-- Human verification required
-- Bot filtering active
-
-Level 4: 🟠 Temporary Disable
-- 1-hour automatic disable
-- Rate limiting enforced
-
-Level 5: 🔴 Link Disabled
-- Complete protection mode
-- Manual recovery required
-```
-
-**🔧 Protection Features:**
-- **Rate Limiting**: 60 requests/minute per IP
-- **Burst Detection**: 100 requests/10 seconds threshold
-- **Automatic Recovery**: Self-healing after threat passes
-- **Manual Override**: Admin controls for emergency situations
-- **Real-time Monitoring**: Live threat detection dashboard
 
 ---
 
@@ -336,100 +257,6 @@ Level 5: 🔴 Link Disabled
 │  │ [🚀 Sign Up]  [▶️ How It Works]                        │ │
 │  └─────────────────────────────────────────────────────────┘ │
 │                                                             │
-│  📊 Live Statistics                                         │
-│  ┌─────────────────────────────────────────────────────────┐ │
-│  │ 99.9% Uptime  │ 10M+ Links  │ 50K+ Users │ 5-Layer DDoS │ │
-│  └─────────────────────────────────────────────────────────┘ │
-│                                                             │
-│  🎯 How It Works (3 Steps)                                 │
-│  ┌─────────────────────────────────────────────────────────┐ │
-│  │ [👤] Create Account → [🔗] Create Links → [📊] Track   │ │
-│  └─────────────────────────────────────────────────────────┘ │
-│                                                             │
-│  ✨ Features Showcase                                       │
-│  ┌─────────────────────────────────────────────────────────┐ │
-│  │ 🛡️ Enterprise Security  🧠 AI-Powered Routing         │ │
-│  │ 📊 Real-Time Analytics  ⚙️ Custom Behavior Rules       │ │
-│  │ 🎨 Smart Monetization   💻 Developer API               │ │
-│  └─────────────────────────────────────────────────────────┘ │
-│                                                             │
-│  ❓ FAQ Section & 📞 Contact Form                          │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### 🏠 Dashboard Overview
-```
-┌─────────────────────────────────────────────────────────────┐
-│ 📊 Smart Link Intelligence Dashboard                        │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  🔗 Create Smart Link                                       │
-│  ┌─────────────────────────────────────────────────────────┐ │
-│  │ Original URL: https://example.com/long-url              │ │
-│  │ Custom Alias: my-link                                   │ │
-│  │ Behavior Rule: E-commerce (3+ visits, 5+ clicks)       │ │
-│  │ Redirect Info: [ Standard / Progressive / Password ]   │ │
-│  │                                                         │ │
-│  │ [Create Smart Link]  [Reset Form]                      │ │
-│  └─────────────────────────────────────────────────────────┘ │
-│                                                             │
-│  🎛️ Behavior Rules Management                               │
-│  ┌─────────────────────────────────────────────────────────┐ │
-│  │ • E-commerce Rule (72h, 3+ visits, 5+ clicks)          │ │
-│  │ • Blog Rule (24h, 2+ visits, 3+ clicks)                │ │
-│  │ • SaaS Rule (168h, 2+ visits, 4+ clicks)               │ │
-│  │                                                         │ │
-│  │ [+ Create New Rule]  [Manage Rules]                    │ │
-│  └─────────────────────────────────────────────────────────┘ │
-│                                                             │
-│  🛡️ DDoS Protection Dashboard                               │
-│  ┌─────────────────────────────────────────────────────────┐ │
-│  │ 🟢 Protected Links: 15    🟡 Under Protection: 2       │ │
-│  │ 🔴 Disabled Links: 0      📊 Total Events: 23          │ │
-│  │                                                         │ │
-│  │ Recent Events:                                          │ │
-│  │ • Rate limit triggered - Link: abc123 (2 min ago)      │ │
-│  │ • Burst attack detected - Link: xyz789 (5 min ago)     │ │
-│  │                                                         │ │
-│  │ [View Security Dashboard]  [Recover Links]             │ │
-│  └─────────────────────────────────────────────────────────┘ │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### 📊 Analytics Deep Dive
-```
-┌─────────────────────────────────────────────────────────────┐
-│ 📈 Link Analytics: /r/demo123                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  🕐 Hourly Traffic        🌍 Geographic Data                │
-│  ┌─────────────────┐     ┌─────────────────────────────────┐ │
-│  │     ▄▄▄         │     │ 🇺🇸 USA        45.2%  ████████ │ │
-│  │   ▄█████▄       │     │ 🇬🇧 UK         23.1%  ████     │ │
-│  │ ▄███████████▄   │     │ 🇨🇦 Canada     15.7%  ███      │ │
-│  │███████████████  │     │ 🇩🇪 Germany    10.3%  ██       │ │
-│  └─────────────────┘     │ 🇫🇷 France      5.7%  █        │ │
-│                          └─────────────────────────────────┘ │
-│                                                             │
-│  📱 Device Breakdown      🎯 Conversion Funnel              │
-│  ┌─────────────────┐     ┌─────────────────────────────────┐ │
-│  │ 📱 Mobile  67%  │     │ 👥 1,000 Visitors               │ │
-│  │ 💻 Desktop 28%  │     │      ↓                          │ │
-│  │ 📟 Tablet   5%  │     │ 😊 450 Curious (45%)           │ │
-│  └─────────────────┘     │      ↓                          │ │
-│                          │ 🤔 350 Interested (35%)        │ │
-│                          │      ↓                          │ │
-│                          │ 🔥 200 Highly Engaged (20%)    │ │
-│                          └─────────────────────────────────┘ │
-│                                                             │
-│  🛡️ Security Overview        🚨 Threat Detection            │
-│  ┌─────────────────┐     ┌─────────────────────────────────┐ │
-│  │ 🟢 Normal  85%  │     │ 📊 Rate Limits: 12 triggered   │ │
-│  │ 🟡 Protected 12%│     │ 🚫 Burst Attacks: 3 blocked    │ │
-│  │ 🔴 Disabled  3% │     │ 🛡️ Auto Recovery: 8 restored   │ │
-│  └─────────────────┘     │ ⚠️ Manual Review: 1 pending    │ │
-│                          └─────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -454,159 +281,6 @@ Content-Type: application/json
 }
 ```
 
-#### Create Behavior Rule
-```http
-POST /api/behavior-rules
-Content-Type: application/json
-
-{
-  "rule_name": "E-commerce Rule",
-  "returning_window_hours": 72,
-  "interested_threshold": 3,
-  "engaged_threshold": 5
-}
-```
-
-#### Get Link Analytics
-```http
-GET /api/links/{code}/analytics
-```
-
-```json
-{
-  "code": "my-link",
-  "total_clicks": 1234,
-  "unique_visitors": 567,
-  "behavior_breakdown": {
-    "curious": 45.2,
-    "interested": 35.1,
-    "highly_engaged": 19.7
-  },
-  "geographic_data": [...],
-  "hourly_distribution": [...],
-  "trust_score": 94
-}
-```
-
-### 📊 Analytics Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/links` | GET | List all links |
-| `/api/links` | POST | Create new link |
-| `/api/links/{code}` | GET | Get link details |
-| `/api/links/{code}/analytics` | GET | Get analytics |
-| `/api/links/{code}/export` | GET | Export data |
-| `/api/behavior-rules` | GET | List behavior rules |
-| `/api/behavior-rules` | POST | Create behavior rule |
-| `/api/behavior-rules/{id}` | DELETE | Delete behavior rule |
-| `/api/ddos-protection` | GET | Get protection status |
-| `/api/ddos-protection/{link_id}/recover` | POST | Recover protected link |
-| `/api/ddos-protection/{link_id}/stats` | GET | Get DDoS statistics |
-
----
-
-## 🎯 Use Cases
-
-### 🛒 **E-commerce**
-- **Product Launches**: Guide users through awareness → interest → purchase
-- **Abandoned Cart Recovery**: Smart retargeting based on engagement level
-- **Seasonal Campaigns**: Adaptive content based on user behavior
-
-### 📚 **Content Marketing**
-- **Blog Promotion**: Route readers to related content based on interest
-- **Lead Generation**: Progressive disclosure of premium content
-- **Newsletter Growth**: Behavior-based subscription funnels
-
-### 🎪 **Event Marketing**
-- **Registration Funnels**: Guide attendees through multi-step registration
-- **Sponsor Engagement**: Premium routing for VIP experiences
-- **Post-Event Follow-up**: Targeted content based on participation
-
-### 💼 **SaaS & Tech**
-- **Product Demos**: Personalized demo experiences
-- **Trial Conversions**: Smart upgrade prompts based on usage
-- **Feature Adoption**: Guided onboarding journeys
-
----
-
-## 🚀 Advanced Features
-
-### 🎛️ Custom Behavior Rules System
-
-Create and manage your own visitor classification rules:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│ 🎛️ Behavior Rules Management                                │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  📋 Rule: E-commerce Conversion                             │
-│  ┌─────────────────────────────────────────────────────────┐ │
-│  │ Returning Window: 72 hours                              │ │
-│  │ Interested Threshold: 3+ visits                         │ │
-│  │ Engaged Threshold: 5+ clicks                            │ │
-│  │                                                         │ │
-│  │ 😊 Curious → Product Page                               │ │
-│  │ 🤔 Interested → Special Offer                           │ │
-│  │ 🔥 Highly Engaged → Checkout Page                       │ │
-│  └─────────────────────────────────────────────────────────┘ │
-│                                                             │
-│  📋 Rule: Content Marketing                                 │
-│  ┌─────────────────────────────────────────────────────────┐ │
-│  │ Returning Window: 24 hours                              │ │
-│  │ Interested Threshold: 2+ visits                         │ │
-│  │ Engaged Threshold: 3+ clicks                            │ │
-│  │                                                         │ │
-│  │ 😊 Curious → Blog Post                                  │ │
-│  │ 🤔 Interested → Related Articles                        │ │
-│  │ 🔥 Highly Engaged → Newsletter Signup                   │ │
-│  └─────────────────────────────────────────────────────────┘ │
-│                                                             │
-│  [+ Create New Rule]  [Set as Default]  [Delete Rule]      │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### 🎨 Smart Ad System
-
-Create beautiful, engaging ads that appear between clicks:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│ 🎯 Smart Ad Grid System                                     │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ┌─────────────────────────────────────────────────────────┐ │
-│  │ 📱 Large Ad Space (Position 1)                         │ │
-│  │ ┌─────────────────────────────────────────────────────┐ │ │
-│  │ │ 🚀 Your Premium Product Here                        │ │ │
-│  │ │ ✨ Engaging visuals and compelling copy             │ │ │
-│  │ │ 🎯 [Call-to-Action Button]                          │ │ │
-│  │ └─────────────────────────────────────────────────────┘ │ │
-│  └─────────────────────────────────────────────────────────┘ │
-│                                                             │
-│  ┌─────────────────────┐  ┌─────────────────────────────────┐ │
-│  │ 📊 Small Ad (Pos 2) │  │ 💡 Small Ad (Position 3)       │ │
-│  │ ┌─────────────────┐ │  │ ┌─────────────────────────────┐ │ │
-│  │ │ 🎨 Creative     │ │  │ │ 🔥 Hot Offer               │ │ │
-│  │ │ 📈 Analytics    │ │  │ │ 💰 Great Deal              │ │ │
-│  │ │ [Learn More]    │ │  │ │ [Shop Now]                 │ │ │
-│  │ └─────────────────┘ │  │ └─────────────────────────────┘ │ │
-│  └─────────────────────┘  └─────────────────────────────────┘ │
-│                                                             │
-│  🔄 Continue to destination in 5 seconds...                │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### 📊 Export & Sharing
-
-Generate beautiful reports and share insights:
-
-- **📈 Excel Reports**: Comprehensive analytics in spreadsheet format
-- **🔗 Shareable Links**: Public analytics dashboards with QR codes
-- **📱 Mobile-Friendly**: Responsive design for all devices
-- **🎨 Custom Branding**: White-label options for agencies
-
 ---
 
 ## 🔒 Security & Privacy
@@ -619,100 +293,20 @@ Smart Link Intelligence features enterprise-grade DDoS protection:
 🔄 Protection Workflow:
 
 1. 📊 Request Analysis
-   ├── IP-based rate limiting (60/min)
-   ├── Burst detection (100/10sec)
+   ├── IP-based rate limiting
+   ├── Burst detection
    └── Behavioral analysis
 
 2. 🎯 Threat Classification
    ├── Level 1-2: Enhanced monitoring
    ├── Level 3: Captcha verification
-   ├── Level 4: Temporary disable (1h)
+   ├── Level 4: Temporary disable
    └── Level 5: Manual recovery required
 
 3. 🛡️ Automatic Response
    ├── Real-time blocking
    ├── Link protection activation
-   ├── Event logging & analytics
-   └── Self-healing recovery
-
-4. 📊 Monitoring Dashboard
-   ├── Live threat detection
-   ├── Protection level management
-   ├── Event timeline & statistics
-   └── Manual override controls
-```
-
-**🚨 Attack Types Detected:**
-- **Rate Limiting Violations**: Too many requests per IP
-- **Burst Attacks**: Rapid-fire request patterns
-- **Distributed Attacks**: Multiple IP coordination
-- **Bot Traffic**: Automated request patterns
-- **Suspicious Behavior**: Unusual access patterns
-
-### 🛡️ Security Features
-- **🔐 Secure Authentication**: Multi-factor authentication support
-- **🔑 Password Protection**: Optional per-link password requirement
-- **🚫 Advanced DDoS Protection**: 5-level automatic threat mitigation
-- **⚡ Rate Limiting**: Intelligent request throttling and burst detection
-- **🔒 Data Encryption**: All sensitive data encrypted at rest
-- **🌐 HTTPS Only**: Secure connections enforced
-- **🤖 Bot Detection**: AI-powered automated traffic filtering
-
-### 🕵️ Privacy Protection
-- **🎭 Anonymous Tracking**: No personal data collection
-- **🗑️ Data Retention**: Configurable data cleanup policies
-- **📋 GDPR Compliant**: Full compliance with privacy regulations
-- **🔍 Transparent Logging**: Clear audit trails
-
----
-
-## 📈 Performance & Scalability
-
-### ⚡ Performance Metrics
-- **🚀 Response Time**: < 100ms average response
-- **📊 Throughput**: 10,000+ requests per second
-- **🌍 Global CDN**: Worldwide edge locations
-- **📱 Mobile Optimized**: 95+ PageSpeed score
-
-### 🔧 Scalability Options
-- **☁️ Cloud Ready**: Deploy on AWS, GCP, Azure
-- **🐳 Docker Support**: Containerized deployment
-- **🔄 Load Balancing**: Horizontal scaling support
-- **📊 Monitoring**: Built-in health checks and metrics
-
----
-
-## 🤝 Contributing
-
-We love contributions! Here's how you can help:
-
-### 🐛 Bug Reports
-Found a bug? Please create an issue with:
-- 📝 Clear description
-- 🔄 Steps to reproduce
-- 💻 Environment details
-- 📸 Screenshots if applicable
-
-### ✨ Feature Requests
-Have an idea? We'd love to hear it:
-- 🎯 Use case description
-- 💡 Proposed solution
-- 🎨 Mockups or wireframes
-- 📊 Expected impact
-
-### 🔧 Development Setup
-```bash
-# Fork the repository
-git clone https://github.com/yourusername/smart-link-intelligence.git
-
-# Create feature branch
-git checkout -b feature/amazing-feature
-
-# Make your changes
-# Add tests
-# Update documentation
-
-# Submit pull request
+   └── Event logging & analytics
 ```
 
 ---
@@ -720,30 +314,6 @@ git checkout -b feature/amazing-feature
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- **🎨 Bootstrap Team** - For the amazing UI framework
-- **📊 Chart.js** - For beautiful analytics visualizations
-- **🐍 Flask Community** - For the lightweight web framework
-- **💾 SQLite** - For the reliable embedded database
-
----
-
-## 📞 Support & Contact
-
-### 🆘 Need Help?
-- 📚 **Documentation**: [docs.smartlink.io](https://docs.smartlink.io)
-- 💬 **Community Forum**: [community.smartlink.io](https://community.smartlink.io)
-- 📧 **Email Support**: support@smartlink.io
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/yourusername/smart-link-intelligence/issues)
-
-### 🌟 Stay Connected
-- 🐦 **Twitter**: [@SmartLinkIO](https://twitter.com/smartlinkio)
-- 💼 **LinkedIn**: [Smart Link Intelligence](https://linkedin.com/company/smartlink)
-- 📺 **YouTube**: [Smart Link Channel](https://youtube.com/smartlink)
 
 ---
 
@@ -757,9 +327,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 *Made with ❤️ by the Smart Link Intelligence Team*
 
-![Visitors](https://visitor-badge.laobi.icu/badge?page_id=smartlink.readme)
 ![GitHub Stars](https://img.shields.io/github/stars/yourusername/smart-link-intelligence?style=social)
 ![GitHub Forks](https://img.shields.io/github/forks/yourusername/smart-link-intelligence?style=social)
 
 </div>
-
