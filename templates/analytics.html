@@ -12,6 +12,8 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/analytics_theme.css') }}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
 <body class="bg-light min-vh-100">
@@ -293,6 +295,11 @@
                     data-csv-url="{{ url_for('links.export_csv', code_id=link.code, _external=True) }}"
                     onclick="navigator.clipboard.writeText(this.dataset.csvUrl); alert('CSV Link Copied!')">
                     <i class="bi bi-link-45deg"></i> Copy CSV URL
+                  </button>
+                  <button
+                    class="btn btn-danger rounded-pill py-2 d-flex align-items-center justify-content-center gap-2"
+                    onclick="downloadPDF()">
+                    <i class="bi bi-file-earmark-pdf-fill"></i> Download PDF Report
                   </button>
                 </div>
               </div>
@@ -1167,6 +1174,55 @@
 
     function downloadQr() {
       qrCode.download({ name: "smart-link-qr", extension: "png" });
+    }
+
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const element = document.body; // Capture the whole page
+
+      // visual feedback
+      const btn = document.querySelector('button[onclick="downloadPDF()"]');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
+      btn.disabled = true;
+
+      try {
+        const canvas = await html2canvas(element, {
+          scale: 2, // Improve quality
+          useCORS: true, // Handle cross-origin images
+          logging: false,
+          windowWidth: element.scrollWidth,
+          windowHeight: element.scrollHeight
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = pdfWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pdfHeight;
+        }
+
+        pdf.save('analytics-report-{{ link.code }}.pdf');
+      } catch (err) {
+        console.error("PDF generation failed:", err);
+        alert("Failed to generate PDF. Check console for details.");
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
     }
   </script>
 </body>
