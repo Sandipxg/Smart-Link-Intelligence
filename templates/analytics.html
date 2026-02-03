@@ -169,21 +169,11 @@
               <!-- Smart Link Copy Card -->
               <div class="col-12">
                 <div class="info-card bg-primary bg-opacity-10 border-primary border-opacity-10">
-                  <div class="d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="bg-primary text-white p-2 rounded-circle"
-                        style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-link-45deg"></i>
-                      </div>
-                      <div>
-                        <span class="text-muted small d-block fw-bold text-uppercase">Smart Link</span>
-                        <code class="text-primary fw-bold"
-                          style="font-size: 1.1rem;">{{ url_for('links.redirect_link', code=link.code, _external=True) }}</code>
-                      </div>
-                    </div>
-                    <button class="btn btn-primary d-flex align-items-center gap-2 px-4 rounded-pill shadow-sm"
-                      onclick="navigator.clipboard.writeText('{{ url_for('links.redirect_link', code=link.code, _external=True) }}'); this.innerHTML='<i class=\'bi bi-check2-all\'></i> Copied'; setTimeout(()=>this.innerHTML='<i class=\'bi bi-clipboard\'></i> Copy Link', 2000)">
-                      <i class="bi bi-clipboard"></i> Copy Link
+                  <div class="d-flex align-items-center justify-content-center p-3">
+                    <button
+                      class="btn btn-primary btn-lg d-flex align-items-center gap-2 px-5 py-3 rounded-pill shadow-sm transform-hover"
+                      onclick="navigator.clipboard.writeText('{{ url_for('links.redirect_link', code=link.code, _external=True) }}'); this.innerHTML='<i class=\'bi bi-check2-all\'></i> Copied'; setTimeout(()=>this.innerHTML='<i class=\'bi bi-clipboard\'></i> Copy Smart Link', 2000)">
+                      <i class="bi bi-clipboard"></i> Copy Smart Link
                     </button>
                   </div>
                 </div>
@@ -287,15 +277,8 @@
                 <p class="small text-muted mb-4 px-3">Scan QR or click below to export detailed link analytics</p>
 
                 <div class="w-100 px-3 d-grid gap-2">
-                  <a href="{{ url_for('links.export_csv', code_id=link.code) }}"
-                    class="btn btn-dark rounded-pill py-2 d-flex align-items-center justify-content-center gap-2">
-                    <i class="bi bi-cloud-arrow-down-fill"></i> Download CSV
-                  </a>
-                  <button class="btn btn-outline-dark rounded-pill py-2"
-                    data-csv-url="{{ url_for('links.export_csv', code_id=link.code, _external=True) }}"
-                    onclick="navigator.clipboard.writeText(this.dataset.csvUrl); alert('CSV Link Copied!')">
-                    <i class="bi bi-link-45deg"></i> Copy CSV URL
-                  </button>
+
+
                   <button
                     class="btn btn-danger rounded-pill py-2 d-flex align-items-center justify-content-center gap-2"
                     onclick="downloadPDF()">
