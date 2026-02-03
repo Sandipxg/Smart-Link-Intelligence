@@ -799,6 +799,56 @@ def analytics(code):
         weekday_total = sum(day_counts.get(i, 0) for i in range(5)) # Mon-Fri
         weekend_total = sum(day_counts.get(i, 0) for i in range(5, 7)) # Sat-Sun
         
+        # Get social referrers
+        referrer_data = query_db(
+            """
+            SELECT referrer, COUNT(*) as count
+            FROM visits
+            WHERE link_id = ? AND referrer IS NOT NULL AND referrer != 'no referrer'
+            GROUP BY referrer
+            """,
+            [link["id"]]
+        )
+        
+        social_platforms = {
+            'facebook': 'Facebook',
+            'messenger': 'Facebook',
+            'instagram': 'Instagram',
+            'twitter': 'Twitter',
+            't.co': 'Twitter',
+            'x.com': 'Twitter',
+            'linkedin': 'LinkedIn',
+            'pinterest': 'Pinterest',
+            'reddit': 'Reddit',
+            'youtube': 'YouTube',
+            'youtu.be': 'YouTube',
+            'tiktok': 'TikTok',
+            'whatsapp': 'WhatsApp',
+            'snapchat': 'Snapchat',
+            'telegram': 'Telegram',
+            't.me': 'Telegram',
+            'quora': 'Quora',
+            'medium': 'Medium',
+            'bing': 'Bing',
+            'google': 'Google'
+        }
+        
+        social_counts = {}
+        for row in referrer_data:
+            ref = row['referrer'].lower()
+            found = False
+            for key, name in social_platforms.items():
+                if key in ref:
+                    social_counts[name] = social_counts.get(name, 0) + row['count']
+                    found = True
+                    break
+            # Optional: Capture known search engines if desired, but user asked for "social"
+            # The image included "Bing", so we'll include it in the map above.
+        
+        # Sort by count desc
+        top_socials = [{'network': k, 'count': v} 
+                      for k, v in sorted(social_counts.items(), key=lambda x: x[1], reverse=True)]
+        
         weekend_insight = ""
         if weekday_total > 0 and weekend_total > 0:
             weekend_percentage = ((weekend_total - weekday_total) / weekday_total) * 100
@@ -897,6 +947,7 @@ def analytics(code):
             behavior_rule=behavior_rule,
             detailed_visitors=detailed_visitors,
             isp_data=isp_data,
+            top_socials=top_socials,
             is_admin=is_admin,
         )
     except Exception as e:

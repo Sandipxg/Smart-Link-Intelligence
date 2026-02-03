@@ -659,8 +659,8 @@
           </div>
         </div>
 
-        <!-- Row 4: Detailed Analysis (Collapsible or just extra row) -->
-        <div class="col-md-6">
+        <!-- Row 4: Detailed Analysis -->
+        <div class="col-lg-4">
           <div class="card shadow-sm h-100">
             <div class="card-body">
               <h4 class="h6 fw-bold mb-3">Hourly Click Patterns</h4>
@@ -670,7 +670,7 @@
             </div>
           </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-lg-4">
           <div class="card shadow-sm h-100">
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-3">
@@ -698,6 +698,46 @@
                     </table>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="col-lg-4">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h4 class="h6 fw-bold mb-3">Top Social Referrers</h4>
+              <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                <table class="table table-borderless table-sm small align-middle">
+                  <thead>
+                    <tr>
+                      <th class="text-muted fw-normal ps-0">Social Network</th>
+                      <th class="text-end text-muted fw-normal pe-0">Clicks</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for social in top_socials %}
+                    <tr>
+                      <td class="ps-0 py-2">
+                        <div class="d-flex flex-column">
+                          <span class="fw-bold mb-1">{{ social.network }}</span>
+                          <div class="progress" style="height: 4px; background-color: #2d3748;">
+                            {% set percent = (social.count / (totals.total or 1) * 100) %}
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ percent }}%"
+                              aria-valuenow="{{ percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="text-end fw-bold py-2 pe-0">{{ social.count }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                      <td colspan="2" class="text-center text-muted py-4">No social traffic yet</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
