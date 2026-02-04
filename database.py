@@ -12,8 +12,11 @@ from config import DATABASE
 def get_db():
     """Get database connection"""
     if "db" not in g:
-        g.db = sqlite3.connect(DATABASE)
+        g.db = sqlite3.connect(DATABASE, timeout=10) # 10 seconds timeout
         g.db.row_factory = sqlite3.Row
+        
+        # Enable WAL mode for better concurrency
+        g.db.execute("PRAGMA journal_mode=WAL")
     return g.db
 
 
@@ -134,6 +137,12 @@ def ensure_db():
             returning_window_hours INTEGER DEFAULT 48,
             interested_threshold INTEGER DEFAULT 2,
             engaged_threshold INTEGER DEFAULT 3,
+            requests_per_ip_per_minute INTEGER DEFAULT 60,
+            requests_per_ip_per_hour INTEGER DEFAULT 1000,
+            requests_per_link_per_minute INTEGER DEFAULT 500,
+            burst_threshold INTEGER DEFAULT 100,
+            suspicious_threshold INTEGER DEFAULT 10,
+            ddos_threshold INTEGER DEFAULT 50,
             is_default INTEGER DEFAULT 0,
             created_at TEXT DEFAULT (datetime('now')),
             FOREIGN KEY(user_id) REFERENCES users(id)
@@ -171,7 +180,16 @@ def ensure_db():
     ensure_column("links", "password_hash", "password_hash TEXT")
     ensure_column("users", "membership_tier", "membership_tier TEXT DEFAULT 'free'")
     ensure_column("users", "premium_expires_at", "premium_expires_at TEXT")
+    ensure_column("users", "premium_expires_at", "premium_expires_at TEXT")
     ensure_column("links", "expires_at", "expires_at TEXT")
+
+    # Ensure behavior_rules columns
+    ensure_column("behavior_rules", "requests_per_ip_per_minute", "requests_per_ip_per_minute INTEGER DEFAULT 60")
+    ensure_column("behavior_rules", "requests_per_ip_per_hour", "requests_per_ip_per_hour INTEGER DEFAULT 1000")
+    ensure_column("behavior_rules", "requests_per_link_per_minute", "requests_per_link_per_minute INTEGER DEFAULT 500")
+    ensure_column("behavior_rules", "burst_threshold", "burst_threshold INTEGER DEFAULT 100")
+    ensure_column("behavior_rules", "suspicious_threshold", "suspicious_threshold INTEGER DEFAULT 10")
+    ensure_column("behavior_rules", "ddos_threshold", "ddos_threshold INTEGER DEFAULT 50")
     
     # Notification dismissals table
     conn.execute("""

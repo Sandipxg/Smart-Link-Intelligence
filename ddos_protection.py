@@ -44,13 +44,44 @@ class DDoSProtection:
             'ddos_threshold': 50,  # suspicious requests to trigger DDoS
         }
         
-        # In-memory cache for fast lookups
         self.request_cache = defaultdict(list)
         self.blocked_ips = {}
+        
+    def get_link_rules(self, link_id):
+        """Get DDoS rules for a link (custom or default)"""
+        # Default rules
+        rules = self.rate_limits.copy()
+        
+        if not link_id:
+            return rules
+            
+        try:
+            # Get behavior_rule_id for the link
+            link = query_db("SELECT behavior_rule_id FROM links WHERE id = ?", [link_id], one=True)
+            
+            if link and link['behavior_rule_id']:
+                # Get the rule settings
+                rule = query_db("SELECT * FROM behavior_rules WHERE id = ?", [link['behavior_rule_id']], one=True)
+                if rule and 'requests_per_ip_per_minute' in rule.keys(): # Check if columns exist
+                    rules.update({
+                        'requests_per_ip_per_minute': rule['requests_per_ip_per_minute'],
+                        'requests_per_ip_per_hour': rule['requests_per_ip_per_hour'],
+                        'requests_per_link_per_minute': rule['requests_per_link_per_minute'],
+                        'burst_threshold': rule['burst_threshold'],
+                        'suspicious_threshold': rule['suspicious_threshold'],
+                        'ddos_threshold': rule['ddos_threshold'],
+                    })
+        except Exception as e:
+            print(f"Error fetching DDoS rules: {e}")
+            
+        return rules
         
     def check_rate_limit(self, ip_address, link_id=None):
         """Check if request should be rate limited"""
         now = datetime.utcnow()
+        
+        # Get rules for this link
+        rules = self.get_link_rules(link_id)
         
         # Clean old entries
         self._cleanup_cache(now)
@@ -62,7 +93,7 @@ class DDoSProtection:
         minute_ago = now - timedelta(minutes=1)
         recent_requests = [req for req in ip_requests if req > minute_ago]
         
-        if len(recent_requests) > self.rate_limits['requests_per_ip_per_minute']:
+        if len(recent_requests) > rules['requests_per_ip_per_minute']:
             self._log_ddos_event(link_id, 'rate_limit', 2, ip_address)
             return False, 'rate_limited'
         
@@ -70,7 +101,7 @@ class DDoSProtection:
         burst_window = now - timedelta(seconds=10)
         burst_requests = [req for req in ip_requests if req > burst_window]
         
-        if len(burst_requests) > self.rate_limits['burst_threshold']:
+        if len(burst_requests) > rules['burst_threshold']:
             self._log_ddos_event(link_id, 'burst_attack', 4, ip_address)
             return False, 'burst_attack'
         
@@ -81,98 +112,83 @@ class DDoSProtection:
     
     def detect_ddos_attack(self, link_id):
         """Detect if link is under DDoS attack"""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        
         # Check recent suspicious activity
-        recent_suspicious = conn.execute("""
+        recent_suspicious = query_db("""
             SELECT COUNT(*) as count
             FROM visits 
             WHERE link_id = ? 
             AND is_suspicious = 1 
             AND datetime(ts) > datetime('now', '-5 minutes')
-        """, [link_id]).fetchone()
+        """, [link_id], one=True)
         
         # Check request rate
-        recent_requests = conn.execute("""
+        recent_requests = query_db("""
             SELECT COUNT(*) as count
             FROM visits 
             WHERE link_id = ? 
             AND datetime(ts) > datetime('now', '-1 minute')
-        """, [link_id]).fetchone()
-        
-        conn.close()
+        """, [link_id], one=True)
         
         suspicious_count = recent_suspicious['count'] if recent_suspicious else 0
         request_count = recent_requests['count'] if recent_requests else 0
         
+        # Get rules for this link
+        rules = self.get_link_rules(link_id)
+        
         # DDoS Detection Logic
-        if suspicious_count > self.rate_limits['ddos_threshold']:
+        if suspicious_count > rules['ddos_threshold']:
             return True, 'high_suspicious_activity', 5
-        elif request_count > self.rate_limits['requests_per_link_per_minute']:
+        elif request_count > rules['requests_per_link_per_minute']:
             return True, 'high_request_rate', 4
-        elif suspicious_count > self.rate_limits['suspicious_threshold']:
+        elif suspicious_count > rules['suspicious_threshold']:
             return True, 'moderate_suspicious_activity', 3
         
         return False, 'normal', 1
     
     def apply_protection(self, link_id, protection_level):
         """Apply protection measures based on severity"""
-        conn = sqlite3.connect(self.db_path)
         
         if protection_level >= 5:
             # Level 5: Break the link (disable completely)
-            conn.execute("""
+            execute_db("""
                 UPDATE links 
                 SET protection_level = ?, auto_disabled = 1, ddos_detected_at = ?
                 WHERE id = ?
             """, [protection_level, datetime.utcnow().isoformat(), link_id])
             
             self._log_ddos_event(link_id, 'link_disabled', 5)
-            conn.commit()
-            conn.close()
             return 'link_disabled'
             
         elif protection_level >= 4:
             # Level 4: Temporary disable (1 hour)
-            conn.execute("""
+            execute_db("""
                 UPDATE links 
                 SET protection_level = ?, ddos_detected_at = ?
                 WHERE id = ?
             """, [protection_level, datetime.utcnow().isoformat(), link_id])
             
             self._log_ddos_event(link_id, 'temporary_disable', 4)
-            conn.commit()
-            conn.close()
             return 'temporary_disabled'
             
         elif protection_level >= 3:
             # Level 3: Captcha required
-            conn.execute("""
+            execute_db("""
                 UPDATE links 
                 SET protection_level = ?
                 WHERE id = ?
             """, [protection_level, link_id])
             
             self._log_ddos_event(link_id, 'captcha_required', 3)
-            conn.commit()
-            conn.close()
             return 'captcha_required'
         
-        conn.close()
         return 'normal'
     
     def is_link_protected(self, link_id):
         """Check if link has active protection"""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        
-        link = conn.execute("""
+        link = query_db("""
             SELECT protection_level, auto_disabled, ddos_detected_at
             FROM links WHERE id = ?
-        """, [link_id]).fetchone()
-        
-        conn.close()
+        """, [link_id], one=True)
         
         if not link:
             return False, 'not_found'
@@ -206,33 +222,24 @@ class DDoSProtection:
     
     def _log_ddos_event(self, link_id, event_type, severity, ip_address=None):
         """Log DDoS event to database"""
-        conn = sqlite3.connect(self.db_path)
-        conn.execute("""
+        execute_db("""
             INSERT INTO ddos_events 
             (link_id, event_type, severity, ip_address, detected_at, protection_level)
             VALUES (?, ?, ?, ?, ?, ?)
         """, [link_id, event_type, severity, ip_address, 
               datetime.utcnow().isoformat(), severity])
-        conn.commit()
-        conn.close()
     
     def _reset_protection(self, link_id):
         """Reset protection level for a link"""
-        conn = sqlite3.connect(self.db_path)
-        conn.execute("""
+        execute_db("""
             UPDATE links 
             SET protection_level = 0, ddos_detected_at = NULL
             WHERE id = ?
         """, [link_id])
-        conn.commit()
-        conn.close()
     
     def get_protection_stats(self, link_id):
         """Get protection statistics for a link"""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        
-        stats = conn.execute("""
+        stats = query_db("""
             SELECT 
                 event_type,
                 COUNT(*) as count,
@@ -241,9 +248,11 @@ class DDoSProtection:
             WHERE link_id = ?
             GROUP BY event_type
             ORDER BY count DESC
-        """, [link_id]).fetchall()
+        """, [link_id])
         
-        conn.close()
+        if not stats:
+            return []
+            
         return [dict(row) for row in stats]
 
 # DDoS Protection Routes
