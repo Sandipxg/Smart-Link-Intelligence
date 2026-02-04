@@ -202,6 +202,46 @@
                         </div>
                     </div>
 
+                    <hr>
+                    <h6 class="mb-3"><i class="bi bi-shield-check me-2"></i>DDoS Protection Settings</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Requests per IP (Minute)</label>
+                            <input type="number" name="requests_per_ip_per_minute" class="form-control" value="60"
+                                min="10" required>
+                            <div class="form-text">Max requests from one IP per minute</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Requests per IP (Hour)</label>
+                            <input type="number" name="requests_per_ip_per_hour" class="form-control" value="1000"
+                                min="100" required>
+                            <div class="form-text">Max requests from one IP per hour</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Link Requests (Minute)</label>
+                            <input type="number" name="requests_per_link_per_minute" class="form-control" value="500"
+                                min="50" required>
+                            <div class="form-text">Max total requests to link per minute</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Burst Threshold</label>
+                            <input type="number" name="burst_threshold" class="form-control" value="100" min="20"
+                                required>
+                            <div class="form-text">Max requests in 10 seconds</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Suspicious Threshold</label>
+                            <input type="number" name="suspicious_threshold" class="form-control" value="10" min="1"
+                                required>
+                            <div class="form-text">Suspicious events to trigger warning</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">DDoS Threshold</label>
+                            <input type="number" name="ddos_threshold" class="form-control" value="50" min="5" required>
+                            <div class="form-text">Suspicious events to trigger blocking</div>
+                        </div>
+                    </div>
+
                     <!-- Preview -->
                     <div class="alert alert-info">
                         <h6 class="alert-heading">
