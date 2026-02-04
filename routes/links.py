@@ -255,7 +255,7 @@ def redirect_link(code):
     )
     
     behavior, per_session_count = classify_behavior(link["id"], sess_id, visits, now, behavior_rule)
-    suspicious = detect_suspicious(visits, now)
+    suspicious = detect_suspicious(visits, now, ip_hash)
     target_url = decide_target(link, behavior, per_session_count)
 
     execute_db(
@@ -450,7 +450,7 @@ def password_protected(code):
                 )
                 
                 behavior, per_session_count = classify_behavior(link["id"], sess_id, visits, now, behavior_rule)
-                suspicious = detect_suspicious(visits, now)
+                suspicious = detect_suspicious(visits, now, ip_hash)
                 target_url = decide_target(link, behavior, per_session_count)
                 
                 # Log the visit

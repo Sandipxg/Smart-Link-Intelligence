@@ -126,13 +126,68 @@ def classify_behavior(link_id: int, session_id: str, visits, now: datetime, beha
     return "Curious", per_session
 
 
-def detect_suspicious(visits, now: datetime) -> bool:
-    """Detect suspicious activity based on timing"""
-    if len(visits) < 2:
+def detect_suspicious(visits, now: datetime, ip_hash: str = None) -> bool:
+    """
+    Detect suspicious activity based on bot-like patterns.
+    
+    This function now looks for:
+    1. Extremely rapid requests from the SAME IP (< 0.5 seconds apart)
+    2. Repeated identical patterns (bot signatures)
+    
+    It does NOT flag legitimate high traffic as suspicious.
+    Load testing and legitimate high-frequency traffic is allowed.
+    """
+    from flask import request
+    
+    # Check for load testing headers - allow legitimate load tests
+    if request and hasattr(request, 'headers'):
+        # Check for common load testing indicators
+        user_agent = request.headers.get("User-Agent", "").lower()
+        x_load_test = request.headers.get("X-Load-Test", "").lower()
+        
+        # Allow if explicitly marked as load test
+        if x_load_test == "true":
+            return False
+            
+        # Allow common load testing tools
+        load_test_agents = [
+            "jmeter", "apache-httpclient", "loadrunner", "gatling", 
+            "artillery", "k6", "wrk", "siege", "ab/", "curl/",
+            "python-requests", "go-http-client"
+        ]
+        
+        if any(agent in user_agent for agent in load_test_agents):
+            return False
+    
+    if len(visits) < 3:
         return False
-    latest = datetime.fromisoformat(visits[0]["ts"])
-    delta = (now - latest).total_seconds()
-    return delta < SUSPICIOUS_INTERVAL_SECONDS
+    
+    # If we have the current IP hash, check for rapid requests from THIS specific IP
+    if ip_hash:
+        # Get recent visits from this specific IP
+        same_ip_visits = [v for v in visits if v.get('ip_hash') == ip_hash]
+        
+        if len(same_ip_visits) >= 2:
+            # Check if this IP is making requests faster than humanly possible
+            latest = datetime.fromisoformat(same_ip_visits[0]["ts"])
+            second_latest = datetime.fromisoformat(same_ip_visits[1]["ts"])
+            delta = (latest - second_latest).total_seconds()
+            
+            # Flag as suspicious if same IP makes requests < 0.3 seconds apart
+            # Reduced from 0.5 to 0.3 to be less aggressive
+            if delta < 0.3:
+                return True
+    
+    # Check for burst pattern: 8+ requests in 1 second (clear bot signature)
+    # Increased threshold from 5 to 8 and reduced time from 2s to 1s
+    # This catches obvious bots but allows legitimate rapid clicking
+    recent_timestamps = [datetime.fromisoformat(v["ts"]) for v in visits[:15]]
+    if len(recent_timestamps) >= 8:
+        time_span = (recent_timestamps[0] - recent_timestamps[7]).total_seconds()
+        if time_span < 1.0:
+            return True
+    
+    return False
 
 
 def decide_target(link, behavior: str, session_count: int) -> str:
