@@ -4,7 +4,11 @@ All configuration constants and settings
 """
 
 import os
+from dotenv import load_dotenv
 from datetime import timedelta
+
+# Load environment variables from .env file
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 # Database Configuration
 DATABASE = os.path.join(os.path.dirname(__file__), "smart_links.db")
