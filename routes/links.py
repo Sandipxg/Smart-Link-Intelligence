@@ -80,6 +80,13 @@ def create():
     else:
         behavior_rule_id = None
 
+    # Get security profile ID (Elite Pro only)
+    security_profile_id = data.get("security_profile_id")
+    if security_profile_id and user_tier == "elite_pro":
+        security_profile_id = int(security_profile_id)
+    else:
+        security_profile_id = None
+
     # Handle password protection
     password = data.get("password")
     password_hash = None
@@ -92,8 +99,9 @@ def create():
             """
             INSERT INTO links
                 (code, primary_url, returning_url, cta_url,
-                 behavior_rule, created_at, state, user_id, behavior_rule_id, password_hash, expires_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 behavior_rule, created_at, state, user_id, 
+                 behavior_rule_id, security_profile_id, password_hash, expires_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
                 code,
@@ -105,6 +113,7 @@ def create():
                 "Active",
                 g.user["id"],
                 behavior_rule_id,
+                security_profile_id,
                 password_hash,
                 expires_at,
             ],
@@ -169,6 +178,20 @@ def redirect_link(code):
     if has_ddos_protection:
         ddos_protection = DDoSProtection("smart_links.db")
         
+        # DDoS Detection - Run this BEFORE blocking to allow escalation to Level 5
+        is_ddos, ddos_reason, new_protection_level = ddos_protection.detect_ddos_attack(link["id"])
+        if is_ddos:
+            current_level = link['protection_level']
+            # Only apply if new level is higher than current
+            if new_protection_level > current_level:
+                protection_action = ddos_protection.apply_protection(link["id"], new_protection_level)
+                
+                if protection_action in ['link_disabled', 'temporary_disabled']:
+                    flash("This link has been automatically protected due to suspicious activity.", "warning")
+                    return render_template("ddos_blocked.html", 
+                                        message="Link Protected", 
+                                        description="This link has been automatically protected due to detected attacks.")
+
         # Check if link is under protection
         is_protected, protection_status = ddos_protection.is_link_protected(link["id"])
         if is_protected:
@@ -188,7 +211,7 @@ def redirect_link(code):
                                     message="Verification Required", 
                                     description="Please verify you're human to access this link.")
         
-        # Rate limiting check
+        # Rate limiting check (Runs if link is not globally blocked)
         rate_allowed, rate_status = ddos_protection.check_rate_limit(ip_address, link["id"])
         if not rate_allowed:
             if rate_status == 'rate_limited':
@@ -201,17 +224,6 @@ def redirect_link(code):
                 return render_template("ddos_blocked.html", 
                                     message="Blocked", 
                                     description="Suspicious activity detected from your connection.")
-        
-        # DDoS Detection
-        is_ddos, ddos_reason, protection_level = ddos_protection.detect_ddos_attack(link["id"])
-        if is_ddos:
-            protection_action = ddos_protection.apply_protection(link["id"], protection_level)
-            
-            if protection_action in ['link_disabled', 'temporary_disabled']:
-                flash("This link has been automatically protected due to suspicious activity.", "warning")
-                return render_template("ddos_blocked.html", 
-                                    message="Link Protected", 
-                                    description="This link has been automatically protected due to detected attacks.")
 
     sess_id = ensure_session()
     user_agent = request.headers.get("User-Agent", "unknown")[:255]
@@ -245,17 +257,21 @@ def redirect_link(code):
         [link["id"]],
     )
     
-    # Get the link owner's default behavior rule
-    behavior_rule = query_db(
-        """
-        SELECT * FROM behavior_rules 
-        WHERE user_id = ? AND is_default = 1
-        """,
-        [link["user_id"]], one=True
-    )
+    # DDoS Protection & Behavioral Rules
+    ddos_protection = DDoSProtection("smart_links.db")
+    ddos_rules = ddos_protection.get_link_rules(link["id"])
     
-    behavior, per_session_count = classify_behavior(link["id"], sess_id, visits, now, behavior_rule)
-    suspicious = detect_suspicious(visits, now, ip_hash)
+    # Get behavior rule settings (separate from security profile)
+    behavior_rule = None
+    if link["behavior_rule_id"]:
+        behavior_rule = query_db("SELECT * FROM behavior_rules WHERE id = ?", [link["behavior_rule_id"]], one=True)
+    
+    if not behavior_rule:
+        # Fallback to user's default behavioral rule
+        behavior_rule = query_db("SELECT * FROM behavior_rules WHERE user_id = ? AND is_default = 1", [link["user_id"]], one=True)
+    
+    behavior, per_session_count = classify_behavior(link["id"], sess_id, visits, now, dict(behavior_rule) if behavior_rule else None)
+    suspicious = detect_suspicious(visits, now, ip_hash, ddos_rules)
     target_url = decide_target(link, behavior, per_session_count)
 
     execute_db(
@@ -290,7 +306,7 @@ def redirect_link(code):
         ],
     )
 
-    new_state = evaluate_state(link["id"], now)
+    new_state = evaluate_state(link["id"], now, ddos_rules)
     if new_state != link["state"]:
         execute_db("UPDATE links SET state = ? WHERE id = ?", [new_state, link["id"]])
 
@@ -577,6 +593,19 @@ def analytics(code):
             if user_id:
                 behavior_rule = query_db(
                     "SELECT * FROM behavior_rules WHERE user_id = ? AND is_default = 1",
+                    [user_id], one=True
+                )
+
+        # Get the security profile for this link
+        security_profile = None
+        if link["security_profile_id"]:
+            security_profile = query_db("SELECT * FROM security_profiles WHERE id = ?", [link["security_profile_id"]], one=True)
+        
+        if not security_profile:
+            user_id = link["user_id"] or (g.user["id"] if g.user else None)
+            if user_id:
+                security_profile = query_db(
+                    "SELECT * FROM security_profiles WHERE user_id = ? AND is_default = 1",
                     [user_id], one=True
                 )
 
@@ -898,6 +927,7 @@ def analytics(code):
             detailed_visitors=detailed_visitors,
             isp_data=isp_data,
             is_admin=is_admin,
+            security_profile=security_profile,
         )
     except Exception as e:
         import traceback

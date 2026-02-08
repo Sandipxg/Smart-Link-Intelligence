@@ -93,11 +93,12 @@ def send_email(to_email, subject, html_content):
 def classify_behavior(link_id: int, session_id: str, visits, now: datetime, behavior_rule=None) -> str:
     """Classify user behavior based on custom or default rules"""
     
-    # Get behavior rule settings
+    # Get behavior rule settings safely
     if behavior_rule:
-        returning_window_hours = behavior_rule["returning_window_hours"]
-        interested_threshold = behavior_rule["interested_threshold"]
-        engaged_threshold = behavior_rule["engaged_threshold"]
+        # Use .get() to avoid KeyError if the dict is missing these specific keys
+        returning_window_hours = behavior_rule.get("returning_window_hours", RETURNING_WINDOW_HOURS)
+        interested_threshold = behavior_rule.get("interested_threshold", 2)
+        engaged_threshold = behavior_rule.get("engaged_threshold", MULTI_CLICK_THRESHOLD)
     else:
         # Use default values if no rule provided
         returning_window_hours = RETURNING_WINDOW_HOURS
@@ -126,17 +127,20 @@ def classify_behavior(link_id: int, session_id: str, visits, now: datetime, beha
     return "Curious", per_session
 
 
-def detect_suspicious(visits, now: datetime, ip_hash: str = None) -> bool:
+def detect_suspicious(visits, now: datetime, ip_hash: str = None, rules: dict = None) -> bool:
     """
     Detect suspicious activity based on bot-like patterns.
     
     This function now looks for:
-    1. Extremely rapid requests from the SAME IP (< 0.5 seconds apart)
+    1. Extremely rapid requests from the SAME IP (< Customizable)
     2. Repeated identical patterns (bot signatures)
     
     It does NOT flag legitimate high traffic as suspicious.
     Load testing and legitimate high-frequency traffic is allowed.
     """
+    if not rules:
+        rules = {'rapid_click_limit': 0.3}
+        
     from flask import request
     
     # Check for load testing headers - allow legitimate load tests
@@ -157,8 +161,9 @@ def detect_suspicious(visits, now: datetime, ip_hash: str = None) -> bool:
         ]
         
         if any(agent in user_agent for agent in load_test_agents):
+            print(f"DEBUG: Whitelisted agent found in detect_suspicious: {user_agent}")
             return False
-    
+            
     if len(visits) < 3:
         return False
     
@@ -173,9 +178,9 @@ def detect_suspicious(visits, now: datetime, ip_hash: str = None) -> bool:
             second_latest = datetime.fromisoformat(same_ip_visits[1]["ts"])
             delta = (latest - second_latest).total_seconds()
             
-            # Flag as suspicious if same IP makes requests < 0.3 seconds apart
-            # Reduced from 0.5 to 0.3 to be less aggressive
-            if delta < 0.3:
+            # Flag as suspicious if same IP makes requests < rapid_click_limit
+            rapid_limit = rules.get('rapid_click_limit', 0.3)
+            if delta < rapid_limit:
                 return True
     
     # Check for burst pattern: 8+ requests in 1 second (clear bot signature)
@@ -210,8 +215,11 @@ def decide_target(link, behavior: str, session_count: int) -> str:
     return link["primary_url"]
 
 
-def evaluate_state(link_id: int, now: datetime) -> str:
+def evaluate_state(link_id: int, now: datetime, rules: dict = None) -> str:
     """Evaluate link state based on activity"""
+    if not rules:
+        rules = {'health_kill_switch': 5}
+        
     from config import STATE_DECAY_DAYS, ATTENTION_DECAY_DAYS
     
     recent = query_db(
@@ -230,7 +238,8 @@ def evaluate_state(link_id: int, now: datetime) -> str:
     days_since = (now - latest_time).days
     suspicious_hits = sum(1 for v in recent if v["is_suspicious"])
 
-    if suspicious_hits >= 500:  # Increased from 5 to avoid interfering with DDoS testing
+    kill_threshold = rules.get('health_kill_switch', 5)
+    if suspicious_hits >= kill_threshold:
         return "Inactive"
     if days_since > STATE_DECAY_DAYS:
         return "Inactive"

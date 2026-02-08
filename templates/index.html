@@ -129,6 +129,37 @@
                   </a>
                 </div>
               </div>
+
+              <div class="col-md-12">
+                <label class="form-label fw-semibold">
+                  <i class="bi bi-shield-lock me-1"></i>Security Profile
+                  {% if user_tier != 'elite_pro' %}
+                  <i class="bi bi-lock-fill text-muted ms-1" title="Elite Pro Feature"></i>
+                  {% endif %}
+                </label>
+                <select class="form-select form-select-lg" name="security_profile_id" id="securityProfileId" {% if
+                  user_tier !='elite_pro' %}disabled{% endif %}>
+                  <option value="">Default Protection</option>
+                  {% for profile in security_profiles %}
+                  <option value="{{ profile.id }}" {% if profile.is_default %}selected{% endif %}>
+                    {{ profile.profile_name }}
+                    {% if profile.is_default %}(Default){% endif %}
+                    - Limits: {{ profile.requests_per_ip_per_minute }}/m IP, {{ profile.requests_per_link_per_minute
+                    }}/m Link
+                  </option>
+                  {% endfor %}
+                </select>
+                <div class="form-text">
+                  {% if user_tier == 'elite_pro' %}
+                  <a href="{{ url_for('ddos.security_profiles') }}" class="text-decoration-none">
+                    <i class="bi bi-shield-plus"></i> Manage Security Profiles
+                  </a>
+                  {% else %}
+                  <span class="text-muted"><i class="bi bi-info-circle"></i> Custom security profiles require <span
+                      class="badge bg-primary-soft text-primary">Elite Pro</span></span>
+                  {% endif %}
+                </div>
+              </div>
             </div>
 
             <!-- Redirect Configuration -->

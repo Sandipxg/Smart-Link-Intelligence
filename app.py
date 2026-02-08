@@ -52,6 +52,20 @@ def create_app() -> Flask:
     app.register_blueprint(ads_bp)
     # Note: Analytics routes temporarily integrated into other modules
     
+    @app.context_processor
+    def inject_global_data():
+        if g.user:
+            rules = query_db("SELECT * FROM behavior_rules WHERE user_id = ? ORDER BY is_default DESC, rule_name ASC", [g.user["id"]])
+            
+            # Security profiles are for elite_pro only
+            profiles = []
+            user_data = dict(g.user)
+            if user_data.get("membership_tier") == "elite_pro":
+                profiles = query_db("SELECT * FROM security_profiles WHERE user_id = ? ORDER BY is_default DESC, profile_name ASC", [g.user["id"]])
+                
+            return dict(behavior_rules=rules, security_profiles=profiles)
+        return dict(behavior_rules=[], security_profiles=[])
+        
     return app
 
 

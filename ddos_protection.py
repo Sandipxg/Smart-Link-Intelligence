@@ -20,15 +20,16 @@ def ddos_required(f):
             flash("Please log in to continue", "warning")
             return redirect(url_for("login"))
             
-        # Check Membership
-        user_dict = dict(g.user) if g.user else {}
+        # Check Membership safely
+        user_dict = dict(g.user)
         user_tier = user_dict.get("membership_tier", "free")
-        if not user_tier: 
-            user_tier = "free"
         
-        if not MEMBERSHIP_TIERS.get(user_tier, MEMBERSHIP_TIERS["free"])["ddos_protection"]:
+        # ddos_protection key in MEMBERSHIP_TIERS defines access
+        tier_data = MEMBERSHIP_TIERS.get(user_tier, MEMBERSHIP_TIERS["free"])
+        if not tier_data.get("ddos_protection", False):
             flash("DDoS Protection is exclusive to Elite Pro members. Please upgrade to access this feature.", "warning")
             return redirect(url_for("index"))
+            
         return f(*args, **kwargs)
     return decorated_function
 
@@ -36,12 +37,15 @@ class DDoSProtection:
     def __init__(self, database_path):
         self.db_path = database_path
         self.rate_limits = {
-            'requests_per_ip_per_minute': 5,  # Test Value: 5 refreshes
-            'requests_per_ip_per_hour': 100,   # Test Value
-            'requests_per_link_per_minute': 10,  # Test Value: 10 total refreshes
-            'burst_threshold': 5,  # Test Value: 5 refreshes in 10s
-            'suspicious_threshold': 2,  # Test Value: 2 suspicious events -> Captcha
-            'ddos_threshold': 5,  # Test Value: 5 suspicious events -> Disable
+            'requests_per_ip_per_minute': 60,
+            'requests_per_ip_per_hour': 1000,
+            'requests_per_link_per_minute': 500,
+            'burst_threshold': 100,
+            'suspicious_threshold': 10,
+            'ddos_threshold': 50,
+            'rapid_click_limit': 0.3,
+            'health_kill_switch': 5,
+            'detection_window_minutes': 5,
         }
         
         self.request_cache = defaultdict(list)
@@ -56,25 +60,35 @@ class DDoSProtection:
             return rules
             
         try:
-            # Get behavior_rule_id for the link
-            link = query_db("SELECT behavior_rule_id FROM links WHERE id = ?", [link_id], one=True)
+            # Get security_profile_id and user_id for the link
+            link = query_db("SELECT security_profile_id, user_id FROM links WHERE id = ?", [link_id], one=True)
             
-            if link and link['behavior_rule_id']:
-                # Get the rule settings
-                rule = query_db("SELECT * FROM behavior_rules WHERE id = ?", [link['behavior_rule_id']], one=True)
-                if rule and 'requests_per_ip_per_minute' in rule.keys(): # Check if columns exist
-                    rules.update({
-                        'requests_per_ip_per_minute': rule['requests_per_ip_per_minute'],
-                        'requests_per_ip_per_hour': rule['requests_per_ip_per_hour'],
-                        'requests_per_link_per_minute': rule['requests_per_link_per_minute'],
-                        'burst_threshold': rule['burst_threshold'],
-                        'suspicious_threshold': rule['suspicious_threshold'],
-                        'ddos_threshold': rule['ddos_threshold'],
-                    })
+            profile = None
+            if link:
+                if link['security_profile_id']:
+                    # Get the specific security profile settings
+                    profile = query_db("SELECT * FROM security_profiles WHERE id = ?", [link['security_profile_id']], one=True)
+                else:
+                    # Fallback to user's default security profile
+                    profile = query_db("SELECT * FROM security_profiles WHERE user_id = ? AND is_default = 1", [link['user_id']], one=True)
+            
+            if profile:
+                rules.update({
+                    'requests_per_ip_per_minute': profile['requests_per_ip_per_minute'],
+                    'requests_per_ip_per_hour': profile['requests_per_ip_per_hour'],
+                    'requests_per_link_per_minute': profile['requests_per_link_per_minute'],
+                    'burst_threshold': profile['burst_threshold'],
+                    'suspicious_threshold': profile['suspicious_threshold'],
+                    'ddos_threshold': profile['ddos_threshold'],
+                    'rapid_click_limit': profile['rapid_click_limit'],
+                    'health_kill_switch': profile['health_kill_switch'],
+                    'detection_window_minutes': profile['detection_window_minutes'],
+                })
         except Exception as e:
             print(f"Error fetching DDoS rules: {e}")
             
         return rules
+        
         
     def check_rate_limit(self, ip_address, link_id=None):
         """Check if request should be rate limited"""
@@ -117,8 +131,16 @@ class DDoSProtection:
         if len(recent_requests) > rules['requests_per_ip_per_minute']:
             self._log_ddos_event(link_id, 'rate_limit', 2, ip_address)
             return False, 'rate_limited'
+            
+        # Count requests in last hour
+        hour_ago = now - timedelta(hours=1)
+        hourly_requests = [req for req in ip_requests if req > hour_ago]
         
-        # Check for burst attacks (200+ requests in 10 seconds)
+        if len(hourly_requests) > rules['requests_per_ip_per_hour']:
+            self._log_ddos_event(link_id, 'hourly_rate_limit', 2, ip_address)
+            return False, 'rate_limited'
+        
+        # Check for burst attacks (requests in 10 seconds)
         burst_window = now - timedelta(seconds=10)
         burst_requests = [req for req in ip_requests if req > burst_window]
         
@@ -134,6 +156,9 @@ class DDoSProtection:
     def detect_ddos_attack(self, link_id):
         """Detect if link is under DDoS attack"""
         from flask import request
+        
+        # Get rules for this link
+        rules = self.get_link_rules(link_id)
         
         # Check for load testing - don't trigger DDoS protection for legitimate tests
         if request and hasattr(request, 'headers'):
@@ -154,13 +179,14 @@ class DDoSProtection:
             if any(agent in user_agent for agent in load_test_agents):
                 return False, 'load_test_tool_bypass', 1
         
-        # Check recent suspicious activity
-        recent_suspicious = query_db("""
+        # Check recent suspicious activity using CUSTOM WINDOW
+        window = rules.get('detection_window_minutes', 5)
+        recent_suspicious = query_db(f"""
             SELECT COUNT(*) as count
             FROM visits 
             WHERE link_id = ? 
             AND is_suspicious = 1 
-            AND datetime(ts) > datetime('now', '-5 minutes')
+            AND datetime(ts) > datetime('now', '-{window} minutes')
         """, [link_id], one=True)
         
         # Check request rate
@@ -174,10 +200,7 @@ class DDoSProtection:
         suspicious_count = recent_suspicious['count'] if recent_suspicious else 0
         request_count = recent_requests['count'] if recent_requests else 0
         
-        # Get rules for this link
-        rules = self.get_link_rules(link_id)
-        
-        # DDoS Detection Logic - more lenient thresholds
+        # DDoS Detection Logic
         if suspicious_count > rules['ddos_threshold']:
             return True, 'high_suspicious_activity', 5
         elif request_count > rules['requests_per_link_per_minute']:
@@ -241,7 +264,7 @@ class DDoSProtection:
             # Check if temporary disable has expired
             if link['ddos_detected_at']:
                 detected_time = datetime.fromisoformat(link['ddos_detected_at'])
-                if datetime.utcnow() - detected_time > timedelta(minutes=1):
+                if datetime.utcnow() - detected_time > timedelta(hours=1):
                     # Reset protection level
                     self._reset_protection(link_id)
                     return False, 'normal'
@@ -425,3 +448,169 @@ def ddos_link_stats(link_id):
                          link=link, 
                          stats=stats, 
                          events=events)
+
+
+@ddos_bp.route('/security-profiles')
+@ddos_required
+def security_profiles():
+    """Manage security profiles"""
+    # Import here to avoid circular imports
+    from admin_panel import track_user_activity
+    
+    profiles = query_db(
+        "SELECT * FROM security_profiles WHERE user_id = ? ORDER BY is_default DESC, profile_name ASC",
+        [g.user["id"]]
+    )
+    
+    track_user_activity(g.user["id"], "view_security_profiles", "Viewed security profiles")
+    return render_template("security_profiles.html", profiles=profiles)
+
+
+@ddos_bp.route('/security-profiles/create', methods=["POST"])
+@ddos_required
+def create_security_profile():
+    """Create a new security profile"""
+    # Import here to avoid circular imports
+    from admin_panel import track_user_activity
+    
+    profile_name = request.form.get("profile_name", "").strip()
+    
+    # Rate Limits
+    ip_min = int(request.form.get("requests_per_ip_per_minute", 60))
+    ip_hour = int(request.form.get("requests_per_ip_per_hour", 1000))
+    link_min = int(request.form.get("requests_per_link_per_minute", 500))
+    burst = int(request.form.get("burst_threshold", 100))
+    
+    # Thresholds
+    suspicious = int(request.form.get("suspicious_threshold", 10))
+    ddos = int(request.form.get("ddos_threshold", 50))
+    
+    # Behavioral
+    rapid = float(request.form.get("rapid_click_limit", 0.3))
+    kill = int(request.form.get("health_kill_switch", 5))
+    window = int(request.form.get("detection_window_minutes", 5))
+    
+    if not profile_name:
+        flash("Profile name is required", "danger")
+        return redirect(url_for("ddos.security_profiles"))
+        
+    # Validation
+    if ddos <= suspicious:
+        flash("DDoS threshold must be higher than suspicious threshold", "danger")
+        return redirect(url_for("ddos.security_profiles"))
+        
+    # Limit to 5 profiles
+    count = query_db("SELECT COUNT(*) as count FROM security_profiles WHERE user_id = ?", [g.user["id"]], one=True)["count"]
+    if count >= 6: # 1 default + 5 custom
+        flash("You can only have up to 5 custom security profiles", "warning")
+        return redirect(url_for("ddos.security_profiles"))
+
+    execute_db(
+        """
+        INSERT INTO security_profiles 
+        (user_id, profile_name, requests_per_ip_per_minute, requests_per_ip_per_hour, 
+         requests_per_link_per_minute, burst_threshold, suspicious_threshold, ddos_threshold,
+         rapid_click_limit, health_kill_switch, detection_window_minutes, is_default)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+        """,
+        [g.user["id"], profile_name, ip_min, ip_hour, link_min, burst, suspicious, ddos, rapid, kill, window]
+    )
+    
+    track_user_activity(g.user["id"], "create_security_profile", f"Created security profile: {profile_name}")
+    flash(f"Security profile '{profile_name}' created successfully", "success")
+    return redirect(url_for("ddos.security_profiles"))
+
+
+@ddos_bp.route('/security-profiles/update/<int:profile_id>', methods=["POST"])
+@ddos_required
+def update_security_profile(profile_id):
+    """Update a security profile"""
+    # Import here to avoid circular imports
+    from admin_panel import track_user_activity
+    
+    # Check ownership
+    profile = query_db("SELECT * FROM security_profiles WHERE id = ? AND user_id = ?", [profile_id, g.user["id"]], one=True)
+    if not profile:
+        flash("Profile not found", "danger")
+        return redirect(url_for("ddos.security_profiles"))
+        
+    profile_name = request.form.get("profile_name", "").strip()
+    
+    # Get values
+    ip_min = int(request.form.get("requests_per_ip_per_minute", 60))
+    ip_hour = int(request.form.get("requests_per_ip_per_hour", 1000))
+    link_min = int(request.form.get("requests_per_link_per_minute", 500))
+    burst = int(request.form.get("burst_threshold", 100))
+    suspicious = int(request.form.get("suspicious_threshold", 10))
+    ddos = int(request.form.get("ddos_threshold", 50))
+    rapid = float(request.form.get("rapid_click_limit", 0.3))
+    kill = int(request.form.get("health_kill_switch", 5))
+    window = int(request.form.get("detection_window_minutes", 5))
+    
+    if not profile_name:
+        flash("Profile name is required", "danger")
+        return redirect(url_for("ddos.security_profiles"))
+
+    execute_db(
+        """
+        UPDATE security_profiles 
+        SET profile_name = ?, requests_per_ip_per_minute = ?, requests_per_ip_per_hour = ?,
+            requests_per_link_per_minute = ?, burst_threshold = ?, suspicious_threshold = ?,
+            ddos_threshold = ?, rapid_click_limit = ?, health_kill_switch = ?,
+            detection_window_minutes = ?
+        WHERE id = ?
+        """,
+        [profile_name, ip_min, ip_hour, link_min, burst, suspicious, ddos, rapid, kill, window, profile_id]
+    )
+    
+    track_user_activity(g.user["id"], "update_security_profile", f"Updated security profile: {profile_name}")
+    flash(f"Security profile '{profile_name}' updated successfully", "success")
+    return redirect(url_for("ddos.security_profiles"))
+
+
+@ddos_bp.route('/security-profiles/delete/<int:profile_id>', methods=["POST"])
+@ddos_required
+def delete_security_profile(profile_id):
+    """Delete a security profile"""
+    # Import here to avoid circular imports
+    from admin_panel import track_user_activity
+    
+    # Check ownership and not default
+    profile = query_db("SELECT * FROM security_profiles WHERE id = ? AND user_id = ?", [profile_id, g.user["id"]], one=True)
+    if not profile:
+        flash("Profile not found", "danger")
+    elif profile['is_default']:
+        flash("Cannot delete the default profile", "danger")
+    else:
+        # Update links using this profile to use the default profile
+        default_profile = query_db("SELECT id FROM security_profiles WHERE user_id = ? AND is_default = 1", [g.user["id"]], one=True)
+        if default_profile:
+            execute_db("UPDATE links SET security_profile_id = ? WHERE security_profile_id = ?", [default_profile['id'], profile_id])
+            
+        execute_db("DELETE FROM security_profiles WHERE id = ?", [profile_id])
+        track_user_activity(g.user["id"], "delete_security_profile", f"Deleted security profile: {profile['profile_name']}")
+        flash(f"Security profile '{profile['profile_name']}' deleted", "info")
+        
+    return redirect(url_for("ddos.security_profiles"))
+
+
+@ddos_bp.route('/security-profiles/set-default/<int:profile_id>', methods=["POST"])
+@ddos_required
+def set_default_security_profile(profile_id):
+    """Set a security profile as default"""
+    # Import here to avoid circular imports
+    from admin_panel import track_user_activity
+    
+    # Check ownership
+    profile = query_db("SELECT * FROM security_profiles WHERE id = ? AND user_id = ?", [profile_id, g.user["id"]], one=True)
+    if not profile:
+        flash("Profile not found", "danger")
+    else:
+        # Reset all
+        execute_db("UPDATE security_profiles SET is_default = 0 WHERE user_id = ?", [g.user["id"]])
+        # Set new default
+        execute_db("UPDATE security_profiles SET is_default = 1 WHERE id = ?", [profile_id])
+        track_user_activity(g.user["id"], "set_default_security_profile", f"Set default security profile: {profile['profile_name']}")
+        flash(f"Security profile '{profile['profile_name']}' is now the default", "success")
+        
+    return redirect(url_for("ddos.security_profiles"))

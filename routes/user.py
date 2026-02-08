@@ -217,7 +217,7 @@ def behavior_rules():
     
     # Get user's existing behavior rules
     user_rules = query_db(
-        "SELECT * FROM behavior_rules WHERE user_id = ? ORDER BY created_at DESC",
+        "SELECT * FROM behavior_rules WHERE user_id = ? ORDER BY is_default DESC, rule_name ASC",
         [g.user["id"]]
     )
     
@@ -228,13 +228,14 @@ def behavior_rules():
             """
             INSERT INTO behavior_rules (user_id, rule_name, returning_window_hours, interested_threshold, engaged_threshold, 
                                         requests_per_ip_per_minute, requests_per_ip_per_hour, requests_per_link_per_minute,
-                                        burst_threshold, suspicious_threshold, ddos_threshold, is_default)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                        burst_threshold, suspicious_threshold, ddos_threshold, 
+                                        rapid_click_limit, health_kill_switch, detection_window_minutes, is_default)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            [g.user["id"], "Default Rule", 48, 2, 3, 60, 1000, 500, 100, 10, 50, 1]
+            [g.user["id"], "Default Rule", 48, 2, 3, 60, 1000, 500, 100, 10, 50, 0.3, 5, 5, 1]
         )
         user_rules = query_db(
-            "SELECT * FROM behavior_rules WHERE user_id = ? ORDER BY created_at DESC",
+            "SELECT * FROM behavior_rules WHERE user_id = ? ORDER BY is_default DESC, rule_name ASC",
             [g.user["id"]]
         )
     
@@ -256,40 +257,10 @@ def create_behavior_rule():
     interested_threshold = int(request.form.get("interested_threshold", 2))
     engaged_threshold = int(request.form.get("engaged_threshold", 3))
     
-    # DDoS Settings
-    requests_per_ip_per_minute = int(request.form.get("requests_per_ip_per_minute", 60))
-    requests_per_ip_per_hour = int(request.form.get("requests_per_ip_per_hour", 1000))
-    requests_per_link_per_minute = int(request.form.get("requests_per_link_per_minute", 500))
-    burst_threshold = int(request.form.get("burst_threshold", 100))
-    suspicious_threshold = int(request.form.get("suspicious_threshold", 10))
-    ddos_threshold = int(request.form.get("ddos_threshold", 50))
-    
-    # Validation
-    if not rule_name:
-        flash("Rule name is required", "danger")
-        return redirect(url_for("user.behavior_rules"))
-    
-    if returning_window_hours < 1 or returning_window_hours > 168:  # 1 hour to 1 week
-        flash("Returning window must be between 1 and 168 hours", "danger")
-        return redirect(url_for("user.behavior_rules"))
-    
-    if interested_threshold < 1 or engaged_threshold < 1:
-        flash("Thresholds must be at least 1", "danger")
-        return redirect(url_for("user.behavior_rules"))
-    
     if engaged_threshold <= interested_threshold:
         flash("Engaged threshold must be higher than interested threshold", "danger")
         return redirect(url_for("user.behavior_rules"))
         
-    # Validate DDoS Settings
-    if requests_per_ip_per_minute < 10 or requests_per_ip_per_hour < 100:
-        flash("Rate limits are too low", "danger")
-        return redirect(url_for("user.behavior_rules"))
-        
-    if ddos_threshold <= suspicious_threshold:
-        flash("DDoS threshold must be higher than suspicious threshold", "danger")
-        return redirect(url_for("user.behavior_rules"))
-    
     # Check if user already has 5 rules (limit)
     existing_count = query_db("SELECT COUNT(*) as count FROM behavior_rules WHERE user_id = ?", [g.user["id"]], one=True)["count"]
     if existing_count >= 5:
@@ -299,18 +270,61 @@ def create_behavior_rule():
     # Create the rule
     execute_db(
         """
-        INSERT INTO behavior_rules (user_id, rule_name, returning_window_hours, interested_threshold, engaged_threshold,
-                                    requests_per_ip_per_minute, requests_per_ip_per_hour, requests_per_link_per_minute,
-                                    burst_threshold, suspicious_threshold, ddos_threshold, is_default)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO behavior_rules (user_id, rule_name, returning_window_hours, interested_threshold, engaged_threshold, is_default)
+        VALUES (?, ?, ?, ?, ?, 0)
         """,
-        [g.user["id"], rule_name, returning_window_hours, interested_threshold, engaged_threshold,
-         requests_per_ip_per_minute, requests_per_ip_per_hour, requests_per_link_per_minute,
-         burst_threshold, suspicious_threshold, ddos_threshold, 0]
+        [g.user["id"], rule_name, returning_window_hours, interested_threshold, engaged_threshold]
     )
     
     track_user_activity(g.user["id"], "create_rule", f"Created behavior rule: {rule_name}")
     flash(f"Behavior rule '{rule_name}' created successfully", "success")
+    return redirect(url_for("user.behavior_rules"))
+
+
+@user_bp.route("/behavior-rules/update/<int:rule_id>", methods=["POST"])
+@login_required
+def update_behavior_rule(rule_id):
+    """Update an existing behavior rule"""
+    # Import here to avoid circular imports
+    from admin_panel import track_user_activity
+    
+    # Check if rule belongs to current user
+    rule = query_db(
+        "SELECT * FROM behavior_rules WHERE id = ? AND user_id = ?",
+        [rule_id, g.user["id"]], one=True
+    )
+    
+    if not rule:
+        flash("Rule not found", "danger")
+        return redirect(url_for("user.behavior_rules"))
+        
+    rule_name = request.form.get("rule_name", "").strip()
+    returning_window_hours = int(request.form.get("returning_window_hours", 48))
+    interested_threshold = int(request.form.get("interested_threshold", 2))
+    engaged_threshold = int(request.form.get("engaged_threshold", 3))
+    
+    
+    # Validation
+    if not rule_name:
+        flash("Rule name is required", "danger")
+        return redirect(url_for("user.behavior_rules"))
+    
+    if engaged_threshold <= interested_threshold:
+        flash("Engaged threshold must be higher than interested threshold", "danger")
+        return redirect(url_for("user.behavior_rules"))
+        
+    # Update the rule
+    execute_db(
+        """
+        UPDATE behavior_rules 
+        SET rule_name = ?, returning_window_hours = ?, interested_threshold = ?, engaged_threshold = ?
+        WHERE id = ?
+        """,
+        [rule_name, returning_window_hours, interested_threshold, engaged_threshold, rule_id]
+    )
+    
+    track_user_activity(g.user["id"], "update_rule", f"Updated behavior rule: {rule_name}")
+    flash(f"Behavior rule '{rule_name}' updated successfully", "success")
     return redirect(url_for("user.behavior_rules"))
 
 

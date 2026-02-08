@@ -172,7 +172,7 @@
                   <div class="d-flex align-items-center justify-content-center p-3">
                     <button
                       class="btn btn-primary btn-lg d-flex align-items-center gap-2 px-5 py-3 rounded-pill shadow-sm transform-hover"
-                      onclick="navigator.clipboard.writeText('{{ url_for('links.redirect_link', code=link.code, _external=True) }}'); this.innerHTML='<i class=\'bi bi-check2-all\'></i> Copied'; setTimeout(()=>this.innerHTML='<i class=\'bi bi-clipboard\'></i> Copy Smart Link', 2000)">
+                      onclick="var self=this; navigator.clipboard.writeText('{{ url_for('links.redirect_link', code=link.code, _external=True) }}'); self.innerHTML='<i class=&#34;bi bi-check2-all&#34;></i> Copied'; setTimeout(function(){ self.innerHTML='<i class=&#34;bi bi-clipboard&#34;></i> Copy Smart Link'; }, 2000)">
                       <i class="bi bi-clipboard"></i> Copy Smart Link
                     </button>
                   </div>
@@ -195,16 +195,39 @@
               <!-- Behavior Rule Card -->
               <div class="col-md-6">
                 <div class="info-card">
-                  <div class="d-flex align-items-center gap-2 mb-2">
-                    <i class="bi bi-shield-check text-muted"></i>
-                    <span class="text-muted small fw-bold text-uppercase">Behavior Engine</span>
-                  </div>
-                  <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-info text-white rounded-pill">{{ behavior_rule.rule_name if behavior_rule else
-                      'Direct' }}</span>
-                    {% if behavior_rule %}
-                    <small class="text-muted text-truncate">{{ behavior_rule.interested_threshold }}+ visits for
-                      Interest</small>
+                  <div class="row g-2">
+                    {% if g.user['membership_tier'] == 'elite_pro' %}
+                    <div class="col-6">
+                      <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-person-gear text-muted"></i>
+                        <span class="text-muted small fw-bold text-uppercase">Behavior Rule</span>
+                      </div>
+                      <span class="badge bg-info text-white rounded-pill">{{ behavior_rule.rule_name if behavior_rule
+                        else 'Direct' }}</span>
+                    </div>
+                    <div class="col-6 border-start ps-3">
+                      <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-shield-lock text-muted"></i>
+                        <span class="text-muted small fw-bold text-uppercase">Security</span>
+                      </div>
+                      <span
+                        class="badge bg-{{ 'primary' if security_profile else 'secondary' }} text-white rounded-pill">
+                        <i class="bi bi-shield-check me-1"></i>
+                        {{ security_profile.profile_name if security_profile else 'Standard' }}
+                      </span>
+                    </div>
+                    {% else %}
+                    <div class="col-12">
+                      <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-person-gear text-muted"></i>
+                        <span class="text-muted small fw-bold text-uppercase">Behavior Rule</span>
+                      </div>
+                      <span class="badge bg-info text-white rounded-pill">{{ behavior_rule.rule_name if behavior_rule
+                        else 'Direct' }}</span>
+                      {% if behavior_rule %}
+                      <small class="text-muted ms-2">{{ behavior_rule.interested_threshold }}+ hits for Interest</small>
+                      {% endif %}
+                    </div>
                     {% endif %}
                   </div>
                 </div>
@@ -890,7 +913,7 @@
 
   <!-- Data for JavaScript -->
   <script>
-    window.analyticsData = {{ analytics_payload | tojson }};
+    window.analyticsData = {{ analytics_payload | tojson | safe }};
   </script>
   <script src="{{ url_for('static', filename='js/analytics_details.js') }}"></script>
 
@@ -1031,7 +1054,7 @@
               </div>
               <div class="d-flex gap-2 w-100 max-w-sm justify-content-center">
                 <button class="btn btn-outline-secondary rounded-pill px-4"
-                  onclick="qrCode.update({ dotsOptions: { type: 'square' }, cornersSquareOptions: { type: 'square' }, backgroundOptions: { color: '#ffffff' }, dotsOptions: { color: '#000000' } }); resetInputs();">
+                  onclick="qrCode.update({ dotsOptions: { type: 'square', color: '#000000' }, cornersSquareOptions: { type: 'square' }, backgroundOptions: { color: '#ffffff' } }); resetInputs();">
                   Reset
                 </button>
                 <button class="btn btn-primary rounded-pill px-5 shadow-sm" onclick="downloadQr()">

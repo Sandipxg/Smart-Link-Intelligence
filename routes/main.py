@@ -68,12 +68,6 @@ def index():
         [g.user["id"]],
     )
     
-    # Get user's behavior rules for the create form
-    behavior_rules = query_db(
-        "SELECT * FROM behavior_rules WHERE user_id = ? ORDER BY is_default DESC, rule_name ASC",
-        [g.user["id"]]
-    )
-    
     # Prepare chart data
     chart_data = {
         "linkStats": [{"state": row["state"], "count": row["count"]} for row in link_stats]
@@ -94,7 +88,6 @@ def index():
     return render_template("index.html", 
                            links=links, 
                            chart_data=chart_data, 
-                           behavior_rules=behavior_rules, 
                            new_link=new_link,
                            tier_info=tier_info,
                            link_count=link_count,

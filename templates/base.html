@@ -15,7 +15,8 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
     <div class="container">
-      <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.index') if g.user else url_for('main.landing') }}">
+      <a class="navbar-brand d-flex align-items-center"
+        href="{{ url_for('main.index') if g.user else url_for('main.landing') }}">
         <div class="bg-primary rounded-2 p-1 me-2">
           <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
             <path d="M12 20L18 26L28 14" stroke="white" stroke-width="3" stroke-linecap="round" />
@@ -46,13 +47,25 @@
               <i class="bi bi-sliders me-1"></i>Behavior Rules
             </a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item {% if g.user['membership_tier'] == 'elite_pro' %}dropdown{% endif %}">
+            {% if g.user['membership_tier'] == 'elite_pro' %}
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              <i class="bi bi-shield-check me-1"></i>Security
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{{ url_for('ddos.ddos_protection_dashboard') }}">
+                  <i class="bi bi-speedometer2 me-2"></i>Security Dashboard
+                </a></li>
+              <li><a class="dropdown-item" href="{{ url_for('ddos.security_profiles') }}">
+                  <i class="bi bi-shield-lock-fill me-2"></i>Security Profiles
+                </a></li>
+            </ul>
+            {% else %}
             <a class="nav-link" href="{{ url_for('ddos.ddos_protection_dashboard') }}">
               <i class="bi bi-shield-check me-1"></i>Security
-              {% if g.user['membership_tier'] != 'elite_pro' %}
               <i class="bi bi-lock-fill text-secondary ms-1 fs-6" title="Locked for your tier"></i>
-              {% endif %}
             </a>
+            {% endif %}
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('ads.create_ad') }}">
@@ -105,6 +118,7 @@
                 <li><a class="dropdown-item" href="{{ url_for('user.notifications') }}">
                     <i class="bi bi-bell-fill me-2"></i>Notifications
                   </a></li>
+
                 <li><a class="dropdown-item" href="{{ url_for('main.documentation') }}">
                     <i class="bi bi-book me-2"></i>Documentation
                   </a></li>
@@ -181,6 +195,18 @@
                   </option>
                 </select>
               </div>
+              <div class="col-md-12 mt-3">
+                <label class="form-label fw-semibold">Behavior Thresholds (DDoS Protection)</label>
+                <select class="form-select" name="behavior_rule_id">
+                  <option value="">Use Default Thresholds</option>
+                  {% for rule in behavior_rules %}
+                  <option value="{{ rule.id }}" {% if rule.is_default %}selected{% endif %}>
+                    {{ rule.rule_name }} {% if rule.is_default %}(Default){% endif %}
+                  </option>
+                  {% endfor %}
+                </select>
+                <div class="form-text">Choose which DDoS protection levels to apply</div>
+              </div>
             </div>
 
             <!-- Progressive Fields for Modal -->
@@ -213,7 +239,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
   <!-- Pass server-side data to client-side -->
-  <div id="app-data" data-login-url="{{ url_for('auth.login') }}" data-analytics-url="{{ url_for('links.analytics_overview') }}"
+  <div id="app-data" data-login-url="{{ url_for('auth.login') }}"
+    data-analytics-url="{{ url_for('links.analytics_overview') }}"
     data-authenticated="{{ 'true' if g.user else 'false' }}" style="display: none;"></div>
 
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
