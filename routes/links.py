@@ -237,7 +237,7 @@ def redirect_link(code):
 
     visits = query_db(
         """
-        SELECT ts FROM visits
+        SELECT ts, ip_hash FROM visits
         WHERE link_id = ?
         ORDER BY ts DESC
         LIMIT 20

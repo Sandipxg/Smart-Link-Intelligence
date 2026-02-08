@@ -36,12 +36,12 @@ class DDoSProtection:
     def __init__(self, database_path):
         self.db_path = database_path
         self.rate_limits = {
-            'requests_per_ip_per_minute': 120,  # Increased from 60 to 120
-            'requests_per_ip_per_hour': 2000,   # Increased from 1000 to 2000
-            'requests_per_link_per_minute': 1000,  # Increased from 500 to 1000
-            'burst_threshold': 200,  # Increased from 100 to 200 (requests in 10 seconds)
-            'suspicious_threshold': 25,  # Increased from 10 to 25
-            'ddos_threshold': 100,  # Increased from 50 to 100 (suspicious requests to trigger DDoS)
+            'requests_per_ip_per_minute': 5,  # Test Value: 5 refreshes
+            'requests_per_ip_per_hour': 100,   # Test Value
+            'requests_per_link_per_minute': 10,  # Test Value: 10 total refreshes
+            'burst_threshold': 5,  # Test Value: 5 refreshes in 10s
+            'suspicious_threshold': 2,  # Test Value: 2 suspicious events -> Captcha
+            'ddos_threshold': 5,  # Test Value: 5 suspicious events -> Disable
         }
         
         self.request_cache = defaultdict(list)
@@ -241,7 +241,7 @@ class DDoSProtection:
             # Check if temporary disable has expired
             if link['ddos_detected_at']:
                 detected_time = datetime.fromisoformat(link['ddos_detected_at'])
-                if datetime.utcnow() - detected_time > timedelta(hours=1):
+                if datetime.utcnow() - detected_time > timedelta(minutes=1):
                     # Reset protection level
                     self._reset_protection(link_id)
                     return False, 'normal'

@@ -165,7 +165,7 @@ def detect_suspicious(visits, now: datetime, ip_hash: str = None) -> bool:
     # If we have the current IP hash, check for rapid requests from THIS specific IP
     if ip_hash:
         # Get recent visits from this specific IP
-        same_ip_visits = [v for v in visits if v.get('ip_hash') == ip_hash]
+        same_ip_visits = [v for v in visits if v['ip_hash'] == ip_hash]
         
         if len(same_ip_visits) >= 2:
             # Check if this IP is making requests faster than humanly possible
@@ -230,7 +230,7 @@ def evaluate_state(link_id: int, now: datetime) -> str:
     days_since = (now - latest_time).days
     suspicious_hits = sum(1 for v in recent if v["is_suspicious"])
 
-    if suspicious_hits >= 5:
+    if suspicious_hits >= 500:  # Increased from 5 to avoid interfering with DDoS testing
         return "Inactive"
     if days_since > STATE_DECAY_DAYS:
         return "Inactive"
