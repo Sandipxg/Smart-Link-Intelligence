@@ -254,6 +254,17 @@ def redirect_link(code):
     if not referrer:
         referrer = request.headers.get("Referer", "no referrer")
         
+    # 3. Fallback to User-Agent inference (if referrer is still missing/empty)
+    # Many apps strip referrer but identify themselves in UA
+    if not referrer or referrer == 'no referrer':
+        ua_lower = user_agent.lower()
+        if 'whatsapp' in ua_lower:
+            referrer = 'WhatsApp'
+        elif 'instagram' in ua_lower:
+            referrer = 'Instagram'
+        elif any(x in ua_lower for x in ['fban', 'fbav']):
+            referrer = 'Facebook'
+            
     referrer = referrer[:500]  # Truncate for DB safety
     
     now = utcnow()
