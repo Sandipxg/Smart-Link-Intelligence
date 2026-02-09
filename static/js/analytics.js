@@ -119,5 +119,88 @@ document.addEventListener('DOMContentLoaded', function () {
 
             deleteLink(linkId, linkCode, deleteBtn);
         }
+
+        // Add event listeners for edit buttons
+        if (e.target.closest('.edit-link-btn')) {
+            const editBtn = e.target.closest('.edit-link-btn');
+            const linkId = editBtn.dataset.linkId;
+            const linkCode = editBtn.dataset.linkCode;
+            const primaryUrl = editBtn.dataset.primaryUrl;
+            const returningUrl = editBtn.dataset.returningUrl;
+            const ctaUrl = editBtn.dataset.ctaUrl;
+            const behaviorRule = editBtn.dataset.behaviorRule;
+
+            // Fill modal
+            document.getElementById('editLinkId').value = linkId;
+            document.getElementById('modalLinkCode').textContent = linkCode;
+            document.getElementById('editPrimaryUrl').value = primaryUrl;
+            document.getElementById('editReturningUrl').value = returningUrl;
+            document.getElementById('editCtaUrl').value = ctaUrl;
+
+            // Show progressive fields if needed
+            const progressiveFields = document.getElementById('progressiveFields');
+            if (behaviorRule === 'progression') {
+                progressiveFields.style.display = 'block';
+            } else {
+                progressiveFields.style.display = 'none';
+            }
+
+            // Show modal
+            const editModal = new bootstrap.Modal(document.getElementById('editLinkModal'));
+            editModal.show();
+        }
     });
+
+    // Handle save button click
+    const saveBtn = document.getElementById('saveLinkBtn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', function () {
+            const linkId = document.getElementById('editLinkId').value;
+            const primaryUrl = document.getElementById('editPrimaryUrl').value;
+            const returningUrl = document.getElementById('editReturningUrl').value;
+            const ctaUrl = document.getElementById('editCtaUrl').value;
+
+            if (!primaryUrl) {
+                showAlert('danger', 'Primary URL is required');
+                return;
+            }
+
+            // Show loading state
+            const originalContent = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Saving...';
+            saveBtn.disabled = true;
+
+            // Send update request
+            fetch('/update-link', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: linkId,
+                    primary_url: primaryUrl,
+                    returning_url: returningUrl,
+                    cta_url: ctaUrl
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('success', data.message);
+                        // Reload after a short delay to show updated data
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showAlert('danger', data.message);
+                        saveBtn.innerHTML = originalContent;
+                        saveBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('danger', 'An error occurred while updating the link');
+                    saveBtn.innerHTML = originalContent;
+                    saveBtn.disabled = false;
+                });
+        });
+    }
 });

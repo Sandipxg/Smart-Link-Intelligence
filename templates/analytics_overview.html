@@ -208,6 +208,12 @@
                     target="_blank" title="Open Link">
                     <i class="bi bi-box-arrow-up-right"></i>
                   </a>
+                  <a class="btn btn-outline-info edit-link-btn" data-link-id="{{ link.id }}"
+                    data-link-code="{{ link.code }}" data-primary-url="{{ link.primary_url }}"
+                    data-returning-url="{{ link.returning_url or '' }}" data-cta-url="{{ link.cta_url or '' }}"
+                    data-behavior-rule="{{ link.behavior_rule }}" title="Edit Link">
+                    <i class="bi bi-pencil-square"></i>
+                  </a>
                   <button class="btn btn-outline-danger delete-link-btn" data-link-id="{{ link.id }}"
                     data-link-code="{{ link.code }}" title="Delete Link">
                     <i class="bi bi-trash"></i>
@@ -262,5 +268,63 @@
 </script>
 {% endif %}
 
+
+<!-- Edit Link Modal -->
+<div class="modal fade" id="editLinkModal" tabindex="-1" aria-labelledby="editLinkModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="editLinkModalLabel">
+          <i class="bi bi-pencil-square me-2"></i>Edit Smart Link: <span id="modalLinkCode" class="fw-bold"></span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form id="editLinkForm">
+          <input type="hidden" id="editLinkId">
+
+          <div class="mb-3">
+            <label for="editPrimaryUrl" class="form-label fw-bold small">Original Redirecting URL</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
+              <input type="url" class="form-control" id="editPrimaryUrl" required placeholder="https://example.com">
+            </div>
+            <div class="form-text">This is the main destination for new visitors.</div>
+          </div>
+
+          <div id="progressiveFields" style="display: none;">
+            <div class="mb-3">
+              <label for="editReturningUrl" class="form-label fw-bold small">Returning URL</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-arrow-return-right"></i></span>
+                <input type="url" class="form-control" id="editReturningUrl"
+                  placeholder="https://example.com/welcome-back">
+              </div>
+              <div class="form-text">Where returning visitors are sent.</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="editCtaUrl" class="form-label fw-bold small">CTA URL</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-megaphone"></i></span>
+                <input type="url" class="form-control" id="editCtaUrl" placeholder="https://example.com/special-offer">
+              </div>
+              <div class="form-text">Destination for high-interest visitors.</div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer bg-light border-0">
+        <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+          data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary rounded-pill px-4" id="saveLinkBtn">
+          <i class="bi bi-check2-circle me-1"></i>Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+
 {% endblock %}

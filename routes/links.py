@@ -560,6 +560,46 @@ def delete_link(link_id):
     except Exception as e:
         return jsonify({"success": False, "message": f"Error deleting link: {str(e)}"}), 500
 
+# Link Update Route
+@links_bp.route("/update-link", methods=["POST"])
+@login_required
+def update_link():
+    """Update an existing link's redirect URLs"""
+    try:
+        data = request.get_json()
+        link_id = data.get("id")
+        primary_url = data.get("primary_url", "").strip()
+        returning_url = data.get("returning_url", "").strip()
+        cta_url = data.get("cta_url", "").strip()
+        
+        if not link_id or not primary_url:
+            return jsonify({"success": False, "message": "Link ID and Primary URL are required"}), 400
+            
+        # Verify ownership
+        link = query_db("SELECT user_id FROM links WHERE id = ?", [link_id], one=True)
+        if not link or link["user_id"] != g.user["id"]:
+            return jsonify({"success": False, "message": "Unauthorized"}), 403
+            
+        from database import execute_db
+        execute_db(
+            """
+            UPDATE links
+            SET primary_url = ?, returning_url = ?, cta_url = ?
+            WHERE id = ?
+            """,
+            [primary_url, returning_url, cta_url, link_id]
+        )
+        
+        # Track activity
+        from admin_panel import track_user_activity
+        track_user_activity(g.user["id"], "update_link", f"Updated link ID {link_id}")
+        
+        return jsonify({"success": True, "message": "Link updated successfully"})
+        
+    except Exception as e:
+        print(f"Error updating link: {e}")
+        return jsonify({"success": False, "message": "An error occurred while updating the link"}), 500
+
 # Analytics routes (temporarily placed here due to file system issues)
 @links_bp.route("/links/<code>")
 @login_or_admin_required
