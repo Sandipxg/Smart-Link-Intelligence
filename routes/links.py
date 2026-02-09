@@ -845,10 +845,10 @@ def analytics(code):
             for k, v in sorted(normalized_isp_counts.items(), key=lambda x: x[1], reverse=True)
         ][:10]
 
-        # Get Referrer analytics
+        # Get Referrer analytics (using unique visitors like other charts)
         referrer_raw = query_db(
             """
-            SELECT referrer, COUNT(*) as count
+            SELECT referrer, COUNT(DISTINCT ip_hash) as count
             FROM visits
             WHERE link_id = ?
             GROUP BY referrer
@@ -923,7 +923,7 @@ def analytics(code):
                     referrer_counts["Facebook"] += count
                 elif any(x in domain for x in ['whatsapp.com', 'wa.me']):
                     referrer_counts["WhatsApp"] += count
-                elif any(x in domain for x in ['t.co', 'twitter.com', 'x.com']):
+                elif domain == 't.co' or 'twitter.com' in domain or 'x.com' in domain:
                     referrer_counts["Twitter"] += count
                 elif any(x in domain for x in ['linkedin.com', 'lnkd.in']):
                     referrer_counts["LinkedIn"] += count
