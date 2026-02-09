@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0 overflow-hidden">
+                <div class="card-header bg-primary text-white text-center py-5">
+                    <h1 class="display-5 fw-bold mb-0">Terms of Service</h1>
+                    <p class="lead opacity-75 mt-2">Last Updated: February 9, 2026</p>
+                </div>
+                <div class="card-body p-5">
+                    <div class="terms-content">
+                        <section class="mb-5">
+                            <h3 class="h4 text-primary mb-3">
+                                <i class="bi bi-info-circle me-2"></i>1. Acceptance of Terms
+                            </h3>
+                            <p>By accessing and using Smart Link Intelligence (the "Service"), you agree to be bound by
+                                these Terms of Service. If you do not agree to these terms, please do not use our
+                                Service. These terms apply to all visitors, users, and others who access or use the
+                                Service.</p>
+                        </section>
+
+                        <section class="mb-5">
+                            <h3 class="h4 text-primary mb-3">
+                                <i class="bi bi-person-check me-2"></i>2. User Accounts
+                            </h3>
+                            <p>When you create an account with us, you must provide information that is accurate,
+                                complete, and current at all times. Failure to do so constitutes a breach of the Terms,
+                                which may result in immediate termination of your account on our Service.</p>
+                            <p>You are responsible for safeguarding the password that you use to access the Service and
+                                for any activities or actions under your password.</p>
+                        </section>
+
+                        <section class="mb-5">
+                            <h3 class="h4 text-primary mb-3">
+                                <i class="bi bi-shield-exclamation me-2"></i>3. Acceptable Use Policy
+                            </h3>
+                            <p>You agree NOT to use the Service for any of the following:</p>
+                            <ul class="list-group list-group-flush mb-3">
+                                <li class="list-group-item bg-light border-0 rounded mb-2">
+                                    <i class="bi bi-x-circle text-danger me-2"></i>Spamming or sending unsolicited
+                                    communications.
+                                </li>
+                                <li class="list-group-item bg-light border-0 rounded mb-2">
+                                    <i class="bi bi-x-circle text-danger me-2"></i>Phishing or attempting to steal
+                                    sensitive information.
+                                </li>
+                                <li class="list-group-item bg-light border-0 rounded mb-2">
+                                    <i class="bi bi-x-circle text-danger me-2"></i>Distributing malware, viruses, or any
+                                    destructive code.
+                                </li>
+                                <li class="list-group-item bg-light border-0 rounded mb-2">
+                                    <i class="bi bi-x-circle text-danger me-2"></i>Content that is illegal, harmful, or
+                                    promotes discrimination.
+                                </li>
+                                <li class="list-group-item bg-light border-0 rounded mb-2">
+                                    <i class="bi bi-x-circle text-danger me-2"></i>Abusing the API or attempting to
+                                    disrupt the Service's infrastructure.
+                                </li>
+                            </ul>
+                            <p class="text-muted small">Smart Link Intelligence reserves the right to disable any links
+                                that violate these terms without prior notice.</p>
+                        </section>
+
+                        <section class="mb-5" id="privacy">
+                            <h3 class="h4 text-primary mb-3">
+                                <i class="bi bi-bar-chart-steps me-2"></i>4. Data and Analytics (Privacy Policy)
+                            </h3>
+                            <p>We collect data regarding link clicks, including but not limited to IP addresses,
+                                geolocations, and browser information. This data is used to provide analytics to the
+                                link owner and to improve our Service. By using the Service, you consent to the
+                                collection and processing of this data.</p>
+                        </section>
+
+                        <section class="mb-5">
+                            <h3 class="h4 text-primary mb-3">
+                                <i class="bi bi-exclamation-triangle me-2"></i>5. Limitation of Liability
+                            </h3>
+                            <p>In no event shall Smart Link Intelligence, nor its directors, employees, or partners, be
+                                liable for any indirect, incidental, special, consequential, or punitive damages,
+                                including without limitation, loss of profits, data, use, goodwill, or other intangible
+                                losses, resulting from your access to or use of or inability to access or use the
+                                Service.</p>
+                        </section>
+
+                        <section class="mb-5">
+                            <h3 class="h4 text-primary mb-3">
+                                <i class="bi bi-pencil-square me-2"></i>6. Modifications
+                            </h3>
+                            <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any
+                                time. If a revision is material, we will try to provide at least 30 days' notice prior
+                                to any new terms taking effect. What constitutes a material change will be determined at
+                                our sole discretion.</p>
+                        </section>
+
+                        <div class="bg-light p-4 rounded-3 text-center">
+                            <h4 class="h5 mb-3">Questions about our Terms?</h4>
+                            <p class="mb-3">If you have any questions about these Terms, please contact us.</p>
+                            <a href="mailto:support@smartlinkintel.com" class="btn btn-primary px-4">
+                                <i class="bi bi-envelope me-2"></i>Contact Support
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0 text-center py-4">
+                    <a href="{{ url_for('auth.signup') }}" class="btn btn-link text-decoration-none">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Registration
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .terms-content {
+        line-height: 1.8;
+        color: #4a5568;
+    }
+
+    .terms-content h3 {
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+
+    .list-group-item {
+        font-size: 0.95rem;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    }
+</style>
+{% endblock %}

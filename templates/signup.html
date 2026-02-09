@@ -106,8 +106,9 @@
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
               <label class="form-check-label" for="terms">
-                I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and
-                <a href="#" class="text-decoration-none">Privacy Policy</a>
+                I agree to the <a href="{{ url_for('main.terms') }}" class="text-decoration-none" target="_blank">Terms
+                  of Service</a> and
+                <a href="{{ url_for('main.terms') }}#privacy" class="text-decoration-none">Privacy Policy</a>
               </label>
               <div class="invalid-feedback">
                 You must agree to the terms and conditions.

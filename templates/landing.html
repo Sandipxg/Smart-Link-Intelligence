@@ -11,10 +11,12 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
+
     <!-- Modern Landing Page CSS -->
     <link href="{{ url_for('static', filename='css/landing.css') }}" rel="stylesheet">
 </head>
@@ -29,47 +31,48 @@
         <div class="circuit-patterns">
             <div class="circuit circuit-1">
                 <svg viewBox="0 0 200 200" class="circuit-svg">
-                    <path d="M20,20 L180,20 L180,60 L140,60 L140,100 L180,100 L180,180 L20,180 L20,140 L60,140 L60,100 L20,100 Z" 
-                          stroke="rgba(37, 99, 235, 0.3)" stroke-width="2" fill="none"/>
-                    <circle cx="20" cy="20" r="3" fill="rgba(37, 99, 235, 0.6)"/>
-                    <circle cx="180" cy="60" r="3" fill="rgba(14, 165, 233, 0.6)"/>
-                    <circle cx="140" cy="100" r="3" fill="rgba(6, 182, 212, 0.6)"/>
-                    <circle cx="60" cy="140" r="3" fill="rgba(37, 99, 235, 0.6)"/>
+                    <path
+                        d="M20,20 L180,20 L180,60 L140,60 L140,100 L180,100 L180,180 L20,180 L20,140 L60,140 L60,100 L20,100 Z"
+                        stroke="rgba(37, 99, 235, 0.3)" stroke-width="2" fill="none" />
+                    <circle cx="20" cy="20" r="3" fill="rgba(37, 99, 235, 0.6)" />
+                    <circle cx="180" cy="60" r="3" fill="rgba(14, 165, 233, 0.6)" />
+                    <circle cx="140" cy="100" r="3" fill="rgba(6, 182, 212, 0.6)" />
+                    <circle cx="60" cy="140" r="3" fill="rgba(37, 99, 235, 0.6)" />
                 </svg>
             </div>
             <div class="circuit circuit-2">
                 <svg viewBox="0 0 150 150" class="circuit-svg">
-                    <path d="M10,75 L50,75 L50,25 L100,25 L100,75 L140,75 M75,50 L75,100 L125,100" 
-                          stroke="rgba(14, 165, 233, 0.4)" stroke-width="2" fill="none"/>
-                    <rect x="45" y="70" width="10" height="10" fill="rgba(37, 99, 235, 0.5)"/>
-                    <rect x="95" y="20" width="10" height="10" fill="rgba(6, 182, 212, 0.5)"/>
+                    <path d="M10,75 L50,75 L50,25 L100,25 L100,75 L140,75 M75,50 L75,100 L125,100"
+                        stroke="rgba(14, 165, 233, 0.4)" stroke-width="2" fill="none" />
+                    <rect x="45" y="70" width="10" height="10" fill="rgba(37, 99, 235, 0.5)" />
+                    <rect x="95" y="20" width="10" height="10" fill="rgba(6, 182, 212, 0.5)" />
                 </svg>
             </div>
             <div class="circuit circuit-3">
                 <svg viewBox="0 0 180 120" class="circuit-svg">
-                    <path d="M20,60 L60,60 L60,20 L120,20 L120,60 L160,60 L160,100 L80,100 L80,80" 
-                          stroke="rgba(6, 182, 212, 0.3)" stroke-width="2" fill="none"/>
-                    <circle cx="60" cy="60" r="4" fill="rgba(14, 165, 233, 0.7)"/>
-                    <circle cx="120" cy="20" r="4" fill="rgba(37, 99, 235, 0.7)"/>
+                    <path d="M20,60 L60,60 L60,20 L120,20 L120,60 L160,60 L160,100 L80,100 L80,80"
+                        stroke="rgba(6, 182, 212, 0.3)" stroke-width="2" fill="none" />
+                    <circle cx="60" cy="60" r="4" fill="rgba(14, 165, 233, 0.7)" />
+                    <circle cx="120" cy="20" r="4" fill="rgba(37, 99, 235, 0.7)" />
                 </svg>
             </div>
         </div>
         <div class="code-snippets">
             <div class="code-block code-1">
                 <div class="code-line">if (user.engaged) {</div>
-                <div class="code-line">  route.to(premium_url);</div>
+                <div class="code-line"> route.to(premium_url);</div>
                 <div class="code-line">}</div>
             </div>
             <div class="code-block code-2">
                 <div class="code-line">analytics.track('click', {</div>
-                <div class="code-line">  source: 'smart_link',</div>
-                <div class="code-line">  behavior: 'curious'</div>
+                <div class="code-line"> source: 'smart_link',</div>
+                <div class="code-line"> behavior: 'curious'</div>
                 <div class="code-line">});</div>
             </div>
             <div class="code-block code-3">
                 <div class="code-line">const link = new SmartLink({</div>
-                <div class="code-line">  ai: true,</div>
-                <div class="code-line">  ddos_protection: 5</div>
+                <div class="code-line"> ai: true,</div>
+                <div class="code-line"> ddos_protection: 5</div>
                 <div class="code-line">});</div>
             </div>
         </div>
@@ -105,7 +108,8 @@
                 </span>
             </a>
 
-            <button class="navbar-toggler modern-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler modern-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -150,17 +154,17 @@
                         <i class="bi bi-stars"></i>
                         <span>AI-Powered Link Intelligence</span>
                     </div>
-                    
+
                     <h1 class="hero-title" data-aos="fade-up" data-aos-delay="100">
                         Transform Your Links Into
                         <span class="gradient-text">Smart Experiences</span>
                     </h1>
-                    
+
                     <p class="hero-description" data-aos="fade-up" data-aos-delay="200">
-                        Create intelligent, behavior-aware links that adapt to user engagement patterns. 
+                        Create intelligent, behavior-aware links that adapt to user engagement patterns.
                         Get real-time analytics, AI-powered routing, and enterprise-grade security.
                     </p>
-                    
+
                     <div class="hero-actions" data-aos="fade-up" data-aos-delay="300">
                         <a href="{{ url_for('auth.signup') }}" class="btn btn-primary-hero">
                             <span>Start Free Trial</span>
@@ -173,7 +177,7 @@
                             <span>Watch Demo</span>
                         </button>
                     </div>
-                    
+
                     <div class="hero-stats" data-aos="fade-up" data-aos-delay="400">
                         <div class="stat-item">
                             <div class="stat-number">99.9%</div>
@@ -189,7 +193,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-lg-6 hero-visual">
                     <div class="dashboard-preview" data-aos="fade-left" data-aos-delay="200">
                         <div class="preview-container">
@@ -227,7 +231,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Floating Elements -->
                         <div class="floating-card card-1" data-aos="fade-up" data-aos-delay="600">
                             <div class="card-icon">
@@ -235,14 +239,14 @@
                             </div>
                             <div class="card-text">DDoS Protected</div>
                         </div>
-                        
+
                         <div class="floating-card card-2" data-aos="fade-up" data-aos-delay="800">
                             <div class="card-icon">
                                 <i class="bi bi-cpu"></i>
                             </div>
                             <div class="card-text">AI Powered</div>
                         </div>
-                        
+
                         <div class="floating-card card-3" data-aos="fade-up" data-aos-delay="1000">
                             <div class="card-icon">
                                 <i class="bi bi-globe"></i>
@@ -258,9 +262,12 @@
     <!-- Features Section -->
     <section class="features-modern" id="features">
         <div class="binary-bg">
-            <div class="binary-line">01001000 01100101 01101100 01101100 01101111 00100000 01010111 01101111 01110010 01101100 01100100</div>
-            <div class="binary-line">01000001 01001001 00100000 01010000 01101111 01110111 01100101 01110010 01100101 01100100</div>
-            <div class="binary-line">01010011 01101101 01100001 01110010 01110100 00100000 01001100 01101001 01101110 01101011 01110011</div>
+            <div class="binary-line">01001000 01100101 01101100 01101100 01101111 00100000 01010111 01101111 01110010
+                01101100 01100100</div>
+            <div class="binary-line">01000001 01001001 00100000 01010000 01101111 01110111 01100101 01110010 01100101
+                01100100</div>
+            <div class="binary-line">01010011 01101101 01100001 01110010 01110100 00100000 01001100 01101001 01101110
+                01101011 01110011</div>
         </div>
         <div class="container">
             <div class="section-header text-center" data-aos="fade-up">
@@ -273,7 +280,7 @@
                     <span class="gradient-text">Smart Link Management</span>
                 </h2>
                 <p class="section-description">
-                    Advanced features designed for modern businesses who need intelligent 
+                    Advanced features designed for modern businesses who need intelligent
                     URL management with behavioral analytics and enterprise security.
                 </p>
             </div>
@@ -285,7 +292,7 @@
                     </div>
                     <h3 class="feature-title">Behavioral AI Engine</h3>
                     <p class="feature-description">
-                        Advanced AI analyzes user behavior patterns and automatically routes visitors 
+                        Advanced AI analyzes user behavior patterns and automatically routes visitors
                         to the most effective destination based on their engagement level.
                     </p>
                     <div class="feature-highlights">
@@ -360,7 +367,9 @@
                     </div>
                     <h3 class="feature-title">Export Report/Analytics</h3>
                     <p class="feature-description">
-                        Generate comprehensive reports with detailed analytics data. Export to CSV, PDF, or Excel formats for deeper analysis and business intelligence. Schedule automated reports and customize data ranges for strategic decision-making.
+                        Generate comprehensive reports with detailed analytics data. Export to CSV, PDF, or Excel
+                        formats for deeper analysis and business intelligence. Schedule automated reports and customize
+                        data ranges for strategic decision-making.
                     </p>
                     <div class="feature-highlights">
                         <div class="highlight-item">
@@ -394,7 +403,7 @@
                     <span class="gradient-text">Intelligence Level</span>
                 </h2>
                 <p class="section-description">
-                    Start free and scale up as your needs grow. Each tier unlocks 
+                    Start free and scale up as your needs grow. Each tier unlocks
                     powerful features for different business requirements.
                 </p>
             </div>
@@ -530,10 +539,10 @@
                             <span class="gradient-text">Link Strategy?</span>
                         </h2>
                         <p class="section-description">
-                            Have questions about our behavioral AI features or need help choosing 
+                            Have questions about our behavioral AI features or need help choosing
                             the right plan? Our team is here to help you maximize your link intelligence.
                         </p>
-                        
+
                         <div class="contact-info">
                             <div class="contact-item">
                                 <div class="contact-icon">
@@ -556,21 +565,25 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-lg-6" data-aos="fade-left">
                     <div class="contact-form-container">
                         <form class="modern-form" id="contactForm" onsubmit="handleContactForm(event)">
                             <div class="form-group">
-                                <input type="text" name="name" class="form-control modern-input" placeholder="Your Name" required>
+                                <input type="text" name="name" class="form-control modern-input" placeholder="Your Name"
+                                    required>
                             </div>
                             <div class="form-group">
-                                <input type="email" name="email" class="form-control modern-input" placeholder="Your Email" required>
+                                <input type="email" name="email" class="form-control modern-input"
+                                    placeholder="Your Email" required>
                             </div>
                             <div class="form-group">
-                                <input type="text" name="subject" class="form-control modern-input" placeholder="Subject" required>
+                                <input type="text" name="subject" class="form-control modern-input"
+                                    placeholder="Subject" required>
                             </div>
                             <div class="form-group">
-                                <textarea name="message" class="form-control modern-input" rows="4" placeholder="Your Message" required></textarea>
+                                <textarea name="message" class="form-control modern-input" rows="4"
+                                    placeholder="Your Message" required></textarea>
                             </div>
                             <button type="submit" class="btn btn-primary-modern w-100" id="submitBtn">
                                 <span>Send Message</span>
@@ -598,16 +611,17 @@
                         <p>Transform your links into intelligent experiences</p>
                     </div>
                 </div>
-                
+
                 <div class="footer-links">
                     <a href="#hero">Home</a>
                     <a href="#features">Features</a>
                     <a href="#pricing">Pricing</a>
                     <a href="{{ url_for('main.documentation') }}">Documentation</a>
+                    <a href="{{ url_for('main.terms') }}">Terms</a>
                     <a href="#contact">Contact</a>
                 </div>
             </div>
-            
+
             <div class="footer-bottom">
                 <p>&copy; 2026 Smart Link Intelligence. Made with 💙 for the future of link management.</p>
             </div>
@@ -625,8 +639,8 @@
                 </button>
             </div>
             <div class="modal-content">
-                <iframe width="800" height="450" src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
-                        title="Smart Link Intelligence Demo" frameborder="0" allowfullscreen>
+                <iframe width="800" height="450" src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                    title="Smart Link Intelligence Demo" frameborder="0" allowfullscreen>
                 </iframe>
             </div>
         </div>

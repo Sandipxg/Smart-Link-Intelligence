@@ -94,6 +94,12 @@ def index():
                            user_tier=user_tier)
 
 
+@main_bp.route("/terms")
+def terms():
+    """Public terms and conditions page"""
+    return render_template("terms.html")
+
+
 @main_bp.route("/documentation")
 def documentation():
     """Public documentation page"""
