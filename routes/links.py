@@ -254,6 +254,15 @@ def redirect_link(code):
     if not referrer:
         referrer = request.headers.get("Referer", "no referrer")
         
+    # DEBUG: Log raw referrer to file for investigation
+    try:
+        with open("referrer_debug.txt", "a") as f:
+            f.write(f"[{utcnow()}] IP: {ip_address} | Ref Param: {request.args.get('ref')} | Header: {request.headers.get('Referer')} | Final: {referrer} | UA: {user_agent}\n")
+    except:
+        pass
+
+    # 3. Fallback to User-Agent inference (if referrer is still missing/empty)
+        
     # 3. Fallback to User-Agent inference (if referrer is still missing/empty)
     # Many apps strip referrer but identify themselves in UA
     if not referrer or referrer == 'no referrer':
