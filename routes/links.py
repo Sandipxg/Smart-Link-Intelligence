@@ -814,6 +814,65 @@ def analytics(code):
             for k, v in sorted(normalized_isp_counts.items(), key=lambda x: x[1], reverse=True)
         ][:10]
 
+        # Get Referrer analytics
+        referrer_raw = query_db(
+            """
+            SELECT referrer, COUNT(*) as count
+            FROM visits
+            WHERE link_id = ?
+            GROUP BY referrer
+            """,
+            [link["id"]]
+        )
+
+        referrer_counts = {
+            "Direct": 0,
+            "Google": 0,
+            "Facebook": 0,
+            "Twitter": 0,
+            "LinkedIn": 0,
+            "YouTube": 0,
+            "Other": 0
+        }
+
+        from urllib.parse import urlparse
+
+        for row in referrer_raw:
+            ref_url = row['referrer']
+            count = row['count']
+            
+            if not ref_url or ref_url == 'no referrer' or ref_url == 'None':
+                referrer_counts["Direct"] += count
+                continue
+                
+            try:
+                # Basic normalization
+                if not ref_url.startswith(('http://', 'https://')):
+                    ref_url = 'http://' + ref_url
+                    
+                domain = urlparse(ref_url).netloc.lower()
+                
+                if 'google.' in domain:
+                    referrer_counts["Google"] += count
+                elif any(x in domain for x in ['facebook.com', 'fb.com', 'instagram.com']):
+                    referrer_counts["Facebook"] += count
+                elif any(x in domain for x in ['t.co', 'twitter.com', 'x.com']):
+                    referrer_counts["Twitter"] += count
+                elif any(x in domain for x in ['linkedin.com', 'lnkd.in']):
+                    referrer_counts["LinkedIn"] += count
+                elif any(x in domain for x in ['youtube.com', 'youtu.be']):
+                    referrer_counts["YouTube"] += count
+                else:
+                    referrer_counts["Other"] += count
+            except Exception:
+                referrer_counts["Other"] += count
+
+        # Convert to list for Chart.js
+        referrer_data = {
+            "labels": list(referrer_counts.keys()),
+            "data": list(referrer_counts.values())
+        }
+
         # Get device distribution
         device_data = query_db(
             """
@@ -965,6 +1024,7 @@ def analytics(code):
             isp_data=isp_data,
             is_admin=is_admin,
             security_profile=security_profile,
+            referrer_data=referrer_data,
         )
     except Exception as e:
         import traceback
