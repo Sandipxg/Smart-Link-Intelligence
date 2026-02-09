@@ -242,8 +242,19 @@ def redirect_link(code):
     # Get ISP info
     isp_info = get_isp_info(ip_address)
     
-    # Get referrer
-    referrer = request.headers.get("Referer", "no referrer")[:500]
+    # Get referrer (Smart Tracking)
+    # 1. Check URL parameters first (robust for mobile apps/PDFs)
+    referrer = (
+        request.args.get("ref") or 
+        request.args.get("source") or 
+        request.args.get("utm_source")
+    )
+    
+    # 2. Fallback to HTTP Header if no parameter
+    if not referrer:
+        referrer = request.headers.get("Referer", "no referrer")
+        
+    referrer = referrer[:500]  # Truncate for DB safety
     
     now = utcnow()
 
@@ -827,8 +838,10 @@ def analytics(code):
 
         referrer_counts = {
             "Direct": 0,
+            "Gmail": 0,
             "Google": 0,
             "Facebook": 0,
+            "WhatsApp": 0,
             "Twitter": 0,
             "LinkedIn": 0,
             "YouTube": 0,
@@ -838,24 +851,58 @@ def analytics(code):
         from urllib.parse import urlparse
 
         for row in referrer_raw:
-            ref_url = row['referrer']
+            ref_raw = row['referrer']
             count = row['count']
             
-            if not ref_url or ref_url == 'no referrer' or ref_url == 'None':
+            if not ref_raw or ref_raw == 'no referrer' or ref_raw == 'None':
                 referrer_counts["Direct"] += count
                 continue
                 
             try:
-                # Basic normalization
-                if not ref_url.startswith(('http://', 'https://')):
-                    ref_url = 'http://' + ref_url
-                    
-                domain = urlparse(ref_url).netloc.lower()
+                # Handle Smart Tracking (plain text) vs Standard URL
+                # If it's a URL, extract domain. If it's a code (e.g. 'whatsapp'), use it directly.
+                ref_lower = ref_raw.lower()
                 
-                if 'google.' in domain:
+                # Check for Smart Tracking codes or plain text first
+                if ref_lower in ['whatsapp', 'wa', 'w']:
+                     referrer_counts["WhatsApp"] += count
+                     continue
+                if ref_lower in ['gmail', 'mail']:
+                     referrer_counts["Gmail"] += count
+                     continue
+                if ref_lower in ['facebook', 'fb']:
+                     referrer_counts["Facebook"] += count
+                     continue
+                if ref_lower in ['twitter', 'x']:
+                     referrer_counts["Twitter"] += count
+                     continue
+                if ref_lower in ['linkedin', 'li']:
+                     referrer_counts["LinkedIn"] += count
+                     continue
+                if ref_lower in ['youtube', 'yt']:
+                     referrer_counts["YouTube"] += count
+                     continue
+
+                # Fallback to URL parsing
+                if not ref_raw.startswith(('http://', 'https://')):
+                    # If it's not a URL and didn't match above, it might be a domain or other string
+                    # Treat as http to try and parse domain
+                    temp_url = 'http://' + ref_raw
+                else:
+                    temp_url = ref_raw
+                    
+                domain = urlparse(temp_url).netloc.lower()
+                if not domain:
+                     domain = ref_lower # Fallback if parsing failed
+                
+                if 'mail.google.com' in domain:
+                    referrer_counts["Gmail"] += count
+                elif 'google.' in domain:
                     referrer_counts["Google"] += count
                 elif any(x in domain for x in ['facebook.com', 'fb.com', 'instagram.com']):
                     referrer_counts["Facebook"] += count
+                elif any(x in domain for x in ['whatsapp.com', 'wa.me']):
+                    referrer_counts["WhatsApp"] += count
                 elif any(x in domain for x in ['t.co', 'twitter.com', 'x.com']):
                     referrer_counts["Twitter"] += count
                 elif any(x in domain for x in ['linkedin.com', 'lnkd.in']):
@@ -864,7 +911,8 @@ def analytics(code):
                     referrer_counts["YouTube"] += count
                 else:
                     referrer_counts["Other"] += count
-            except Exception:
+            except Exception as e:
+                print(f"Error parsing referrer '{ref_raw}': {e}")
                 referrer_counts["Other"] += count
 
         # Convert to list for Chart.js
