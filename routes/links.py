@@ -8,7 +8,7 @@ import csv
 import io
 from datetime import datetime, timedelta, timezone
 from collections import Counter
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, abort, g, Response
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, abort, g, Response, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from decorators import login_required, login_or_admin_required
 from database import query_db, execute_db
@@ -545,8 +545,7 @@ def delete_link(link_id):
     )
     
     if not link:
-        flash("Link not found", "danger")
-        return redirect(url_for("main.index"))
+        return jsonify({"success": False, "message": "Link not found"}), 404
     
     try:
         # Delete visits first (foreign key constraint)
@@ -557,11 +556,9 @@ def delete_link(link_id):
         execute_db("DELETE FROM links WHERE id = ?", [link_id])
         
         track_user_activity(g.user["id"], "delete_link", f"Deleted link: {link['code']}")
-        flash(f"Link '{link['code']}' has been deleted successfully", "success")
+        return jsonify({"success": True, "message": f"Link '{link['code']}' has been deleted successfully"})
     except Exception as e:
-        flash(f"Error deleting link: {str(e)}", "danger")
-    
-    return redirect(url_for("main.index"))
+        return jsonify({"success": False, "message": f"Error deleting link: {str(e)}"}), 500
 
 # Analytics routes (temporarily placed here due to file system issues)
 @links_bp.route("/links/<code>")
