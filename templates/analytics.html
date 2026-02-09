@@ -683,6 +683,28 @@
             </div>
           </div>
         </div>
+
+        <!-- Referrer Chart -->
+        <div class="col-md-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="h6 fw-bold mb-0">Total Engagements by referrer</h4>
+                <div class="dropdown">
+                  <button class="btn btn-sm btn-outline-secondary" type="button">
+                    <i class="bi bi-download"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-secondary" type="button">
+                    <i class="bi bi-three-dots"></i>
+                  </button>
+                </div>
+              </div>
+              <div style="height: 250px;">
+                <canvas id="referrerChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="col-md-6">
           <div class="card shadow-sm h-100">
             <div class="card-body">
@@ -1231,6 +1253,65 @@
         btn.disabled = false;
       }
     }
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Referrer Chart Logic
+      const referrerCanvas = document.getElementById('referrerChart');
+      if (referrerCanvas) {
+        const referrerData = {{ referrer_data | tojson | safe }};
+    if (referrerData && referrerData.labels && referrerData.labels.length > 0) {
+      new Chart(referrerCanvas, {
+        type: 'bar',
+        data: {
+          labels: referrerData.labels,
+          datasets: [{
+            label: 'Total Engagements',
+            data: referrerData.data,
+            backgroundColor: '#00ACC1',
+            borderRadius: 4,
+            barThickness: 40
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  return context.raw + ' visits';
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              },
+              ticks: {
+                precision: 0
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
+            }
+          }
+        }
+      });
+    } else {
+      // Handle empty data case - show empty message on canvas parent
+      referrerCanvas.parentNode.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 text-muted">No referrer data available</div>';
+    }
+      }
+    });
   </script>
 </body>
 
