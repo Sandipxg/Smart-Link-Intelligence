@@ -1,0 +1,69 @@
+================================================================================
+                    DUPLICATE CLICK FIX - QUICK GUIDE
+================================================================================
+
+PROBLEM: WhatsApp links showing 2 clicks instead of 1
+
+SOLUTION: Restart your Flask app (fix is already in the code!)
+
+================================================================================
+                            HOW TO FIX NOW
+================================================================================
+
+STEP 1: Stop your Flask app
+   → Press Ctrl + C in the terminal
+
+STEP 2: Start it again
+   → Run: python app.py
+
+STEP 3: Test it
+   → Click a link from WhatsApp
+   → Check analytics
+   → Should show 1 click (not 2!)
+
+================================================================================
+                          HOW TO VERIFY IT WORKS
+================================================================================
+
+After restarting and clicking a link, run:
+
+   python debug_visits.py
+
+Look for:
+   ✅ "No duplicate visits found" = WORKING!
+   ⚠️  "DUPLICATE DETECTED" = App not restarted properly
+
+================================================================================
+                         WHAT THE FIX DOES
+================================================================================
+
+Prevents counting the same IP twice within 10 seconds:
+   - WhatsApp prefetch request → Logged
+   - WhatsApp actual click (< 10s later) → Blocked (duplicate)
+   - Same person after 15 seconds → Logged (legitimate revisit)
+
+================================================================================
+                      WHATSAPP TRACKING TIP
+================================================================================
+
+For 100% accurate WhatsApp tracking, use URL parameters:
+
+   Instead of: http://yoursite.com/r/abc123
+   Share this:  http://yoursite.com/r/abc123?ref=whatsapp
+
+This guarantees "WhatsApp" shows in referrer graph!
+
+================================================================================
+                            NEED HELP?
+================================================================================
+
+Read detailed guides:
+   - RESTART_APP_INSTRUCTIONS.md
+   - FINAL_FIX_SUMMARY.md
+   - WHATSAPP_TRACKING_GUIDE.md
+
+Run tests:
+   - python test_deduplication.py (test logic)
+   - python debug_visits.py (check database)
+
+================================================================================
