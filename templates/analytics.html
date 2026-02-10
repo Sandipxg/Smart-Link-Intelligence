@@ -169,12 +169,40 @@
               <!-- Smart Link Copy Card -->
               <div class="col-12">
                 <div class="info-card bg-primary bg-opacity-10 border-primary border-opacity-10">
-                  <div class="d-flex align-items-center justify-content-center p-3">
+                  <div class="text-center mb-2">
+                    <small class="text-muted fw-semibold">Share with tracking for better analytics</small>
+                  </div>
+                  <div class="d-flex flex-column gap-2 p-2">
+                    <!-- Default Copy Button -->
                     <button
-                      class="btn btn-primary btn-lg d-flex align-items-center gap-2 px-5 py-3 rounded-pill shadow-sm transform-hover"
-                      onclick="var self=this; navigator.clipboard.writeText('{{ url_for('links.redirect_link', code=link.code, _external=True) }}'); self.innerHTML='<i class=&#34;bi bi-check2-all&#34;></i> Copied'; setTimeout(function(){ self.innerHTML='<i class=&#34;bi bi-clipboard&#34;></i> Copy Smart Link'; }, 2000)">
-                      <i class="bi bi-clipboard"></i> Copy Smart Link
+                      class="btn btn-primary btn-lg shadow-sm"
+                      onclick="copyLinkToClipboard('{{ url_for('links.redirect_link', code=link.code, _external=True) }}', this)">
+                      <i class="bi bi-clipboard me-2"></i>Copy Link
                     </button>
+                    
+                    <!-- Share with Tracking Buttons -->
+                    <div class="btn-group" role="group">
+                      <button type="button" class="btn btn-outline-success" 
+                        onclick="copyLinkWithTracking('{{ url_for('links.redirect_link', code=link.code, _external=True) }}', 'WhatsApp', this)"
+                        title="Copy with WhatsApp tracking">
+                        <i class="bi bi-whatsapp me-1"></i>WhatsApp
+                      </button>
+                      <button type="button" class="btn btn-outline-primary" 
+                        onclick="copyLinkWithTracking('{{ url_for('links.redirect_link', code=link.code, _external=True) }}', 'Facebook', this)"
+                        title="Copy with Facebook tracking">
+                        <i class="bi bi-facebook me-1"></i>Facebook
+                      </button>
+                      <button type="button" class="btn btn-outline-info" 
+                        onclick="copyLinkWithTracking('{{ url_for('links.redirect_link', code=link.code, _external=True) }}', 'Twitter', this)"
+                        title="Copy with Twitter tracking">
+                        <i class="bi bi-twitter me-1"></i>Twitter
+                      </button>
+                      <button type="button" class="btn btn-outline-danger" 
+                        onclick="copyLinkWithTracking('{{ url_for('links.redirect_link', code=link.code, _external=True) }}', 'Email', this)"
+                        title="Copy with Email tracking">
+                        <i class="bi bi-envelope me-1"></i>Email
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1110,6 +1138,41 @@
   </style>
 
   <script>
+    // Copy link functions
+    function copyLinkToClipboard(url, element) {
+      navigator.clipboard.writeText(url).then(() => {
+        const originalHTML = element.innerHTML;
+        element.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>Copied!';
+        element.disabled = true;
+        setTimeout(() => {
+          element.innerHTML = originalHTML;
+          element.disabled = false;
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+        alert('Failed to copy link. Please try again.');
+      });
+    }
+
+    function copyLinkWithTracking(baseUrl, platform, element) {
+      // Add tracking parameter based on platform
+      const separator = baseUrl.includes('?') ? '&' : '?';
+      const trackedUrl = `${baseUrl}${separator}ref=${platform}`;
+      
+      navigator.clipboard.writeText(trackedUrl).then(() => {
+        const originalHTML = element.innerHTML;
+        element.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Copied!';
+        element.disabled = true;
+        setTimeout(() => {
+          element.innerHTML = originalHTML;
+          element.disabled = false;
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+        alert('Failed to copy link. Please try again.');
+      });
+    }
+
     // Initialize QR Code Styling instance
     let qrCode;
     const linkUrl = "{{ url_for('links.redirect_link', code=link.code, _external=True) }}";

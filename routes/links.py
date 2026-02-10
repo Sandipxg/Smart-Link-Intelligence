@@ -254,33 +254,63 @@ def redirect_link(code):
     # This takes priority over HTTP Referer to detect WhatsApp, Instagram, etc.
     if not referrer:
         ua_lower = user_agent.lower()
-        if 'whatsapp' in ua_lower:
+        # WhatsApp detection - covers mobile app, web, and desktop
+        if any(x in ua_lower for x in ['whatsapp', 'wv)', 'line/']):
             referrer = 'WhatsApp'
+        # Instagram detection
         elif 'instagram' in ua_lower:
             referrer = 'Instagram'
-        elif any(x in ua_lower for x in ['fban', 'fbav']):
+        # Facebook detection - covers app and messenger
+        elif any(x in ua_lower for x in ['fban', 'fbav', 'fb_iab', 'fbios', 'messenger']):
             referrer = 'Facebook'
+        # Twitter/X detection
+        elif any(x in ua_lower for x in ['twitter', 'twitterbot']):
+            referrer = 'Twitter'
+        # LinkedIn detection
+        elif 'linkedin' in ua_lower:
+            referrer = 'LinkedIn'
     
-    # 3. Fallback to HTTP Header if no parameter and no social app detected
+    # 3. Check HTTP Referer header
     if not referrer:
-        http_referrer = request.headers.get("Referer", "no referrer")
+        http_referrer = request.headers.get("Referer", "")
         
-        # Filter out internal referrers (from your own dashboard/pages)
-        # Only use external referrers
-        if http_referrer and http_referrer != 'no referrer':
+        if http_referrer:
             from urllib.parse import urlparse
             try:
-                ref_domain = urlparse(http_referrer).netloc
-                current_domain = urlparse(request.host_url).netloc
+                ref_domain = urlparse(http_referrer).netloc.lower()
+                current_domain = urlparse(request.host_url).netloc.lower()
                 
-                # If referrer is from external domain, use it
+                # Check if it's an external referrer
                 if ref_domain and ref_domain != current_domain:
-                    referrer = http_referrer
+                    # Check for known social media domains
+                    if any(x in ref_domain for x in ['whatsapp.com', 'wa.me']):
+                        referrer = 'WhatsApp'
+                    elif any(x in ref_domain for x in ['facebook.com', 'fb.com', 'messenger.com']):
+                        referrer = 'Facebook'
+                    elif any(x in ref_domain for x in ['instagram.com']):
+                        referrer = 'Instagram'
+                    elif any(x in ref_domain for x in ['t.co', 'twitter.com', 'x.com']):
+                        referrer = 'Twitter'
+                    elif any(x in ref_domain for x in ['linkedin.com', 'lnkd.in']):
+                        referrer = 'LinkedIn'
+                    elif any(x in ref_domain for x in ['youtube.com', 'youtu.be']):
+                        referrer = 'YouTube'
+                    elif any(x in ref_domain for x in ['google.com', 'google.']):
+                        referrer = 'Google'
+                    elif 'mail.google.com' in ref_domain:
+                        referrer = 'Gmail'
+                    else:
+                        # External referrer - use the full URL
+                        referrer = http_referrer
                 else:
-                    # Internal referrer (dashboard, etc.) - mark as Direct
+                    # Internal referrer (from your own dashboard) - mark as no referrer
                     referrer = "no referrer"
             except:
-                referrer = http_referrer
+                # If parsing fails, use the referrer as-is if it looks like a URL
+                if http_referrer.startswith(('http://', 'https://')):
+                    referrer = http_referrer
+                else:
+                    referrer = "no referrer"
         else:
             referrer = "no referrer"
             
