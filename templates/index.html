@@ -65,50 +65,11 @@
       <!-- New Link Success Box -->
       {% if new_link %}
       <div class="new-link-box fade-in mb-4">
-        <div class="card shadow-sm border-0">
-          <div class="card-body p-4">
-            <div class="text-center mb-3">
-              <h5 class="text-success mb-2"><i class="bi bi-check-circle-fill me-2"></i>Link Created Successfully!</h5>
-              <p class="text-muted small mb-0">Share your link with tracking parameters for better analytics</p>
-            </div>
-            
-            <div class="d-flex flex-column gap-2">
-              <!-- Default Copy Button -->
-              <button class="btn btn-primary btn-lg fw-bold shadow-sm"
-                onclick="copyToClipboard('{{ new_link }}', this)">
-                <i class="bi bi-clipboard-check me-2"></i>Copy Link
-              </button>
-              
-              <!-- Share with Tracking Buttons -->
-              <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-success" 
-                  onclick="copyWithTracking('{{ new_link }}', 'WhatsApp', this)"
-                  title="Copy with WhatsApp tracking">
-                  <i class="bi bi-whatsapp me-1"></i>WhatsApp
-                </button>
-                <button type="button" class="btn btn-outline-primary" 
-                  onclick="copyWithTracking('{{ new_link }}', 'Facebook', this)"
-                  title="Copy with Facebook tracking">
-                  <i class="bi bi-facebook me-1"></i>Facebook
-                </button>
-                <button type="button" class="btn btn-outline-info" 
-                  onclick="copyWithTracking('{{ new_link }}', 'Twitter', this)"
-                  title="Copy with Twitter tracking">
-                  <i class="bi bi-twitter me-1"></i>Twitter
-                </button>
-                <button type="button" class="btn btn-outline-danger" 
-                  onclick="copyWithTracking('{{ new_link }}', 'Email', this)"
-                  title="Copy with Email tracking">
-                  <i class="bi bi-envelope me-1"></i>Email
-                </button>
-              </div>
-            </div>
-            
-            <div class="alert alert-info mt-3 mb-0 small">
-              <i class="bi bi-info-circle me-1"></i>
-              <strong>Tip:</strong> Use the platform-specific buttons above to add tracking parameters. This helps identify where your clicks come from in analytics!
-            </div>
-          </div>
+        <div class="d-flex align-items-center justify-content-center p-4 bg-primary rounded shadow-sm">
+          <button class="btn btn-light btn-lg fw-bold text-primary px-5 py-3 shadow-sm transform-hover"
+            onclick="copyToClipboard('{{ new_link }}', this)">
+            <i class="bi bi-clipboard-check me-2"></i>Copy Smart Link
+          </button>
         </div>
       </div>
       {% endif %}
@@ -314,35 +275,13 @@
 <script>
   function copyToClipboard(text, element) {
     navigator.clipboard.writeText(text).then(() => {
-      const originalHTML = element.innerHTML;
-      element.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>Copied!';
-      element.disabled = true;
+      const originalClass = element.className;
+      element.className = 'bi bi-check2 text-success fs-4';
       setTimeout(() => {
-        element.innerHTML = originalHTML;
-        element.disabled = false;
+        element.className = originalClass;
       }, 2000);
     }).catch(err => {
       console.error('Failed to copy: ', err);
-      alert('Failed to copy link. Please try again.');
-    });
-  }
-
-  function copyWithTracking(baseUrl, platform, element) {
-    // Add tracking parameter based on platform
-    const separator = baseUrl.includes('?') ? '&' : '?';
-    const trackedUrl = `${baseUrl}${separator}ref=${platform}`;
-    
-    navigator.clipboard.writeText(trackedUrl).then(() => {
-      const originalHTML = element.innerHTML;
-      element.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Copied!';
-      element.disabled = true;
-      setTimeout(() => {
-        element.innerHTML = originalHTML;
-        element.disabled = false;
-      }, 2000);
-    }).catch(err => {
-      console.error('Failed to copy: ', err);
-      alert('Failed to copy link. Please try again.');
     });
   }
 </script>

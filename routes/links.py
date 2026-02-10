@@ -254,21 +254,45 @@ def redirect_link(code):
     # This takes priority over HTTP Referer to detect WhatsApp, Instagram, etc.
     if not referrer:
         ua_lower = user_agent.lower()
-        # WhatsApp detection - covers mobile app, web, and desktop
-        if any(x in ua_lower for x in ['whatsapp', 'wv)', 'line/']):
+        
+        # WhatsApp detection - comprehensive patterns
+        # WhatsApp uses different User-Agents depending on platform:
+        # - Android: Contains "WhatsApp" or "wv)" (WebView)
+        # - iOS: Often just shows as Safari but with specific patterns
+        # - Desktop: May show as Chrome/Edge
+        if any(x in ua_lower for x in [
+            'whatsapp',           # Direct WhatsApp identifier
+            'wa/',                # WhatsApp short form
+            'wv)',                # Android WebView (commonly used by WhatsApp)
+        ]):
             referrer = 'WhatsApp'
+        
         # Instagram detection
         elif 'instagram' in ua_lower:
             referrer = 'Instagram'
+        
         # Facebook detection - covers app and messenger
-        elif any(x in ua_lower for x in ['fban', 'fbav', 'fb_iab', 'fbios', 'messenger']):
+        elif any(x in ua_lower for x in [
+            'fban',               # Facebook App
+            'fbav',               # Facebook App Version
+            'fb_iab',             # Facebook In-App Browser
+            'fbios',              # Facebook iOS
+            'messenger',          # Facebook Messenger
+            'fb4a',               # Facebook for Android
+        ]):
             referrer = 'Facebook'
+        
         # Twitter/X detection
         elif any(x in ua_lower for x in ['twitter', 'twitterbot']):
             referrer = 'Twitter'
+        
         # LinkedIn detection
         elif 'linkedin' in ua_lower:
             referrer = 'LinkedIn'
+        
+        # Telegram detection
+        elif 'telegram' in ua_lower:
+            referrer = 'Telegram'
     
     # 3. Check HTTP Referer header
     if not referrer:
@@ -283,19 +307,21 @@ def redirect_link(code):
                 # Check if it's an external referrer
                 if ref_domain and ref_domain != current_domain:
                     # Check for known social media domains
-                    if any(x in ref_domain for x in ['whatsapp.com', 'wa.me']):
+                    if any(x in ref_domain for x in ['whatsapp.com', 'wa.me', 'chat.whatsapp.com']):
                         referrer = 'WhatsApp'
-                    elif any(x in ref_domain for x in ['facebook.com', 'fb.com', 'messenger.com']):
+                    elif any(x in ref_domain for x in ['facebook.com', 'fb.com', 'messenger.com', 'fb.me', 'm.facebook.com', 'l.facebook.com', 'lm.facebook.com']):
                         referrer = 'Facebook'
-                    elif any(x in ref_domain for x in ['instagram.com']):
+                    elif any(x in ref_domain for x in ['instagram.com', 'l.instagram.com']):
                         referrer = 'Instagram'
-                    elif any(x in ref_domain for x in ['t.co', 'twitter.com', 'x.com']):
+                    elif any(x in ref_domain for x in ['t.co', 'twitter.com', 'x.com', 'mobile.twitter.com']):
                         referrer = 'Twitter'
                     elif any(x in ref_domain for x in ['linkedin.com', 'lnkd.in']):
                         referrer = 'LinkedIn'
-                    elif any(x in ref_domain for x in ['youtube.com', 'youtu.be']):
+                    elif any(x in ref_domain for x in ['youtube.com', 'youtu.be', 'm.youtube.com']):
                         referrer = 'YouTube'
-                    elif any(x in ref_domain for x in ['google.com', 'google.']):
+                    elif any(x in ref_domain for x in ['t.me', 'telegram.me', 'telegram.org']):
+                        referrer = 'Telegram'
+                    elif any(x in ref_domain for x in ['google.com', 'google.', 'www.google.']):
                         referrer = 'Google'
                     elif 'mail.google.com' in ref_domain:
                         referrer = 'Gmail'
@@ -923,102 +949,6 @@ def analytics(code):
             for k, v in sorted(normalized_isp_counts.items(), key=lambda x: x[1], reverse=True)
         ][:10]
 
-        # Get Referrer analytics
-        referrer_raw = query_db(
-            """
-            SELECT referrer, COUNT(*) as count
-            FROM visits
-            WHERE link_id = ?
-            GROUP BY referrer
-            """,
-            [link["id"]]
-        )
-
-        referrer_counts = {
-            "Direct": 0,
-            "Gmail": 0,
-            "Google": 0,
-            "Facebook": 0,
-            "WhatsApp": 0,
-            "Twitter": 0,
-            "LinkedIn": 0,
-            "YouTube": 0,
-            "Other": 0
-        }
-
-        from urllib.parse import urlparse
-
-        for row in referrer_raw:
-            ref_raw = row['referrer']
-            count = row['count']
-            
-            if not ref_raw or ref_raw == 'no referrer' or ref_raw == 'None':
-                referrer_counts["Direct"] += count
-                continue
-                
-            try:
-                # Handle Smart Tracking (plain text) vs Standard URL
-                # If it's a URL, extract domain. If it's a code (e.g. 'whatsapp'), use it directly.
-                ref_lower = ref_raw.lower()
-                
-                # Check for Smart Tracking codes or plain text first
-                if ref_lower in ['whatsapp', 'wa', 'w']:
-                     referrer_counts["WhatsApp"] += count
-                     continue
-                if ref_lower in ['gmail', 'mail']:
-                     referrer_counts["Gmail"] += count
-                     continue
-                if ref_lower in ['facebook', 'fb']:
-                     referrer_counts["Facebook"] += count
-                     continue
-                if ref_lower in ['twitter', 'x']:
-                     referrer_counts["Twitter"] += count
-                     continue
-                if ref_lower in ['linkedin', 'li']:
-                     referrer_counts["LinkedIn"] += count
-                     continue
-                if ref_lower in ['youtube', 'yt']:
-                     referrer_counts["YouTube"] += count
-                     continue
-
-                # Fallback to URL parsing
-                if not ref_raw.startswith(('http://', 'https://')):
-                    # If it's not a URL and didn't match above, it might be a domain or other string
-                    # Treat as http to try and parse domain
-                    temp_url = 'http://' + ref_raw
-                else:
-                    temp_url = ref_raw
-                    
-                domain = urlparse(temp_url).netloc.lower()
-                if not domain:
-                     domain = ref_lower # Fallback if parsing failed
-                
-                if 'mail.google.com' in domain:
-                    referrer_counts["Gmail"] += count
-                elif 'google.' in domain:
-                    referrer_counts["Google"] += count
-                elif any(x in domain for x in ['facebook.com', 'fb.com', 'instagram.com']):
-                    referrer_counts["Facebook"] += count
-                elif any(x in domain for x in ['whatsapp.com', 'wa.me']):
-                    referrer_counts["WhatsApp"] += count
-                elif any(x in domain for x in ['t.co', 'twitter.com', 'x.com']):
-                    referrer_counts["Twitter"] += count
-                elif any(x in domain for x in ['linkedin.com', 'lnkd.in']):
-                    referrer_counts["LinkedIn"] += count
-                elif any(x in domain for x in ['youtube.com', 'youtu.be']):
-                    referrer_counts["YouTube"] += count
-                else:
-                    referrer_counts["Other"] += count
-            except Exception as e:
-                print(f"Error parsing referrer '{ref_raw}': {e}")
-                referrer_counts["Other"] += count
-
-        # Convert to list for Chart.js
-        referrer_data = {
-            "labels": list(referrer_counts.keys()),
-            "data": list(referrer_counts.values())
-        }
-
         # Get device distribution
         device_data = query_db(
             """
@@ -1170,7 +1100,6 @@ def analytics(code):
             isp_data=isp_data,
             is_admin=is_admin,
             security_profile=security_profile,
-            referrer_data=referrer_data,
         )
     except Exception as e:
         import traceback
