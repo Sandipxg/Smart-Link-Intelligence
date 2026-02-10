@@ -250,13 +250,9 @@ def redirect_link(code):
         request.args.get("utm_source")
     )
     
-    # 2. Fallback to HTTP Header if no parameter
+    # 2. Check User-Agent for social media apps (they often strip referrer)
+    # This takes priority over HTTP Referer to detect WhatsApp, Instagram, etc.
     if not referrer:
-        referrer = request.headers.get("Referer", "no referrer")
-        
-    # 3. Fallback to User-Agent inference (if referrer is still missing/empty)
-    # Many apps strip referrer but identify themselves in UA
-    if not referrer or referrer == 'no referrer':
         ua_lower = user_agent.lower()
         if 'whatsapp' in ua_lower:
             referrer = 'WhatsApp'
@@ -264,6 +260,29 @@ def redirect_link(code):
             referrer = 'Instagram'
         elif any(x in ua_lower for x in ['fban', 'fbav']):
             referrer = 'Facebook'
+    
+    # 3. Fallback to HTTP Header if no parameter and no social app detected
+    if not referrer:
+        http_referrer = request.headers.get("Referer", "no referrer")
+        
+        # Filter out internal referrers (from your own dashboard/pages)
+        # Only use external referrers
+        if http_referrer and http_referrer != 'no referrer':
+            from urllib.parse import urlparse
+            try:
+                ref_domain = urlparse(http_referrer).netloc
+                current_domain = urlparse(request.host_url).netloc
+                
+                # If referrer is from external domain, use it
+                if ref_domain and ref_domain != current_domain:
+                    referrer = http_referrer
+                else:
+                    # Internal referrer (dashboard, etc.) - mark as Direct
+                    referrer = "no referrer"
+            except:
+                referrer = http_referrer
+        else:
+            referrer = "no referrer"
             
     referrer = referrer[:500]  # Truncate for DB safety
     
@@ -464,7 +483,45 @@ def password_protected(code):
                 browser = parse_browser(user_agent)
                 os_name = parse_os(user_agent)
                 isp_info = get_isp_info(ip_address)
-                referrer = request.headers.get("Referer", "no referrer")[:500]
+                
+                # Get referrer (Smart Tracking) - same logic as redirect_link
+                # 1. Check URL parameters first
+                referrer = (
+                    request.args.get("ref") or 
+                    request.args.get("source") or 
+                    request.args.get("utm_source")
+                )
+                
+                # 2. Check User-Agent for social media apps
+                if not referrer:
+                    ua_lower = user_agent.lower()
+                    if 'whatsapp' in ua_lower:
+                        referrer = 'WhatsApp'
+                    elif 'instagram' in ua_lower:
+                        referrer = 'Instagram'
+                    elif any(x in ua_lower for x in ['fban', 'fbav']):
+                        referrer = 'Facebook'
+                
+                # 3. Fallback to HTTP Header (filter internal referrers)
+                if not referrer:
+                    http_referrer = request.headers.get("Referer", "no referrer")
+                    
+                    if http_referrer and http_referrer != 'no referrer':
+                        from urllib.parse import urlparse
+                        try:
+                            ref_domain = urlparse(http_referrer).netloc
+                            current_domain = urlparse(request.host_url).netloc
+                            
+                            if ref_domain and ref_domain != current_domain:
+                                referrer = http_referrer
+                            else:
+                                referrer = "no referrer"
+                        except:
+                            referrer = http_referrer
+                    else:
+                        referrer = "no referrer"
+                        
+                referrer = referrer[:500]
                 now = utcnow()
                 
                 # Get visits for behavior classification
