@@ -93,31 +93,70 @@
     </style>
 </head>
 
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Smart Link Intelligence</h1>
+<body
+    style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4;">
+    <div class="container"
+        style="max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden;">
+        <div class="header"
+            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; text-align: center;">
+            <h1
+                style="margin: 0; font-size: 24px; font-weight: 700; letter-spacing: 1px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                Smart Link Intelligence</h1>
         </div>
-        <div class="content">
-            <p class="welcome-text">Hi <strong>{{ username }}</strong>, Welcome aboard! 👋</p>
-            <p>We're thrilled to have you join our community. Your account has been successfully created, and you're now
+        <div class="content" style="padding: 30px;">
+            <p class="welcome-text"
+                style="font-size: 18px; color: #4a5568; margin-bottom: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                Hi <strong>{{ username }}</strong>, Welcome aboard! 👋</p>
+            <p style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333;">
+                We're thrilled to have you join our community. Your account has been successfully created, and you're
+                now
                 ready to take your link management to the next level.</p>
 
-            <div class="feature-list">
-                <div class="feature-item">Create smart, trackable links instantly</div>
-                <div class="feature-item">Access detailed analytics and insights</div>
-                <div class="feature-item">Protect your links with advanced security</div>
+            <div class="feature-list"
+                style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e2e8f0;">
+                <div class="feature-item"
+                    style="margin-bottom: 10px; padding-left: 0; position: relative; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333;">
+                    <span style="color: #667eea; font-weight: bold; margin-right: 10px;">✓</span> Create smart,
+                    trackable links instantly
+                </div>
+                <div class="feature-item"
+                    style="margin-bottom: 10px; padding-left: 0; position: relative; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333;">
+                    <span style="color: #667eea; font-weight: bold; margin-right: 10px;">✓</span> Access detailed
+                    analytics and insights
+                </div>
+                <div class="feature-item"
+                    style="margin-bottom: 10px; padding-left: 0; position: relative; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333;">
+                    <span style="color: #667eea; font-weight: bold; margin-right: 10px;">✓</span> Protect your links
+                    with advanced security
+                </div>
             </div>
 
-            <p>Ready to get started? Detailed analytics are just a click away.</p>
+            <!-- Pro Features Section -->
+            <div style="margin-top: 30px; margin-bottom: 30px; text-align: center;">
+                <h3
+                    style="color: #2d3748; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 20px; margin-bottom: 15px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px;">
+                    Unlock Pro Power 🚀</h3>
+                <img src="{{ host_url }}static/screenshots/screenshot_upgrade.png" alt="Pro Features"
+                    style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+            </div>
+
+            <p style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333;">
+                Ready to get started? Detailed analytics are just a click away.</p>
 
             <div style="text-align: center;">
-                <a href="{{ host_url }}login" class="btn">Go to Dashboard</a>
+                <a href="{{ host_url }}" class="btn"
+                    style="display: inline-block; background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 25px; font-weight: 600; margin-top: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Go
+                    to Dashboard</a>
             </div>
         </div>
-        <div class="footer">
-            <p>&copy; {{ current_year }} Smart Link Intelligence. All rights reserved.</p>
-            <p>You received this email because you signed up on our platform.</p>
+        <div class="footer"
+            style="background: #2d3748; color: #cbd5e0; padding: 20px; text-align: center; font-size: 12px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6;">
+            <p
+                style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #cbd5e0 !important; margin: 0 0 10px 0;">
+                &copy; {{ current_year }} Smart Link Intelligence. All rights reserved.</p>
+            <p
+                style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #cbd5e0 !important; margin: 0;">
+                You received this email because you signed up on our platform.</p>
         </div>
     </div>
 </body>
