@@ -373,49 +373,41 @@ def redirect_link(code):
 
     target_url = decide_target(link, behavior, per_session_count)
 
-    # Check if the visitor is the owner of the link
-    is_owner = g.user and g.user["id"] == link["user_id"]
+    execute_db(
+        """
+        INSERT INTO visits
+            (link_id, session_id, ip_hash, user_agent, ts, behavior, is_suspicious, target_url, region, device, country, city, latitude, longitude, timezone, browser, os, isp, hostname, org, referrer, ip_address)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        [
+            link["id"],
+            sess_id,
+            ip_hash,
+            user_agent,
+            now.isoformat(),
+            behavior,
+            1 if suspicious else 0,
+            target_url,
+            region,
+            device,
+            location_info['country'],
+            location_info['city'],
+            location_info['latitude'],
+            location_info['longitude'],
+            location_info['timezone'],
+            browser,
+            os_name,
+            isp_info['isp'],
+            isp_info['hostname'],
+            isp_info['org'],
+            referrer,
+            ip_address,
+        ],
+    )
 
-    if not is_owner:
-        execute_db(
-            """
-            INSERT INTO visits
-                (link_id, session_id, ip_hash, user_agent, ts, behavior, is_suspicious, target_url, region, device, country, city, latitude, longitude, timezone, browser, os, isp, hostname, org, referrer, ip_address)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            [
-                link["id"],
-                sess_id,
-                ip_hash,
-                user_agent,
-                now.isoformat(),
-                behavior,
-                1 if suspicious else 0,
-                target_url,
-                region,
-                device,
-                location_info['country'],
-                location_info['city'],
-                location_info['latitude'],
-                location_info['longitude'],
-                location_info['timezone'],
-                browser,
-                os_name,
-                isp_info['isp'],
-                isp_info['hostname'],
-                isp_info['org'],
-                referrer,
-                ip_address,
-            ],
-        )
-
-        new_state = evaluate_state(link["id"], now, ddos_rules)
-        if new_state != link["state"]:
-            execute_db("UPDATE links SET state = ? WHERE id = ?", [new_state, link["id"]])
-    else:
-        # If owner, just ensure state doesn't change arbitrarily, or maybe we just don't touch it.
-        # We definitely don't record the visit.
-        new_state = link["state"]
+    new_state = evaluate_state(link["id"], now, ddos_rules)
+    if new_state != link["state"]:
+        execute_db("UPDATE links SET state = ? WHERE id = ?", [new_state, link["id"]])
 
     if new_state == "Inactive":
         flash("Link became inactive due to decay or abnormal behavior", "warning")
@@ -616,44 +608,39 @@ def password_protected(code):
                 
                 target_url = decide_target(link, behavior, per_session_count)
                 
-                # Check if the visitor is the owner of the link
-                is_owner = g.user and g.user["id"] == link["user_id"]
-
-                # Log the visit only if NOT owner
+                # Log the visit
                 ip_hash = hash_value(ip_address)
-                
-                if not is_owner:
-                    execute_db(
-                        """
-                        INSERT INTO visits
-                            (link_id, session_id, ip_hash, user_agent, ts, behavior, is_suspicious, target_url, region, device, country, city, latitude, longitude, timezone, browser, os, isp, hostname, org, referrer, ip_address)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        """,
-                        [
-                            link["id"],
-                            sess_id,
-                            ip_hash,
-                            user_agent,
-                            now.isoformat(),
-                            behavior,
-                            1 if suspicious else 0,
-                            target_url,
-                            region,
-                            device,
-                            location_info['country'],
-                            location_info['city'],
-                            location_info['latitude'],
-                            location_info['longitude'],
-                            location_info['timezone'],
-                            browser,
-                            os_name,
-                            isp_info['isp'],
-                            isp_info['hostname'],
-                            isp_info['org'],
-                            referrer,
-                            ip_address,
-                        ],
-                    )
+                execute_db(
+                    """
+                    INSERT INTO visits
+                        (link_id, session_id, ip_hash, user_agent, ts, behavior, is_suspicious, target_url, region, device, country, city, latitude, longitude, timezone, browser, os, isp, hostname, org, referrer, ip_address)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    [
+                        link["id"],
+                        sess_id,
+                        ip_hash,
+                        user_agent,
+                        now.isoformat(),
+                        behavior,
+                        1 if suspicious else 0,
+                        target_url,
+                        region,
+                        device,
+                        location_info['country'],
+                        location_info['city'],
+                        location_info['latitude'],
+                        location_info['longitude'],
+                        location_info['timezone'],
+                        browser,
+                        os_name,
+                        isp_info['isp'],
+                        isp_info['hostname'],
+                        isp_info['org'],
+                        referrer,
+                        ip_address,
+                    ],
+                )
                 
                 # Check if user wants to skip ads or if link owner has ad-free experience
                 skip_ads = request.args.get('direct', '').lower() == 'true'
@@ -901,7 +888,7 @@ def analytics(code):
             "engaged": engaged_count
         }
         
-        # Get region distribution (grouped by continent)
+        # Get region distribution (grouped by continent) - using COUNT(*) for total clicks
         region_data_raw = query_db(
             """
             SELECT 
@@ -909,7 +896,7 @@ def analytics(code):
                     WHEN country IS NOT NULL AND country != 'Unknown' THEN country
                     ELSE region 
                 END as location,
-                COUNT(DISTINCT ip_hash) as count
+                COUNT(*) as count
             FROM visits
             WHERE link_id = ? AND (country IS NOT NULL OR region IS NOT NULL)
             GROUP BY location
@@ -932,10 +919,10 @@ def analytics(code):
                       for continent, count in sorted(continent_counts.items(), 
                                                    key=lambda x: x[1], reverse=True)]
 
-        # Get city distribution
+        # Get city distribution - using COUNT(*) for total clicks
         city_data = query_db(
             """
-            SELECT city, country, COUNT(DISTINCT ip_hash) as count 
+            SELECT city, country, COUNT(*) as count 
             FROM visits 
             WHERE link_id = ? AND city IS NOT NULL AND city != 'Unknown'
             GROUP BY city, country
@@ -945,10 +932,10 @@ def analytics(code):
             [link["id"]]
         )
 
-        # Get ISP distribution
+        # Get ISP distribution - using COUNT(*) for total clicks
         isp_counts_raw = query_db(
             """
-            SELECT isp, COUNT(DISTINCT ip_hash) as count
+            SELECT isp, COUNT(*) as count
             FROM visits
             WHERE link_id = ?
             GROUP BY isp
@@ -968,10 +955,10 @@ def analytics(code):
             for k, v in sorted(normalized_isp_counts.items(), key=lambda x: x[1], reverse=True)
         ][:10]
 
-        # Get device distribution
+        # Get device distribution - using COUNT(*) for total clicks
         device_data = query_db(
             """
-            SELECT device, COUNT(DISTINCT ip_hash) as count
+            SELECT device, COUNT(*) as count
             FROM visits
             WHERE link_id = ? AND device IS NOT NULL
             GROUP BY device
@@ -1032,12 +1019,15 @@ def analytics(code):
             weekend_insight = "Gathering engagement pattern data..."
 
         trust = trust_score(link["id"])
-        attention = attention_decay(list(reversed(recalculated_visits)))
+        
+        # Get ALL timestamps for attention decay (no limit)
+        all_visits_timestamps = query_db("SELECT ts FROM visits WHERE link_id = ? ORDER BY ts ASC", [link["id"]])
+        attention = attention_decay(all_visits_timestamps)
 
-        # Get country data explicitly for the Country Chart
+        # Get country data explicitly for the Country Chart - using COUNT(*) for total clicks
         country_data_raw = query_db(
             """
-            SELECT country, COUNT(DISTINCT ip_hash) as count
+            SELECT country, COUNT(*) as count
             FROM visits
             WHERE link_id = ? AND country IS NOT NULL AND country != 'Unknown'
             GROUP BY country
