@@ -371,41 +371,51 @@ def redirect_link(code):
     suspicious = detect_suspicious(visits, now, ip_hash, ddos_rules)
     target_url = decide_target(link, behavior, per_session_count)
 
-    execute_db(
-        """
-        INSERT INTO visits
-            (link_id, session_id, ip_hash, user_agent, ts, behavior, is_suspicious, target_url, region, device, country, city, latitude, longitude, timezone, browser, os, isp, hostname, org, referrer, ip_address)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        [
-            link["id"],
-            sess_id,
-            ip_hash,
-            user_agent,
-            now.isoformat(),
-            behavior,
-            1 if suspicious else 0,
-            target_url,
-            region,
-            device,
-            location_info['country'],
-            location_info['city'],
-            location_info['latitude'],
-            location_info['longitude'],
-            location_info['timezone'],
-            browser,
-            os_name,
-            isp_info['isp'],
-            isp_info['hostname'],
-            isp_info['org'],
-            referrer,
-            ip_address,
-        ],
-    )
+    target_url = decide_target(link, behavior, per_session_count)
 
-    new_state = evaluate_state(link["id"], now, ddos_rules)
-    if new_state != link["state"]:
-        execute_db("UPDATE links SET state = ? WHERE id = ?", [new_state, link["id"]])
+    # Check if the visitor is the owner of the link
+    is_owner = g.user and g.user["id"] == link["user_id"]
+
+    if not is_owner:
+        execute_db(
+            """
+            INSERT INTO visits
+                (link_id, session_id, ip_hash, user_agent, ts, behavior, is_suspicious, target_url, region, device, country, city, latitude, longitude, timezone, browser, os, isp, hostname, org, referrer, ip_address)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                link["id"],
+                sess_id,
+                ip_hash,
+                user_agent,
+                now.isoformat(),
+                behavior,
+                1 if suspicious else 0,
+                target_url,
+                region,
+                device,
+                location_info['country'],
+                location_info['city'],
+                location_info['latitude'],
+                location_info['longitude'],
+                location_info['timezone'],
+                browser,
+                os_name,
+                isp_info['isp'],
+                isp_info['hostname'],
+                isp_info['org'],
+                referrer,
+                ip_address,
+            ],
+        )
+
+        new_state = evaluate_state(link["id"], now, ddos_rules)
+        if new_state != link["state"]:
+            execute_db("UPDATE links SET state = ? WHERE id = ?", [new_state, link["id"]])
+    else:
+        # If owner, just ensure state doesn't change arbitrarily, or maybe we just don't touch it.
+        # We definitely don't record the visit.
+        new_state = link["state"]
 
     if new_state == "Inactive":
         flash("Link became inactive due to decay or abnormal behavior", "warning")
@@ -604,39 +614,46 @@ def password_protected(code):
                 suspicious = detect_suspicious(visits, now, ip_hash)
                 target_url = decide_target(link, behavior, per_session_count)
                 
-                # Log the visit
+                target_url = decide_target(link, behavior, per_session_count)
+                
+                # Check if the visitor is the owner of the link
+                is_owner = g.user and g.user["id"] == link["user_id"]
+
+                # Log the visit only if NOT owner
                 ip_hash = hash_value(ip_address)
-                execute_db(
-                    """
-                    INSERT INTO visits
-                        (link_id, session_id, ip_hash, user_agent, ts, behavior, is_suspicious, target_url, region, device, country, city, latitude, longitude, timezone, browser, os, isp, hostname, org, referrer, ip_address)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """,
-                    [
-                        link["id"],
-                        sess_id,
-                        ip_hash,
-                        user_agent,
-                        now.isoformat(),
-                        behavior,
-                        1 if suspicious else 0,
-                        target_url,
-                        region,
-                        device,
-                        location_info['country'],
-                        location_info['city'],
-                        location_info['latitude'],
-                        location_info['longitude'],
-                        location_info['timezone'],
-                        browser,
-                        os_name,
-                        isp_info['isp'],
-                        isp_info['hostname'],
-                        isp_info['org'],
-                        referrer,
-                        ip_address,
-                    ],
-                )
+                
+                if not is_owner:
+                    execute_db(
+                        """
+                        INSERT INTO visits
+                            (link_id, session_id, ip_hash, user_agent, ts, behavior, is_suspicious, target_url, region, device, country, city, latitude, longitude, timezone, browser, os, isp, hostname, org, referrer, ip_address)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        [
+                            link["id"],
+                            sess_id,
+                            ip_hash,
+                            user_agent,
+                            now.isoformat(),
+                            behavior,
+                            1 if suspicious else 0,
+                            target_url,
+                            region,
+                            device,
+                            location_info['country'],
+                            location_info['city'],
+                            location_info['latitude'],
+                            location_info['longitude'],
+                            location_info['timezone'],
+                            browser,
+                            os_name,
+                            isp_info['isp'],
+                            isp_info['hostname'],
+                            isp_info['org'],
+                            referrer,
+                            ip_address,
+                        ],
+                    )
                 
                 # Check if user wants to skip ads or if link owner has ad-free experience
                 skip_ads = request.args.get('direct', '').lower() == 'true'
@@ -862,11 +879,13 @@ def analytics(code):
                 curious_users += 1
 
         # Calculate totals
-        total_visits = len(recalculated_visits)
+        # Get TRUE total counts from DB (independent of the 200 limit)
+        total_visits = query_db("SELECT COUNT(*) as count FROM visits WHERE link_id = ?", [link["id"]], one=True)["count"]
+        suspicious_count = query_db("SELECT COUNT(*) as count FROM visits WHERE link_id = ? AND is_suspicious = 1", [link["id"]], one=True)["count"]
+        
         # Use ip_hash for unique visitors instead of session_id for better persistence
         unique_visitors_query = query_db("SELECT DISTINCT ip_hash FROM visits WHERE link_id = ?", [link["id"]])
         unique_visitors = len(unique_visitors_query)
-        suspicious_count = sum(1 for v in recalculated_visits if v["is_suspicious"])
         
         # Update totals dictionary with USER counts instead of VISIT counts
         curious_count = curious_users
