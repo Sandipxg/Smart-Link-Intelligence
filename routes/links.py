@@ -373,41 +373,49 @@ def redirect_link(code):
 
     target_url = decide_target(link, behavior, per_session_count)
 
-    execute_db(
-        """
-        INSERT INTO visits
-            (link_id, session_id, ip_hash, user_agent, ts, behavior, is_suspicious, target_url, region, device, country, city, latitude, longitude, timezone, browser, os, isp, hostname, org, referrer, ip_address)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        [
-            link["id"],
-            sess_id,
-            ip_hash,
-            user_agent,
-            now.isoformat(),
-            behavior,
-            1 if suspicious else 0,
-            target_url,
-            region,
-            device,
-            location_info['country'],
-            location_info['city'],
-            location_info['latitude'],
-            location_info['longitude'],
-            location_info['timezone'],
-            browser,
-            os_name,
-            isp_info['isp'],
-            isp_info['hostname'],
-            isp_info['org'],
-            referrer,
-            ip_address,
-        ],
-    )
+    # Bot Detection - Filter out preview bots to prevent double counting
+    bot_agents = ['WhatsApp/', 'TelegramBot', 'facebookexternalhit', 'Twitterbot', 'LinkedInBot', 'Discordbot', 'SkypeUriPreview', 'Slackbot']
+    is_bot = any(bot in user_agent for bot in bot_agents)
 
-    new_state = evaluate_state(link["id"], now, ddos_rules)
-    if new_state != link["state"]:
-        execute_db("UPDATE links SET state = ? WHERE id = ?", [new_state, link["id"]])
+    if not is_bot:
+        execute_db(
+            """
+            INSERT INTO visits
+                (link_id, session_id, ip_hash, user_agent, ts, behavior, is_suspicious, target_url, region, device, country, city, latitude, longitude, timezone, browser, os, isp, hostname, org, referrer, ip_address)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                link["id"],
+                sess_id,
+                ip_hash,
+                user_agent,
+                now.isoformat(),
+                behavior,
+                1 if suspicious else 0,
+                target_url,
+                region,
+                device,
+                location_info['country'],
+                location_info['city'],
+                location_info['latitude'],
+                location_info['longitude'],
+                location_info['timezone'],
+                browser,
+                os_name,
+                isp_info['isp'],
+                isp_info['hostname'],
+                isp_info['org'],
+                referrer,
+                ip_address,
+            ],
+        )
+
+        new_state = evaluate_state(link["id"], now, ddos_rules)
+        if new_state != link["state"]:
+            execute_db("UPDATE links SET state = ? WHERE id = ?", [new_state, link["id"]])
+    else:
+        # It's a bot/preview, just ensure state doesn't change
+        new_state = link["state"]
 
     if new_state == "Inactive":
         flash("Link became inactive due to decay or abnormal behavior", "warning")
@@ -608,39 +616,44 @@ def password_protected(code):
                 
                 target_url = decide_target(link, behavior, per_session_count)
                 
-                # Log the visit
-                ip_hash = hash_value(ip_address)
-                execute_db(
-                    """
-                    INSERT INTO visits
-                        (link_id, session_id, ip_hash, user_agent, ts, behavior, is_suspicious, target_url, region, device, country, city, latitude, longitude, timezone, browser, os, isp, hostname, org, referrer, ip_address)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """,
-                    [
-                        link["id"],
-                        sess_id,
-                        ip_hash,
-                        user_agent,
-                        now.isoformat(),
-                        behavior,
-                        1 if suspicious else 0,
-                        target_url,
-                        region,
-                        device,
-                        location_info['country'],
-                        location_info['city'],
-                        location_info['latitude'],
-                        location_info['longitude'],
-                        location_info['timezone'],
-                        browser,
-                        os_name,
-                        isp_info['isp'],
-                        isp_info['hostname'],
-                        isp_info['org'],
-                        referrer,
-                        ip_address,
-                    ],
-                )
+                # Bot Detection
+                bot_agents = ['WhatsApp/', 'TelegramBot', 'facebookexternalhit', 'Twitterbot', 'LinkedInBot', 'Discordbot', 'SkypeUriPreview', 'Slackbot']
+                is_bot = any(bot in user_agent for bot in bot_agents)
+
+                if not is_bot:
+                    # Log the visit
+                    ip_hash = hash_value(ip_address)
+                    execute_db(
+                        """
+                        INSERT INTO visits
+                            (link_id, session_id, ip_hash, user_agent, ts, behavior, is_suspicious, target_url, region, device, country, city, latitude, longitude, timezone, browser, os, isp, hostname, org, referrer, ip_address)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        [
+                            link["id"],
+                            sess_id,
+                            ip_hash,
+                            user_agent,
+                            now.isoformat(),
+                            behavior,
+                            1 if suspicious else 0,
+                            target_url,
+                            region,
+                            device,
+                            location_info['country'],
+                            location_info['city'],
+                            location_info['latitude'],
+                            location_info['longitude'],
+                            location_info['timezone'],
+                            browser,
+                            os_name,
+                            isp_info['isp'],
+                            isp_info['hostname'],
+                            isp_info['org'],
+                            referrer,
+                            ip_address,
+                        ],
+                    )
                 
                 # Check if user wants to skip ads or if link owner has ad-free experience
                 skip_ads = request.args.get('direct', '').lower() == 'true'
@@ -865,9 +878,46 @@ def analytics(code):
             else:
                 curious_users += 1
 
-        # Calculate totals
-        # Get TRUE total counts from DB (independent of the 200 limit)
-        total_visits = query_db("SELECT COUNT(*) as count FROM visits WHERE link_id = ?", [link["id"]], one=True)["count"]
+        # Get daily and hourly engagement trends using visitor's local timezone
+        # FETCH ALL VISITS (No Limit) to match graph data
+        visits_raw = query_db(
+            "SELECT ts, timezone FROM visits WHERE link_id = ?",
+            [link["id"]]
+        )
+        # Fix: Process visits first to match graph data exactly
+        local_days = []
+        local_hours = []
+        
+        for row in visits_raw:
+            try:
+                # Parse timestamp as UTC
+                dt_utc = datetime.fromisoformat(row["ts"]).replace(tzinfo=timezone.utc)
+                
+                # Bin as UTC for absolute baseline (frontend will localize for the viewer)
+                local_days.append(dt_utc.weekday())
+                local_hours.append(dt_utc.hour)
+            except Exception as e:
+                print(f"Error processing timestamp: {e}")
+                pass
+        
+        # Process daily distribution (Mon=0...Sun=6)
+        day_names_sun = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+        day_counts = Counter(local_days)
+        daily_data = []
+        # Map Python's 0=Mon...6=Sun to display 0=Sun...6=Sat
+        ordered_indices = [6, 0, 1, 2, 3, 4, 5]
+        for i, idx in enumerate(ordered_indices):
+            daily_data.append({"day": day_names_sun[i], "count": day_counts.get(idx, 0)})
+        
+        # Process hourly distribution (0-23)
+        hour_counts = Counter(local_hours)
+        hourly_data = []
+        for h in range(24):
+            hourly_data.append({"hour": h, "count": hour_counts.get(h, 0)})
+
+        # Fix: Total visits is now the sum of valid processed visits (same as graph)
+        total_visits = len(local_days)
+
         suspicious_count = query_db("SELECT COUNT(*) as count FROM visits WHERE link_id = ? AND is_suspicious = 1", [link["id"]], one=True)["count"]
         
         # Use ip_hash for unique visitors instead of session_id for better persistence
@@ -966,41 +1016,7 @@ def analytics(code):
             [link["id"]],
         )
 
-        # Get daily and hourly engagement trends using visitor's local timezone
-        visits_raw = query_db(
-            "SELECT ts, timezone FROM visits WHERE link_id = ?",
-            [link["id"]]
-        )
-        
-        local_days = []
-        local_hours = []
-        
-        for row in visits_raw:
-            try:
-                # Parse timestamp as UTC
-                dt_utc = datetime.fromisoformat(row["ts"]).replace(tzinfo=timezone.utc)
-                
-                # Bin as UTC for absolute baseline (frontend will localize for the viewer)
-                local_days.append(dt_utc.weekday())
-                local_hours.append(dt_utc.hour)
-            except Exception as e:
-                print(f"Error processing timestamp: {e}")
-                pass
-        
-        # Process daily distribution (Mon=0...Sun=6)
-        day_names_sun = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-        day_counts = Counter(local_days)
-        daily_data = []
-        # Map Python's 0=Mon...6=Sun to display 0=Sun...6=Sat
-        ordered_indices = [6, 0, 1, 2, 3, 4, 5]
-        for i, idx in enumerate(ordered_indices):
-            daily_data.append({"day": day_names_sun[i], "count": day_counts.get(idx, 0)})
-        
-        # Process hourly distribution (0-23)
-        hour_counts = Counter(local_hours)
-        hourly_data = []
-        for h in range(24):
-            hourly_data.append({"hour": h, "count": hour_counts.get(h, 0)})
+
 
         # Calculate weekend vs weekday insight
         weekday_total = sum(day_counts.get(i, 0) for i in range(5)) # Mon-Fri
