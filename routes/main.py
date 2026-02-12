@@ -3,7 +3,8 @@ Smart Link Intelligence - Main Routes
 Landing page, dashboard, maintenance, documentation, and chat
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for, g, jsonify, session, flash
+import os
+from flask import Blueprint, render_template, request, redirect, url_for, g, jsonify, session, flash, send_file, current_app
 from datetime import datetime
 from decorators import login_required
 from database import query_db
@@ -158,3 +159,21 @@ def chat():
         track_user_activity(g.user["id"], "use_ai_chat", "Interacted with AI chatbot")
         
     return jsonify({"response": response})
+
+
+@main_bp.route("/brochure")
+def brochure():
+    """Download the brochure PDF"""
+    try:
+        # File is in the root directory (same level as app.py)
+        # current_app.root_path points to the folder containing app.py
+        file_path = os.path.join(current_app.root_path, 'brochure.pdf')
+        
+        if not os.path.exists(file_path):
+            flash("Brochure file not found.", "danger")
+            return redirect(url_for("main.index"))
+
+        return send_file(file_path, as_attachment=True, download_name="Binaryfy_Brochure.pdf")
+    except Exception as e:
+        print(f"Error serving brochure: {e}")
+        return redirect(url_for("main.index"))

@@ -371,11 +371,20 @@ def redirect_link(code):
     suspicious = detect_suspicious(visits, now, ip_hash, ddos_rules)
     target_url = decide_target(link, behavior, per_session_count)
 
-    target_url = decide_target(link, behavior, per_session_count)
-
     # Bot Detection - Filter out preview bots to prevent double counting
-    bot_agents = ['WhatsApp/', 'TelegramBot', 'facebookexternalhit', 'Twitterbot', 'LinkedInBot', 'Discordbot', 'SkypeUriPreview', 'Slackbot']
-    is_bot = any(bot in user_agent for bot in bot_agents)
+    # Case-insensitive and broader matching
+    ua_lower = user_agent.lower()
+    bot_keywords = [
+        'whatsapp', 'telegram', 'facebook', 'twitter', 'linkedin', 
+        'discord', 'skype', 'slack', 'bot', 'crawl', 'spider', 'preview'
+    ]
+    is_bot = any(keyword in ua_lower for keyword in bot_keywords)
+    
+    # DEBUG: Print to console to verify (will show in server logs)
+    if is_bot:
+        print(f"DEBUG: Bot detected! UA='{user_agent}' -> IGNORING visit.")
+    else:
+        print(f"DEBUG: Real User? UA='{user_agent}' -> LOGGING visit.")
 
     if not is_bot:
         execute_db(
@@ -614,11 +623,20 @@ def password_protected(code):
                 suspicious = detect_suspicious(visits, now, ip_hash)
                 target_url = decide_target(link, behavior, per_session_count)
                 
-                target_url = decide_target(link, behavior, per_session_count)
+
                 
                 # Bot Detection
-                bot_agents = ['WhatsApp/', 'TelegramBot', 'facebookexternalhit', 'Twitterbot', 'LinkedInBot', 'Discordbot', 'SkypeUriPreview', 'Slackbot']
-                is_bot = any(bot in user_agent for bot in bot_agents)
+                ua_lower = user_agent.lower()
+                bot_keywords = [
+                    'whatsapp', 'telegram', 'facebook', 'twitter', 'linkedin', 
+                    'discord', 'skype', 'slack', 'bot', 'crawl', 'spider', 'preview'
+                ]
+                is_bot = any(keyword in ua_lower for keyword in bot_keywords)
+
+                if is_bot:
+                    print(f"DEBUG: Bot detected (Password)! UA='{user_agent}' -> IGNORING visit.")
+                else:
+                    print(f"DEBUG: Real User (Password)? UA='{user_agent}' -> LOGGING visit.")
 
                 if not is_bot:
                     # Log the visit
