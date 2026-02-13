@@ -95,6 +95,8 @@ def classify_behavior(link_id: int, session_id: str, visits, now: datetime, beha
     
     # Get behavior rule settings safely
     if behavior_rule:
+        # Convert to dict if it's a sqlite3.Row object
+        behavior_rule = dict(behavior_rule)
         # Use .get() to avoid KeyError if the dict is missing these specific keys
         returning_window_hours = behavior_rule.get("returning_window_hours", RETURNING_WINDOW_HOURS)
         interested_threshold = behavior_rule.get("interested_threshold", 2)

@@ -137,12 +137,12 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('editReturningUrl').value = returningUrl;
             document.getElementById('editCtaUrl').value = ctaUrl;
 
-            // Show progressive fields if needed
-            const progressiveFields = document.getElementById('progressiveFields');
-            if (behaviorRule === 'progression') {
-                progressiveFields.style.display = 'block';
-            } else {
-                progressiveFields.style.display = 'none';
+            // Set behavior rule
+            const ruleSelect = document.getElementById('editBehaviorRule');
+            if (ruleSelect) {
+                ruleSelect.value = behaviorRule;
+                // Trigger change event to show/hide fields
+                ruleSelect.dispatchEvent(new Event('change'));
             }
 
             // Show modal
@@ -150,6 +150,27 @@ document.addEventListener('DOMContentLoaded', function () {
             editModal.show();
         }
     });
+
+    // Handle Behavior Rule Change
+    const ruleSelect = document.getElementById('editBehaviorRule');
+    if (ruleSelect) {
+        ruleSelect.addEventListener('change', function () {
+            const rule = this.value;
+            const progressiveFields = document.getElementById('progressiveFields');
+            const passwordFields = document.getElementById('passwordFields');
+
+            // Hide all first
+            if (progressiveFields) progressiveFields.style.display = 'none';
+            if (passwordFields) passwordFields.style.display = 'none';
+
+            // Show relevant
+            if (rule === 'progression' && progressiveFields) {
+                progressiveFields.style.display = 'block';
+            } else if (rule === 'password_protected' && passwordFields) {
+                passwordFields.style.display = 'block';
+            }
+        });
+    }
 
     // Handle save button click
     const saveBtn = document.getElementById('saveLinkBtn');
@@ -163,6 +184,24 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!primaryUrl) {
                 showAlert('danger', 'Primary URL is required');
                 return;
+            }
+
+            const behaviorRule = document.getElementById('editBehaviorRule').value;
+            const password = document.getElementById('editPassword').value;
+
+            // Validate progressive fields
+            if (behaviorRule === 'progression') {
+                if (!returningUrl || !ctaUrl) {
+                    showAlert('danger', 'Returning URL and CTA URL are required for Progressive Redirect');
+                    return;
+                }
+            }
+
+            // Validate password for NEW password protection (if switching to it)
+            // We can't easily check if it HAS a password already without more data, so we rely on user to enter it if needed.
+            if (behaviorRule === 'password_protected') {
+                // Ideally we'd validte if password is provided if it wasn't before, but backend handles update logic.
+                // We'll trust the user to enter a password if they want to set/change it.
             }
 
             // Show loading state
@@ -180,7 +219,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     id: linkId,
                     primary_url: primaryUrl,
                     returning_url: returningUrl,
-                    cta_url: ctaUrl
+                    cta_url: ctaUrl,
+                    behavior_rule: behaviorRule,
+                    password: password
                 })
             })
                 .then(response => response.json())
