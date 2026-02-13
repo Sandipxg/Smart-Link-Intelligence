@@ -598,11 +598,12 @@ def password_protected(code):
                         
                 referrer = referrer[:500]
                 now = utcnow()
+                ip_hash = hash_value(ip_address)
                 
                 # Get visits for behavior classification
                 visits = query_db(
                     """
-                    SELECT ts FROM visits
+                    SELECT ts, ip_hash FROM visits
                     WHERE link_id = ?
                     ORDER BY ts DESC
                     LIMIT 20
@@ -640,7 +641,6 @@ def password_protected(code):
 
                 if not is_bot:
                     # Log the visit
-                    ip_hash = hash_value(ip_address)
                     execute_db(
                         """
                         INSERT INTO visits
@@ -745,19 +745,48 @@ def update_link():
         if not link_id or not primary_url:
             return jsonify({"success": False, "message": "Link ID and Primary URL are required"}), 400
             
+        behavior_rule = data.get("behavior_rule")
+        password = data.get("password")
+        
         # Verify ownership
-        link = query_db("SELECT user_id FROM links WHERE id = ?", [link_id], one=True)
+        link = query_db("SELECT user_id, behavior_rule FROM links WHERE id = ?", [link_id], one=True)
         if not link or link["user_id"] != g.user["id"]:
             return jsonify({"success": False, "message": "Unauthorized"}), 403
+
+        # Check Membership Limits for Behavior Rules
+        user_dict = dict(g.user) if g.user else {}
+        user_tier = user_dict.get("membership_tier", "free")
+        
+        # Enforce Feature Restrictions for Free Users
+        if user_tier == "free" and behavior_rule in ["progression", "password_protected"]:
+            return jsonify({"success": False, "message": f" The '{behavior_rule}' feature requires an upgrade."}), 403
+
+        # Prepare update query
+        update_fields = ["primary_url = ?", "returning_url = ?", "cta_url = ?"]
+        update_values = [primary_url, returning_url, cta_url]
+        
+        # Update behavior rule if provided
+        if behavior_rule:
+            update_fields.append("behavior_rule = ?")
+            update_values.append(behavior_rule)
             
+            # clear specific fields based on rule
+            if behavior_rule == "standard":
+                update_fields.append("password_hash = NULL")
+            elif behavior_rule == "password_protected":
+                # Password handling
+                if password:
+                    from werkzeug.security import generate_password_hash
+                    password_hash = generate_password_hash(password)
+                    update_fields.append("password_hash = ?")
+                    update_values.append(password_hash)
+        
+        update_values.append(link_id)
+        
         from database import execute_db
         execute_db(
-            """
-            UPDATE links
-            SET primary_url = ?, returning_url = ?, cta_url = ?
-            WHERE id = ?
-            """,
-            [primary_url, returning_url, cta_url, link_id]
+            f"UPDATE links SET {', '.join(update_fields)} WHERE id = ?",
+            update_values
         )
         
         # Track activity

@@ -292,6 +292,28 @@
             <div class="form-text">This is the main destination for new visitors.</div>
           </div>
 
+          <div class="mb-3">
+            <label for="editBehaviorRule" class="form-label fw-bold small">Behavior Rule</label>
+            <select class="form-select" id="editBehaviorRule">
+              <option value="standard">Standard Redirect</option>
+              <option value="progression">Progressive Redirect</option>
+              <option value="password_protected">Password Protected</option>
+            </select>
+          </div>
+
+          <div id="passwordFields" style="display: none;">
+            <div class="mb-3">
+              <label for="editPassword" class="form-label fw-bold small">New Password (Leave blank to keep
+                current)</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-key"></i></span>
+                <input type="password" class="form-control" id="editPassword" placeholder="Enter new password">
+              </div>
+              <div class="form-text text-warning"><i class="bi bi-exclamation-triangle"></i> Changing this will require
+                users to enter the new password.</div>
+            </div>
+          </div>
+
           <div id="progressiveFields" style="display: none;">
             <div class="mb-3">
               <label for="editReturningUrl" class="form-label fw-bold small">Returning URL</label>
